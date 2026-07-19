@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 3 · Retrieval metrics - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 3 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 3 of 10</div>
+    <h1>Retrieval metrics: <span class="accent">the full family, and which to gate on</span></h1>
+    <p class="sub">In b1 you met Hit Rate and MRR. They are the front door, not the whole house. This session opens the rest: Precision@k, Recall@k, and NDCG, plus the distinction between measuring whether the ranking is good (precision, MRR, NDCG) and whether it is complete (recall). You will read the same live scorecard as a set of formulas, run LlamaIndex's evaluator with the whole metric suite, and - the point of the session - decide which single metric to gate Recall's retriever on and why.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Builder track · medium</span>
+      <span class="chip audience">Practitioners · some Python</span>
+      <span class="chip audience">Live scorecard included</span>
+      <span class="chip time">Session 3 of 10</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Metrics</span>
+      <span class="a3" style="flex:4">20-40 · Build + choose</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Two metrics is not enough</h2>
+    </div>
+    <p class="lede">Hit Rate says "did the right doc show up at all". MRR says "how high did the first right doc rank". Real questions need more: how much of the top k is actually relevant (precision), did we find <em>all</em> the relevant docs (recall), and how good is the whole ranking when relevance is graded rather than yes/no (NDCG). This session gives you the family, the formulas, and a rule for picking the one metric you will actually hold your retriever to.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A working grasp of Precision@k, Recall@k, and NDCG alongside Hit Rate and MRR, the precision-versus-recall lens (ranking quality vs completeness), hands-on time reading the live scorecard as formulas, the LlamaIndex evaluator running the full suite, and a defended choice of the one metric to gate Recall on.
+    </div>
+  </section>
+
+  <section class="section" id="family">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers precision, recall, and ranking</span>
+      <h2>Precision, recall, and where the metrics read from <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Every retrieval metric reads from the same object: a ranked list of results, each either relevant or not for this query. Once you can see that list, every metric is just a different question asked of it. Here is one ranked list, and the four metrics pointing at what they measure.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A ranked list of five results with relevant and irrelevant items marked, showing where Precision at k, Recall at k, Hit Rate, and MRR each read from the ranking">
+        <style>
+          .b3mT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b3mI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .b3mW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .b3mS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .b3mN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b3mArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b3mAh); }
+        </style>
+        <defs>
+          <marker id="b3mAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <text class="b3mI" x="30" y="34">Ranked results for one query (2 of 3 relevant docs found in top 5)</text>
+        <rect x="30" y="48" width="120" height="46" rx="10" fill="#DC2626"/>
+        <text class="b3mT" x="46" y="70">rank 1</text>
+        <text class="b3mW" x="46" y="88">relevant ✓</text>
+        <rect x="160" y="48" width="120" height="46" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b3mI" x="176" y="70">rank 2</text>
+        <text class="b3mS" x="176" y="88">not relevant</text>
+        <rect x="290" y="48" width="120" height="46" rx="10" fill="#DC2626"/>
+        <text class="b3mT" x="306" y="70">rank 3</text>
+        <text class="b3mW" x="306" y="88">relevant ✓</text>
+        <rect x="420" y="48" width="120" height="46" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b3mI" x="436" y="70">rank 4</text>
+        <text class="b3mS" x="436" y="88">not relevant</text>
+        <rect x="550" y="48" width="120" height="46" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b3mI" x="566" y="70">rank 5</text>
+        <text class="b3mS" x="566" y="88">not relevant</text>
+        <line class="b3mArr" x1="90" y1="118" x2="90" y2="150"/>
+        <rect x="30" y="152" width="200" height="66" rx="10" fill="#B91C1C"/>
+        <text class="b3mT" x="46" y="176">Hit Rate + MRR</text>
+        <text class="b3mW" x="46" y="196">first hit at rank 1:</text>
+        <text class="b3mW" x="46" y="212">hit; MRR = 1/1 = 1.0</text>
+        <line class="b3mArr" x1="350" y1="118" x2="350" y2="150"/>
+        <rect x="260" y="152" width="220" height="66" rx="10" fill="#7F1D1D"/>
+        <text class="b3mT" x="276" y="176">Precision@5</text>
+        <text class="b3mW" x="276" y="196">2 relevant in top 5</text>
+        <text class="b3mW" x="276" y="212">= 2/5 = 0.40</text>
+        <line class="b3mArr" x1="610" y1="118" x2="610" y2="150"/>
+        <rect x="510" y="152" width="340" height="66" rx="10" fill="#D97706"/>
+        <text class="b3mT" x="526" y="176">Recall@5</text>
+        <text class="b3mW" x="526" y="196">2 of 3 relevant docs found</text>
+        <text class="b3mW" x="526" y="212">= 2/3 ≈ 0.67 (needs total relevant)</text>
+        <rect x="30" y="248" width="820" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b3mS" x="46" y="270">Precision asks "of what I returned, how much was good?" Recall asks "of all the good, how much did I return?"</text>
+        <text class="b3mS" x="46" y="290">Same ranked list, different questions. Precision guards against noise; recall guards against gaps.</text>
+        <rect x="30" y="320" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b3mN" x="54" y="332">Every metric reads from one ranked, relevance-marked list. Learn to see the list first.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - one ranked list, and where each metric reads from it</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The formula table<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Four metrics, four formulas, four different failures they catch. Keep this table next to the ranked list above.</p>
+        <table class="clean">
+          <thead>
+            <tr><th>Metric</th><th>Formula</th><th>What it catches</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Hit Rate@k</td><td>fraction of queries with a relevant doc in top k</td><td>Did we find it at all, anywhere in top k</td></tr>
+            <tr><td>MRR</td><td>mean of 1/rank of the first relevant doc (0 if none)</td><td>How high the first right answer ranks</td></tr>
+            <tr><td>Precision@k</td><td>relevant in top k / k</td><td>Noise: how much of what we returned was junk</td></tr>
+            <tr><td>Recall@k</td><td>relevant in top k / total relevant</td><td>Gaps: how much relevant material we missed</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Context precision vs context recall<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>RAGAS frames these two as the retriever's twin responsibilities, and names them in a way worth borrowing.</p>
+        <ul>
+          <li><strong>Context precision = ranking quality.</strong> It measures whether the relevant chunks are ranked <em>high</em> among what was retrieved. A retriever can return the right chunk buried at rank 8 and still have poor context precision - the good stuff has to be near the top.</li>
+          <li><strong>Context recall = completeness.</strong> It measures whether all the chunks needed to answer were retrieved. Crucially, context recall <strong>requires a reference</strong> (a ground-truth answer or the set of relevant chunks) to know what "all" means - you cannot compute recall without knowing the full set of relevant docs.</li>
+          <li><strong>They trade off.</strong> Widen k and recall rises while precision usually falls (more relevant found, but more junk too). The right balance depends on the product, which is Part 2's whole subject.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Recall needs a reference; precision does not</strong>
+          Precision only needs the returned list labeled relevant/not. Recall needs the <em>denominator</em> - the total count of relevant docs - which only a reference gives you. This is why recall is the more expensive metric to measure honestly, and why some teams approximate it.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="scorecard">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the live scorecard as formulas</span>
+      <h2>Read the scorecard as formulas <span class="tag demo">★ 8 min live</span></h2>
+    </div>
+    <p class="lede">This is the required build-along. Below is Recall's golden set scored live - the same numbers as b1, but this time you connect each on-screen number to the formula behind it. Move k and watch Hit Rate and Precision@1 diverge: they answer different questions and respond to k differently.</p>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>★ Build-along: numbers to formulas<span class="mini">6 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>For the current k, take one row of the table and compute the metric by hand from the formula table above, then confirm it matches the on-screen number. Then change k: watch Hit Rate climb (a wider net finds more) while Precision@1 stays fixed (position 1 does not care about k). That divergence is the whole point.</p>
+        <div class="evalbox" data-k="3"
+             data-caption="The same golden set, now read as retrieval metrics. Change k and watch Hit Rate and Precision@1 diverge."></div>
+        <div class="callout tip">
+          <strong>Honesty note - what this scorecard really does</strong>
+          Retrieval here uses the same <em>simplified</em> lexical embedder as the RAG course playground, so it runs with zero network. But the evaluation math - Hit Rate@k, MRR, Precision@1 over a golden set - is exactly what you compute in production. You are watching the real metric mechanic with a toy retriever.
+        </div>
+        <p>Tie it back to the formulas: Hit Rate@k is <em>hits anywhere in top k / number of queries</em>, so raising k can only hold or raise it. Precision@1 is <em>relevant in top 1 / 1</em>, so it is decided entirely by what sits at rank 1 - untouched by k. MRR reads only the first hit's rank, so it too ignores k past that first hit.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="ndcg">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers NDCG + choosing a metric</span>
+      <h2>NDCG, and choosing the one metric to gate on <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Hit Rate, MRR, and Precision treat relevance as yes/no. But some results are more relevant than others, and their position matters. NDCG handles both: graded relevance, discounted by rank. It is the metric of choice when the whole ordering matters, not just the first hit.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="NDCG combines graded relevance scores per result with a logarithmic rank discount to form DCG, normalized by the ideal DCG to land between 0 and 1">
+        <style>
+          .b3nT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b3nI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .b3nW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .b3nS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .b3nN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b3nArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b3nAh); }
+        </style>
+        <defs>
+          <marker id="b3nAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="70" width="200" height="90" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b3nI" x="40" y="96">Graded relevance</text>
+        <text class="b3nS" x="40" y="118">rank 1: rel 3</text>
+        <text class="b3nS" x="40" y="136">rank 2: rel 2</text>
+        <text class="b3nS" x="40" y="154">rank 3: rel 1</text>
+        <rect x="274" y="70" width="200" height="90" rx="12" fill="#B91C1C"/>
+        <text class="b3nT" x="290" y="96">Rank discount</text>
+        <text class="b3nW" x="290" y="118">divide each rel</text>
+        <text class="b3nW" x="290" y="136">by log2(rank + 1):</text>
+        <text class="b3nW" x="290" y="154">lower ranks count less</text>
+        <rect x="524" y="70" width="180" height="90" rx="12" fill="#DC2626"/>
+        <text class="b3nT" x="540" y="96">DCG@k</text>
+        <text class="b3nW" x="540" y="120">sum of the</text>
+        <text class="b3nW" x="540" y="140">discounted rels</text>
+        <rect x="754" y="70" width="100" height="90" rx="12" fill="#7F1D1D"/>
+        <text class="b3nT" x="770" y="104">NDCG</text>
+        <text class="b3nW" x="770" y="126">DCG /</text>
+        <text class="b3nW" x="770" y="144">IDCG</text>
+        <line class="b3nArr" x1="226" y1="115" x2="270" y2="115"/>
+        <line class="b3nArr" x1="476" y1="115" x2="520" y2="115"/>
+        <line class="b3nArr" x1="706" y1="115" x2="750" y2="115"/>
+        <rect x="24" y="200" width="830" height="70" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b3nS" x="40" y="226">DCG@k = sum over i of rel_i / log2(i + 1). IDCG@k is the DCG of the perfect ordering.</text>
+        <text class="b3nS" x="40" y="248">NDCG@k = DCG@k / IDCG@k, so it always lands in 0 to 1 and is comparable across queries.</text>
+        <rect x="24" y="300" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b3nN" x="48" y="312">NDCG rewards putting the most-relevant results highest. It judges the whole ranking, not one hit.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - graded relevance plus a rank discount, normalized, gives NDCG</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode self">Self-study</span>The full suite from LlamaIndex<span class="mini">3 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>You do not implement these one by one in production. LlamaIndex's evaluator takes the metric names and reports the whole family over your golden set.</p>
+        <div class="prompt-box good"><span class="label">Python · LlamaIndex RetrieverEvaluator, full suite</span>from llama_index.core.evaluation import RetrieverEvaluator
+
+# valid metric names: hit_rate, mrr, precision, recall, ap, ndcg
+evaluator = RetrieverEvaluator.from_metric_names(
+    ["hit_rate", "mrr", "precision", "recall", "ndcg"],
+    retriever=retriever,
+)
+
+# run over the whole golden set (built in b2) at once
+results = await evaluator.aevaluate_dataset(golden_dataset)
+
+# average each metric across all queries
+import pandas as pd
+df = pd.DataFrame([r.metric_vals_dict for r in results])
+print(df.mean().round(3))
+# hit_rate  0.917
+# mrr       0.806
+# precision 0.306
+# recall    0.917
+# ndcg      0.842</div>
+        <p>One call, the whole family. Now the question is not how to compute them - it is which one you actually hold the retriever to.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>MRR vs NDCG, and which metric for which product<span class="mini">3 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The last thing that matters is fit: the right metric depends on what your product does with the results.</p>
+        <ul>
+          <li><strong>MRR vs NDCG.</strong> MRR cares only about the rank of the <em>first</em> relevant result and treats relevance as yes/no. NDCG grades relevance and scores the <em>whole</em> ranking. Use MRR when one good hit is enough; use NDCG when the ordering of several results matters.</li>
+          <li><strong>One-answer bot → Precision@1 or MRR.</strong> If the product shows a single answer (a support bot, a "top result" assistant), you only care about position 1. Gate on Precision@1 or MRR and ignore how the tail is ordered.</li>
+          <li><strong>Research tool → Recall or NDCG.</strong> If the product surfaces many results for a human to scan (a search tool, a research assistant), completeness and whole-ranking quality matter. Gate on Recall (did we surface everything relevant) or NDCG (is the whole ordering good).</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          Recall answers support-style questions with one grounded answer per query. That profile points at Precision@1 or MRR as the gating metric - the tail ordering barely matters when the user reads the top result. If Recall later grows a "show me everything about incident X" mode over corpus B, that mode would want Recall@k or NDCG instead. The metric follows the product.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Choose Recall's gating metric <span class="tag demo">★ 10 min · the scorecard above</span></h2>
+    </div>
+    <p class="lede">A retriever with five metrics and no chosen gate has no gate at all. Decide the one number Recall lives or dies by.</p>
+    <div class="steps">
+      <div class="step"><p><strong>State the product.</strong> Write one line: what does Recall do with retrieved results? One grounded answer per query, or a list a human scans? Be honest about today, not the roadmap.</p></div>
+      <div class="step"><p><strong>Map product to metric.</strong> One-answer → Precision@1 or MRR. Many-results → Recall@k or NDCG. Pick the single metric your product profile points at.</p></div>
+      <div class="step"><p><strong>Read it off the scorecard.</strong> Find your chosen metric's current value in the live scorecard above. That number, at your chosen k, is the candidate gate.</p></div>
+      <div class="step"><p><strong>Set and justify a threshold.</strong> Write the gate: "ship only if [metric] ≥ [value] at k=[k]" and one sentence on why that bar fits the product. That line is what b8's CI gate will enforce.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's retriever after b3</strong>
+      Recall's retriever is no longer described by a single borrowed number - it has a full profile (Hit Rate, MRR, Precision, Recall, NDCG) and, more importantly, one chosen gating metric tied to what the product actually does. You can now say not just how good the retriever is, but which "good" you are holding it to. In b4 we turn from retrieval to generation metrics: faithfulness, relevance, and correctness of the answer itself.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b4 <span class="tag exercise">◐ 45 min total</span></h2>
+    </div>
+    <ul>
+      <li>Run LlamaIndex's RetrieverEvaluator with all five metric names over the golden set you grew in b2, and record the averaged numbers.</li>
+      <li>By hand, compute DCG@3 and NDCG@3 for one query with graded relevance 3, 2, 1 at ranks 1, 2, 3 - confirm the perfect ordering gives NDCG = 1.0.</li>
+      <li>Write your one-line gating rule for your own retriever, with the metric, the k, the threshold, and one sentence of product justification.</li>
+      <li>Read: RAGAS context precision and context recall docs, LlamaIndex's retrieval evaluation guide, and the DCG/NDCG entry on Wikipedia.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers ~80% of their working content on retrieval metrics - the rest (custom metrics, hosted runners) lands in later sessions.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · context precision + context recall</span><span class="note">Part 1 · ranking quality vs completeness · recall requires a reference</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LlamaIndex · retrieval evaluation (full metric suite)</span><span class="note">Part 3 · hit_rate, mrr, precision, recall, ap, ndcg via from_metric_names</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">DCG / NDCG (definition + formula)</span><span class="note">Part 3 · rel_i / log2(i+1), normalized by IDCG, range 0-1</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · Precision@k and Recall@k differ because...</p>
+      <button class="qopt" type="button">A · They are two names for the same number</button>
+      <button class="qopt" type="button">B · Precision needs a reference and recall does not</button>
+      <button class="qopt" type="button">C · Precision = relevant in top k / k (noise), recall = relevant in top k / total relevant (gaps, needs the full relevant set)</button>
+      <p class="qwhy">Precision divides by k and catches noise; recall divides by the total number of relevant docs and catches gaps - which is why recall needs a reference to know that denominator.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · NDCG differs from MRR mainly because...</p>
+      <button class="qopt" type="button">A · NDCG uses graded relevance and scores the whole ranking; MRR uses yes/no relevance and only the first hit's rank</button>
+      <button class="qopt" type="button">B · NDCG ignores rank entirely</button>
+      <button class="qopt" type="button">C · MRR can exceed 1.0 but NDCG cannot</button>
+      <p class="qwhy">MRR reads only the first relevant result's rank with binary relevance. NDCG grades relevance and discounts by rank across the whole list, then normalizes to 0-1 by the ideal ordering.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · For a support bot that shows the user one answer, the best gating metric is...</p>
+      <button class="qopt" type="button">A · Recall@10, to surface everything relevant</button>
+      <button class="qopt" type="button">B · Precision@1 or MRR, because only the top result reaches the user</button>
+      <button class="qopt" type="button">C · Hit Rate@50, the widest possible net</button>
+      <p class="qwhy">When the product shows a single answer, only position 1 matters. Precision@1 or MRR captures that; recall and wide-k metrics reward a tail the user never sees.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 3 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>One ranked list</b><span>Every metric reads from the same ranked, relevance-marked list. See the list first.</span></div>
+      <div class="cheat-item"><b>Precision@k</b><span>relevant in top k / k. Catches noise: how much of what you returned was junk.</span></div>
+      <div class="cheat-item"><b>Recall@k</b><span>relevant in top k / total relevant. Catches gaps; needs a reference for the denominator.</span></div>
+      <div class="cheat-item"><b>Context precision vs recall</b><span>RAGAS: precision = ranking quality; recall = completeness (requires a reference).</span></div>
+      <div class="cheat-item"><b>NDCG@k</b><span>DCG@k / IDCG@k, DCG = sum rel_i / log2(i+1). Graded relevance + rank discount, range 0-1.</span></div>
+      <div class="cheat-item"><b>MRR vs NDCG</b><span>MRR = first hit, binary. NDCG = whole ranking, graded. Pick by what the product shows.</span></div>
+      <div class="cheat-item"><b>LlamaIndex suite</b><span>from_metric_names(["hit_rate","mrr","precision","recall","ndcg"]). One call, whole family.</span></div>
+      <div class="cheat-item"><b>Metric follows product</b><span>One-answer bot → Precision@1 / MRR. Research tool → Recall / NDCG. Gate on one.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 3 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b4-generation-metrics.html">Next: Generation metrics →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/rag-corpora.js?v=1"></script>
+<script src="../assets/eval-live.js?v=1"></script>
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

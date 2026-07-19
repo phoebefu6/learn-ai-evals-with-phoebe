@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 7 · Answer correctness - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 7 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 7 of 10</div>
+    <h1>Answer correctness: <span class="accent">grading against a known-right answer</span></h1>
+    <p class="sub">Faithfulness told you the answer stayed loyal to the retrieved context. It said nothing about whether that answer is actually right. This session grades Recall's answers against a reference - the ground truth you wrote down in advance. We build it in two moves: factual correctness by decomposing text into claims and scoring a claim-level F1, then semantic similarity by embedding, and finally the blend RAGAS calls answer correctness. By the end you can say not just "grounded" but "correct".</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Builder track</span>
+      <span class="chip audience">Hands-on · Python + RAGAS</span>
+      <span class="chip audience">Reference required</span>
+      <span class="chip time">Session 7 of 10</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Recap</span>
+      <span class="a2" style="flex:4">3-20 · Claim F1</span>
+      <span class="a3" style="flex:4">20-38 · Similarity + blend</span>
+      <span class="a4" style="flex:1">38-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Grounded is not the same as correct</h2>
+    </div>
+    <p class="lede">A Recall answer can be perfectly faithful to a retrieved chunk and still be wrong - because the chunk was wrong, or because the question needed information no chunk carried. Faithfulness grades an answer against the <em>context it used</em>. Correctness grades it against the <em>answer it should have given</em>. That second thing needs a reference: a human-written ground-truth answer, agreed in advance, exactly like the golden set from b1. Today we score against it two ways and blend them.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A claim-level factual F1 scorer over a reference, a semantic-similarity score from embeddings, and the RAGAS answer-correctness call that blends them - the first metric in this track that measures whether Recall is <em>right</em>, not just consistent.
+    </div>
+  </section>
+
+  <section class="section" id="factual">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers factual correctness by claim F1</span>
+      <h2>Factual correctness by claim F1 <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">You cannot compare two paragraphs with a single equals sign - phrasing differs, order differs, a right answer can be shorter or longer than the reference. So RAGAS breaks both the response and the reference into atomic <strong>claims</strong>, then checks each claim against the other text with a natural-language-inference (NLI) step. That turns "are these two answers the same" into a countable set of true positives, false positives, and false negatives - and from those, an F1.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Factual correctness: the response and the reference are each decomposed into claims, an NLI step classifies each claim as true positive, false positive, or false negative, and precision, recall, and F1 are computed from the counts">
+        <style>
+          .b7fT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b7fI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b7fW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b7fS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b7fN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b7fArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b7fAh); }
+        </style>
+        <defs>
+          <marker id="b7fAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="40" width="176" height="70" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b7fI" x="40" y="68">Response</text>
+        <text class="b7fS" x="40" y="88">what Recall said</text>
+        <rect x="24" y="220" width="176" height="70" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b7fI" x="40" y="248">Reference</text>
+        <text class="b7fS" x="40" y="268">ground truth</text>
+        <rect x="270" y="120" width="180" height="90" rx="12" fill="#B91C1C"/>
+        <text class="b7fT" x="288" y="150">Decompose</text>
+        <text class="b7fW" x="288" y="172">into atomic claims</text>
+        <text class="b7fW" x="288" y="190">on both sides</text>
+        <rect x="510" y="120" width="180" height="90" rx="12" fill="#DC2626"/>
+        <text class="b7fT" x="528" y="150">NLI classify</text>
+        <text class="b7fW" x="528" y="172">TP / FP / FN</text>
+        <text class="b7fW" x="528" y="190">claim by claim</text>
+        <rect x="742" y="120" width="114" height="90" rx="12" fill="#7F1D1D"/>
+        <text class="b7fT" x="758" y="150">Score</text>
+        <text class="b7fW" x="758" y="172">P, R, F1</text>
+        <line class="b7fArr" x1="202" y1="75" x2="266" y2="140"/>
+        <line class="b7fArr" x1="202" y1="255" x2="266" y2="190"/>
+        <line class="b7fArr" x1="452" y1="165" x2="506" y2="165"/>
+        <line class="b7fArr" x1="692" y1="165" x2="738" y2="165"/>
+        <rect x="24" y="306" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b7fN" x="48" y="318">Two paragraphs become two sets of claims, and set overlap becomes an F1 - comparable across phrasings.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - factual correctness: decompose into claims, classify TP/FP/FN, compute F1</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>What TP, FP, and FN mean here<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The three counts are the whole engine. Once you have them, precision, recall, and F1 fall out mechanically. The trick is reading each count as a specific kind of rightness or wrongness in the answer.</p>
+        <ul>
+          <li><strong>True positive (TP)</strong> = a claim in the response that is supported by the reference. This is the answer getting something right - a fact it said that the ground truth agrees with.</li>
+          <li><strong>False positive (FP)</strong> = a claim in the response that the reference does <em>not</em> support. This is the answer adding something wrong or made up - it hurts precision.</li>
+          <li><strong>False negative (FN)</strong> = a claim in the reference that the response failed to say. This is the answer leaving out something it should have covered - it hurts recall.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The F1 formula, once</strong>
+          Precision = TP / (TP + FP) - of what the answer claimed, how much was right. Recall = TP / (TP + FN) - of what should have been said, how much was said. F1 = 2PR / (P + R) - the harmonic mean, so an answer must be both accurate and complete to score high. Say everything correct but omit half, and recall drags F1 down; pad with a wrong claim, and precision does.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>FactualCorrectness in RAGAS<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>RAGAS ships this as a metric. You give it the response and a reference, and it runs the decompose-then-NLI pipeline for you, returning the claim-level F1. Over a dataset with a <code>reference</code> column, it scores every row.</p>
+        <div class="prompt-box good"><span class="label">Python · RAGAS FactualCorrectness on one sample</span>from ragas import evaluate
+from ragas.dataset_schema import SingleTurnSample
+from ragas.metrics import FactualCorrectness
+
+sample = SingleTurnSample(
+    response="Refunds are issued within 5 business days to the original card.",
+    reference="Approved refunds are returned to the original payment method within 5 business days.",
+)
+
+scorer = FactualCorrectness()          # claim decomposition + NLI -&gt; claim F1
+score = await scorer.single_turn_ascore(sample)
+print(score)   # 0-1; higher means the response's claims match the reference's</div>
+        <p>Across Recall's whole golden set you pass a dataset that carries a <code>reference</code> for each question, and let <code>evaluate()</code> roll it up.</p>
+        <div class="prompt-box good"><span class="label">Python · FactualCorrectness over a dataset with reference</span>from datasets import Dataset
+from ragas import evaluate
+from ragas.metrics import FactualCorrectness
+
+data = Dataset.from_dict({
+    "user_input": ["How long do refunds take?", "How do I reset my password?"],
+    "response":   [recall_answer(q) for q in questions],   # what Recall produced
+    "reference":  ["Refunds reach the original method in 5 business days.",
+                   "Use the Forgot password link; a reset email arrives in minutes."],
+})
+
+result = evaluate(data, metrics=[FactualCorrectness()])
+print(result)   # mean factual-correctness F1 across the set</div>
+        <div class="callout tip">
+          <strong>Reference is mandatory here</strong>
+          FactualCorrectness cannot run without a <code>reference</code>. There is nothing to compute TP, FP, and FN against otherwise. If your dataset has no ground-truth column, this metric silently has no meaning - which is exactly why b1's golden set matters so much.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="similarity">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers semantic similarity + answer correctness</span>
+      <h2>Semantic similarity and the blend <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Claim F1 is strict and structural. It can miss the case where an answer means the same thing but shares no claims cleanly - a paraphrase, a different framing. So RAGAS adds a second, softer view: embed the response and the reference, and take the cosine of the two vectors. That is semantic similarity, a 0-to-1 read of "do these two answers mean the same". Answer correctness then blends the strict claim F1 with this soft similarity into one number.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Semantic similarity embeds the response and the reference and takes their cosine; answer correctness is a weighted blend of the factual claim F1 and the semantic similarity into a single score">
+        <style>
+          .b7sT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b7sI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b7sW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b7sS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b7sN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b7sArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b7sAh); }
+        </style>
+        <defs>
+          <marker id="b7sAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="30" width="170" height="66" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b7sI" x="40" y="58">Response emb.</text>
+        <text class="b7sS" x="40" y="78">vector</text>
+        <rect x="24" y="150" width="170" height="66" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b7sI" x="40" y="178">Reference emb.</text>
+        <text class="b7sS" x="40" y="198">vector</text>
+        <rect x="256" y="90" width="176" height="66" rx="12" fill="#DC2626"/>
+        <text class="b7sT" x="272" y="118">Cosine</text>
+        <text class="b7sW" x="272" y="138">semantic similarity 0-1</text>
+        <rect x="256" y="230" width="176" height="66" rx="12" fill="#B91C1C"/>
+        <text class="b7sT" x="272" y="258">Claim F1</text>
+        <text class="b7sW" x="272" y="278">from Part 1</text>
+        <rect x="500" y="150" width="200" height="76" rx="12" fill="#7F1D1D"/>
+        <text class="b7sT" x="518" y="182">Answer correctness</text>
+        <text class="b7sW" x="518" y="204">weighted blend of both</text>
+        <rect x="742" y="158" width="114" height="60" rx="12" fill="#DC2626"/>
+        <text class="b7sT" x="758" y="192">Score 0-1</text>
+        <line class="b7sArr" x1="196" y1="63" x2="252" y2="115"/>
+        <line class="b7sArr" x1="196" y1="183" x2="252" y2="128"/>
+        <line class="b7sArr" x1="434" y1="123" x2="496" y2="175"/>
+        <line class="b7sArr" x1="434" y1="263" x2="496" y2="200"/>
+        <line class="b7sArr" x1="702" y1="188" x2="738" y2="188"/>
+        <rect x="24" y="298" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b7sN" x="48" y="310">Strict claim overlap plus soft meaning overlap - two views of the same reference, blended into one grade.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - semantic similarity via cosine, then the answer-correctness blend</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Semantic similarity: cosine of two embeddings<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Similarity ignores claims entirely. It asks a blunter question: embedded as vectors, do the response and the reference point the same way? Cosine of 1.0 means identical direction (same meaning); near 0 means unrelated.</p>
+        <ul>
+          <li><strong>It forgives phrasing.</strong> "Refunds take five days" and "You will get your money back within a business week" share few words but embed close. Claim F1 might penalise the wording; similarity does not.</li>
+          <li><strong>It is a single soft number.</strong> No TP/FP/FN, just one cosine per pair, 0 to 1. Cheap once you have embeddings.</li>
+          <li><strong>It can be fooled by topic.</strong> Two answers about refunds that disagree on the number of days can still score high on similarity - they are on-topic. That is why you do not use it alone.</li>
+        </ul>
+        <div class="prompt-box good"><span class="label">Python · RAGAS SemanticSimilarity</span>from ragas.dataset_schema import SingleTurnSample
+from ragas.metrics import SemanticSimilarity
+from ragas.embeddings import LangchainEmbeddingsWrapper
+from langchain_openai import OpenAIEmbeddings
+
+scorer = SemanticSimilarity(
+    embeddings=LangchainEmbeddingsWrapper(OpenAIEmbeddings())
+)
+sample = SingleTurnSample(
+    response="You get your money back within a business week.",
+    reference="Refunds reach the original method in 5 business days.",
+)
+score = await scorer.single_turn_ascore(sample)
+print(score)   # cosine of the two embeddings, 0-1</div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Answer correctness = factual F1 blended with similarity<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Answer correctness is the composite. It takes the strict claim F1 (accuracy and completeness of facts) and the soft semantic similarity (meaning overlap) and combines them, weighted, into one 0-to-1 score. High answer correctness means the response is both factually aligned with the reference and reads as the same answer.</p>
+        <ul>
+          <li><strong>Correctness needs a reference; faithfulness does not.</strong> Use correctness when you have a known-right answer to grade against - regression sets, QA benchmarks, anything with ground truth. Use faithfulness (b5) when you only have the retrieved context and want to catch made-up claims, with no ground truth in hand.</li>
+          <li><strong>Correctness = vs a known answer. Faithfulness = vs retrieved context.</strong> They can disagree loudly: an answer can be faithful to a bad chunk (grounded but wrong) or correct while drawing on context you did not track. Different references, different questions.</li>
+        </ul>
+        <div class="prompt-box good"><span class="label">Python · RAGAS AnswerCorrectness over a dataset</span>from datasets import Dataset
+from ragas import evaluate
+from ragas.metrics import answer_correctness
+
+data = Dataset.from_dict({
+    "question":     questions,
+    "answer":       [recall_answer(q) for q in questions],
+    "ground_truth": references,        # your written-in-advance right answers
+})
+
+result = evaluate(data, metrics=[answer_correctness])
+print(result)   # blends factual claim-F1 + semantic similarity into one 0-1 score</div>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <strong>A partially-correct answer</strong>
+          Recall answers "Refunds are issued within 7 business days to your bank account." The reference says "within 5 business days to the original payment method." The "refund is issued" claim is a TP; "7 business days" and "to your bank account" are FPs; the reference's "5 business days" and "original payment method" become FNs. Claim F1 lands low - lots of wrong and missing claims. But semantic similarity stays high - both are clearly refund-timing answers on the same topic. Answer correctness lands in the middle: the blend refuses to call a wrong-number answer fully correct, but does not treat it as unrelated either. That middle score is the honest read of "close, but wrong on the details that matter".
+        </div>
+        <div class="callout tip">
+          <strong>Honesty note - the default weights are not published</strong>
+          Answer correctness combines factual similarity (claim F1) and semantic similarity with a weighting, and the split is tunable. RAGAS does not publish a fixed default ratio we can quote, so do not memorise a number. What is stable: it is a weighted blend of those two components, both require a reference, and you can adjust the weights when you configure the metric. Treat the exact mix as an implementation detail, not a fact to recite.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Write references, then reason about the scores <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">You cannot grade correctness without ground truth, so first you author it - then you predict how a flawed answer scores under each lens before any tool runs.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Write three references.</strong> Pick three Recall questions from your golden set (refund timing, password reset, one of your own). For each, write the one-sentence answer you would accept as fully correct. These are your <code>ground_truth</code> entries.</p></div>
+      <div class="step"><p><strong>Draft a partially-correct answer.</strong> For one question, write an answer that gets the topic right but changes one fact (a wrong number, a wrong channel). This is your test case.</p></div>
+      <div class="step"><p><strong>Reason on factual F1.</strong> List the claims in your answer and in your reference. Mark each TP, FP, or FN. Estimate precision, recall, F1. It should be low - the wrong fact is an FP and the missing right fact is an FN.</p></div>
+      <div class="step"><p><strong>Reason on semantic similarity.</strong> Would the two answers embed close? Almost certainly - same topic, same shape. Note that similarity stays high while F1 drops, and write one line on why answer correctness (the blend) is more trustworthy than either alone.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's correctness after b7</strong>
+      Recall can now be graded against ground truth, not just its own context. You can compute claim-level factual F1, semantic similarity, and the answer-correctness blend over the golden set - and you know that a right-topic, wrong-fact answer lands in the honest middle. In b8 we turn all of these scores into a pass/fail gate that blocks a bad change from shipping.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b8 <span class="tag exercise">◐ 45 min total</span></h2>
+    </div>
+    <ul>
+      <li>Add a <code>reference</code> column to your b6 RAGAS dataset for at least five Recall questions, then run <code>FactualCorrectness</code> and read which rows score lowest.</li>
+      <li>Run <code>answer_correctness</code> on the same set and compare its ranking of the answers to the factual-F1 ranking - note where the blend disagrees with strict F1 and ask why.</li>
+      <li>Take one answer that is faithful (high b5 faithfulness) but wrong, and confirm its answer correctness is low - proof the two metrics measure different things.</li>
+      <li>Read: RAGAS docs on factual correctness, answer correctness, and semantic similarity.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers the reference-based correctness metrics in RAGAS - the claim-F1 mechanic, semantic similarity, and their blend.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · Factual Correctness (claim decomposition + NLI + F1)</span><span class="note">Part 1 · TP/FP/FN over claims, P/R/F1; needs reference</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · Answer Correctness (weighted blend)</span><span class="note">Part 2 · factual F1 + semantic similarity; weights tunable, default not quoted</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · Semantic Similarity (cosine of embeddings)</span><span class="note">Part 2 · response vs reference embedding, 0-1</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · In factual correctness, a claim the response makes that the reference does NOT support is a...</p>
+      <button class="qopt" type="button">A · True positive, which raises recall</button>
+      <button class="qopt" type="button">B · False positive, which lowers precision</button>
+      <button class="qopt" type="button">C · False negative, which lowers recall</button>
+      <p class="qwhy">A response claim unsupported by the reference is a false positive - the answer added something wrong. FPs sit in the denominator of precision = TP/(TP+FP), so they drag precision down.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · Semantic similarity in RAGAS is computed as...</p>
+      <button class="qopt" type="button">A · The count of shared words between response and reference</button>
+      <button class="qopt" type="button">B · An LLM rating the answer from 1 to 5</button>
+      <button class="qopt" type="button">C · The cosine of the response embedding and the reference embedding, 0 to 1</button>
+      <p class="qwhy">Semantic similarity embeds both texts and takes the cosine of the two vectors - a 0-to-1 read of shared meaning that forgives phrasing differences.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · You have no ground-truth answers, only the retrieved context. Which metric applies?</p>
+      <button class="qopt" type="button">A · Faithfulness - it grades against the retrieved context, no reference needed</button>
+      <button class="qopt" type="button">B · Answer correctness - it works without any reference</button>
+      <button class="qopt" type="button">C · Factual correctness - it needs only the response</button>
+      <p class="qwhy">Correctness metrics (factual correctness, answer correctness, semantic similarity) all require a reference. Without ground truth, use faithfulness, which grades the answer against the retrieved context instead.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 7 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Correctness vs faithfulness</b><span>Correctness grades vs a known-right answer; faithfulness grades vs the retrieved context. Different references.</span></div>
+      <div class="cheat-item"><b>Reference is mandatory</b><span>All three correctness metrics need a ground-truth answer written in advance. No reference, no meaning.</span></div>
+      <div class="cheat-item"><b>Claim decomposition</b><span>Response and reference are each split into atomic claims, then compared - not matched as raw paragraphs.</span></div>
+      <div class="cheat-item"><b>TP / FP / FN</b><span>TP = response claim supported by reference. FP = response claim it does not support. FN = reference claim the response missed.</span></div>
+      <div class="cheat-item"><b>Claim F1</b><span>Precision = TP/(TP+FP), Recall = TP/(TP+FN), F1 = 2PR/(P+R). Must be accurate AND complete.</span></div>
+      <div class="cheat-item"><b>Semantic similarity</b><span>Cosine of response vs reference embedding, 0-1. Forgives phrasing; can be fooled by same-topic disagreement.</span></div>
+      <div class="cheat-item"><b>Answer correctness</b><span>Weighted blend of claim F1 + semantic similarity. Weights tunable; the default split is not published - do not quote one.</span></div>
+      <div class="cheat-item"><b>Right topic, wrong fact</b><span>Lands mid-score: low claim F1, high similarity. The blend calls it "close but wrong", which is honest.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 7 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b8-regression-suites.html">Next: Regression eval suites →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

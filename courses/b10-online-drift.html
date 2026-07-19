@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 10 · Online eval &amp; drift - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 10 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 10 of 10</div>
+    <h1>Online eval and drift: <span class="accent">keeping Recall honest in production</span></h1>
+    <p class="sub">This is the last builder session, and it closes the loop. Everything so far ran offline - golden sets, judges, suites, traces - all before the deploy. But production is where the truth lives, and production has no reference answers. Here you learn to evaluate live traffic: sample a slice of real requests, judge them without a ground truth, fold in user thumbs, and watch for drift - both the slow shift in what users ask and the quieter shift in what the right answer even is. By the end Recall is not just measured once; it is continuously measured, and you have a monitoring design you could ship. Then Recall graduates.</p>
+    <div class="chip-row">
+      <span class="chip level">🔴 Builder track · hardest</span>
+      <span class="chip audience">Practitioners · Python</span>
+      <span class="chip audience">Online eval · drift detection</span>
+      <span class="chip time">Final session · 10 of 10</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:3">3-18 · Concepts</span>
+      <span class="a3" style="flex:5">18-40 · Build-along</span>
+      <span class="a4" style="flex:1">40-45 · Close</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Offline proves it works once; online proves it keeps working</h2>
+    </div>
+    <p class="lede">Every eval before this one had an answer key. The golden set knew the right chunk; the judge had a rubric; the suite had a baseline. Production has none of that. Real users ask questions you never wrote down, and nobody labels the right answer in real time. So online evaluation trades the answer key for two other signals: reference-free judging on a <em>sample</em> of traffic, and the users themselves - a thumbs up or down. On top of that, you watch for drift, because a system that passed every test in June can quietly rot by September without a single line of code changing.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A production monitoring design for Recall: a sampling strategy that controls cost, reference-free online eval on live traces, user feedback captured as scores, and two drift signals - data drift and concept drift - with an alert threshold. The final piece that turns Recall from "shipped" into "continuously trustworthy".
+    </div>
+  </section>
+
+  <section class="section" id="online">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers online evaluation</span>
+      <h2>Online evaluation <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Online eval runs continuously on production traces, with <strong>no reference answers</strong>. You cannot judge every request - that would double your LLM bill - so you <strong>sample</strong>: a rate like 0.1 means score 10% of traffic. On that sample you run reference-free heuristics and LLM-judges, fold in any user feedback, and push the result to a dashboard with alerts. Because judging costs money, a smart pattern is to judge everything cheaply and reserve the expensive LLM-judge for runs the users already flagged.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Production traces are sampled at ten percent, the sample is judged by LLM judges, heuristics and user feedback, and results flow to a dashboard with alerts">
+        <style>
+          .b10oT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b10oI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b10oW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b10oS { font: 400 11px Inter, sans-serif; fill: #334155; }
+          .b10oN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b10oArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b10oAh); }
+        </style>
+        <defs>
+          <marker id="b10oAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="120" width="170" height="86" rx="12" fill="#7F1D1D"/>
+        <text class="b10oT" x="42" y="150">Production</text>
+        <text class="b10oW" x="42" y="172">every live request</text>
+        <text class="b10oW" x="42" y="190">as a trace</text>
+        <rect x="248" y="120" width="150" height="86" rx="12" fill="#B91C1C"/>
+        <text class="b10oT" x="266" y="150">Sample</text>
+        <text class="b10oW" x="266" y="172">rate 0.1</text>
+        <text class="b10oW" x="266" y="190">= 10% of traffic</text>
+        <rect x="452" y="120" width="180" height="86" rx="12" fill="#DC2626"/>
+        <text class="b10oT" x="470" y="146">Judge (no ref)</text>
+        <text class="b10oW" x="470" y="168">LLM-judge +</text>
+        <text class="b10oW" x="470" y="184">heuristics + feedback</text>
+        <rect x="686" y="120" width="168" height="86" rx="12" fill="#B91C1C"/>
+        <text class="b10oT" x="704" y="150">Dashboard</text>
+        <text class="b10oW" x="704" y="172">+ alerts on</text>
+        <text class="b10oW" x="704" y="190">score drop</text>
+        <rect x="452" y="248" width="180" height="60" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b10oI" x="470" y="272">User feedback</text>
+        <text class="b10oS" x="470" y="292">thumbs up=1 / down=0</text>
+        <line class="b10oArr" x1="196" y1="163" x2="244" y2="163"/>
+        <line class="b10oArr" x1="400" y1="163" x2="448" y2="163"/>
+        <line class="b10oArr" x1="634" y1="163" x2="682" y2="163"/>
+        <line class="b10oArr" x1="542" y1="246" x2="542" y2="210"/>
+        <rect x="24" y="300" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b10oN" x="48" y="312">No answer key in prod. Sample to control cost, judge reference-free, and let users vote with thumbs.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the online eval pipeline: sample, judge, dashboard, alert</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>What changes when you go online<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Online eval is the offline loop with the answer key removed and a cost dial added.</p>
+        <ul>
+          <li><strong>No reference answers.</strong> You cannot compute Hit Rate or exact-match on live traffic - nobody labeled it. You lean on reference-free judges (is the answer grounded in the retrieved chunks? is it relevant?) and on the users.</li>
+          <li><strong>Sampling controls cost.</strong> A sampling rate like 0.1 scores 10% of requests. Higher catches issues faster; lower saves money. It is a dial you set against your budget, not a fixed number.</li>
+          <li><strong>User feedback is a first-class score.</strong> A thumbs up is a 1, a thumbs down is a 0, attached to that request's run. Cheap, honest, and it needs no judge at all.</li>
+          <li><strong>Filter the expensive judge.</strong> Run cheap heuristics on the whole sample, but reserve the pricey LLM-judge for runs users flagged with a thumbs-down - you spend judgment where the signal already points.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Attach feedback and sample the online eval<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>User feedback is a numeric score attached to a run by its id - the same run/span from b9. A thumbs up sends 1, a thumbs down sends 0. Then you decide which sampled runs get the expensive judge.</p>
+        <div class="prompt-box good"><span class="label">Python · capture a thumb + sample the judge</span>import random
+from langsmith import Client
+
+client = Client()
+
+# user clicked thumbs up/down on a Recall answer
+def on_user_vote(run_id: str, thumbs_up: bool):
+    client.create_feedback(
+        run_id,                       # the run/span from b9's trace
+        key="user_thumb",
+        score=1 if thumbs_up else 0,  # up=1, down=0
+    )
+
+# online eval: judge a sample, and always judge flagged runs
+SAMPLE_RATE = 0.1                     # 10% of traffic
+
+def maybe_judge(run):
+    flagged = run.feedback.get("user_thumb") == 0
+    if flagged or random.random() &lt; SAMPLE_RATE:
+        score = grounded_judge(run)   # reference-free LLM-judge
+        client.create_feedback(run.id, key="grounded", score=score)</div>
+        <div class="callout tip">
+          <strong>Sampled, not skipped</strong>
+          Sampling is not laziness - at scale, judging every request with an LLM can cost more than serving them. A 10% sample of a busy endpoint is thousands of judged calls a day: plenty to see a trend and fire an alert, at a tenth of the bill. Push the rate up temporarily when you suspect trouble, back down when it is quiet.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="drift">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers drift + the graduation</span>
+      <h2>Drift, and the graduation <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">A monitored system can still degrade without any code change, and there are two flavors. <strong>Data drift</strong> is when the <em>inputs</em> shift - users start asking about things they never used to. <strong>Concept drift</strong> is sneakier: the inputs look the same, but the <em>right answer</em> has changed underneath you. Layer 1 detects that something moved; layer 2 sends a sample of the drifted prompts to an LLM-judge to classify <em>why</em> - a new topic, an intent shift, more complexity, a change in language style.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data drift is a shift in input distribution detected by embedding distribution and a threshold alert; concept drift is when the right answer changes though inputs look similar; a layer two LLM judge classifies the cause">
+        <style>
+          .b10dT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b10dI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b10dW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b10dS { font: 400 11px Inter, sans-serif; fill: #334155; }
+          .b10dN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b10dArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b10dAh); }
+        </style>
+        <defs>
+          <marker id="b10dAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="40" width="260" height="110" rx="12" fill="#B91C1C"/>
+        <text class="b10dT" x="44" y="70">Data drift</text>
+        <text class="b10dW" x="44" y="94">input distribution shifts</text>
+        <text class="b10dW" x="44" y="114">detect: input-embedding shift</text>
+        <text class="b10dW" x="44" y="134">alert on threshold</text>
+        <rect x="24" y="180" width="260" height="110" rx="12" fill="#DC2626"/>
+        <text class="b10dT" x="44" y="210">Concept drift</text>
+        <text class="b10dW" x="44" y="234">inputs look similar</text>
+        <text class="b10dW" x="44" y="254">but the right answer</text>
+        <text class="b10dW" x="44" y="274">has changed</text>
+        <rect x="360" y="110" width="220" height="110" rx="12" fill="#7F1D1D"/>
+        <text class="b10dT" x="380" y="140">Layer 2</text>
+        <text class="b10dW" x="380" y="164">LLM-judge on a</text>
+        <text class="b10dW" x="380" y="184">sample of drifted</text>
+        <text class="b10dW" x="380" y="204">prompts</text>
+        <rect x="656" y="110" width="200" height="110" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b10dI" x="676" y="138">Classify cause</text>
+        <text class="b10dS" x="676" y="162">new topic ·</text>
+        <text class="b10dS" x="676" y="182">intent shift ·</text>
+        <text class="b10dS" x="676" y="202">complexity · style</text>
+        <line class="b10dArr" x1="284" y1="120" x2="356" y2="150"/>
+        <line class="b10dArr" x1="284" y1="220" x2="356" y2="190"/>
+        <line class="b10dArr" x1="580" y1="165" x2="652" y2="165"/>
+        <rect x="24" y="308" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b10dN" x="48" y="320">Layer 1 says something moved; layer 2 says what kind. That is the difference between an alarm and a diagnosis.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - data drift vs concept drift, and the layer-2 cause classifier</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>What drifts in a RAG system<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Recall has three moving parts that can each drift the ground under it, even while your code sits still.</p>
+        <ul>
+          <li><strong>Corpus staleness.</strong> The refund policy changes but the indexed chunk still says the old thing. Inputs look normal, retrieval looks fine, and the answer is confidently out of date - classic concept drift.</li>
+          <li><strong>Model updates.</strong> The provider ships a new model version and your grounded, well-behaved prompt suddenly phrases things differently or refuses more. Same input, different behavior.</li>
+          <li><strong>User behavior.</strong> A product launch sends a wave of questions about a feature Recall has never seen - a clean example of data drift, a shift in the input distribution.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          Recall runs quietly for months. Then support updates the refund window from 14 to 30 days but nobody re-indexes the doc. No input changed, no code changed, yet every refund answer is now wrong. Data-drift monitors stay green; only a concept-drift check - or a spike in thumbs-down on refund questions - catches it.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Detecting drift without a freshness rule<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Detection is mostly a statistics-plus-threshold job, with an honest gap where a magic number would be.</p>
+        <ul>
+          <li><strong>Data drift: watch the input distribution.</strong> Embed incoming questions and compare this window's distribution to a baseline. For high-dimensional embeddings, Wasserstein distance is a common measure; alert when it crosses a threshold you tune.</li>
+          <li><strong>Concept drift: watch the outcomes.</strong> Inputs can look identical while quality falls - a drop in the grounded score or a rise in thumbs-down on a topic is your signal that the right answer moved.</li>
+          <li><strong>No universal freshness cadence.</strong> There is no authoritative "re-index every N days". How often to refresh the corpus is a design decision you make from how fast your source-of-truth changes - present it as a trade-off, not a constant.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Two layers, two jobs</strong>
+          Keep detection and diagnosis separate. Layer 1 is cheap and always-on: an embedding-distribution monitor with a threshold that just says "something shifted". Layer 2 is expensive and on-demand: sample the drifted prompts and let an LLM-judge classify the cause - new topic, intent shift, more complexity, changed language style - so a human gets a diagnosis, not just an alarm.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>The graduation - Recall, from vibe to continuously measured<span class="mini">3 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>This is the last session, so step back and see the whole ladder you climbed over the builder track. Each rung is a session, and each one made Recall a little harder to fool.</p>
+        <ul>
+          <li><strong>b1-b3 · the offline foundation.</strong> A golden set, trustworthy questions, and the metric suite - Recall got its first real number.</li>
+          <li><strong>b4-b7 · judging the ungradeable.</strong> LLM-as-judge, groundedness and faithfulness, rubrics and pairwise - Recall's <em>answers</em>, not just its retrieval, got measured.</li>
+          <li><strong>b8-b10 · making it durable.</strong> A regression suite as a merge gate, tracing so failures are inspectable, and now online eval and drift so the measurement never stops.</li>
+        </ul>
+        <p>Recall began as a RAG assistant in the RAG course. It is now grounded, gated, observable, and continuously measured against live traffic. That is a system you can actually trust in front of users - and trust you can defend with numbers.</p>
+        <div class="callout tip">
+          <strong>The next frontier: agent eval</strong>
+          Recall answers in one shot. The moment you let it plan, call tools, and loop - an agent - a new evaluation surface opens: was the trajectory right, not just the final answer? Did it call the right tool with the right arguments? That is where orchestration and evaluation meet, and it is exactly what the LangChain course picks up next.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Design Recall's production monitoring <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">The final exercise is a design, not a script. Write the monitoring plan you would actually ship for Recall - four decisions, each defended in a sentence.</p>
+    <div class="steps">
+      <div class="step"><p><strong>What to sample.</strong> Pick a sampling rate and justify it against a rough traffic and cost estimate. Would you always judge thumbs-down runs on top of the sample? Say why.</p></div>
+      <div class="step"><p><strong>What feedback.</strong> Decide what the user can send - thumbs up/down at minimum - and which run it attaches to. Note how a thumbs-down would trigger the expensive judge from Part 1.</p></div>
+      <div class="step"><p><strong>What drift signal.</strong> Choose one data-drift signal (embedding-distribution shift on incoming questions) and one concept-drift signal (a fall in grounded score or a rise in thumbs-down on a topic). State what baseline you compare against.</p></div>
+      <div class="step"><p><strong>What alert threshold.</strong> Set a threshold that pages a human, and be honest that it is a starting guess you will tune. Decide how re-indexing cadence gets decided - remember there is no universal freshness number.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall graduates</strong>
+      That is the builder track. Recall started as a RAG assistant, and across ten sessions it became something you can defend: grounded in its sources, gated on every change, observable step by step, and now continuously measured against live traffic with drift alarms watching its back. Evaluation is no longer a thing you do before launch - it is a thing that never stops. Recall is built, and it is honest. Congratulations - go keep something in production honest.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>After the track <span class="tag exercise">◐ light · 30 min</span></h2>
+    </div>
+    <ul>
+      <li>Wire <code>create_feedback</code> into one real endpoint so a thumbs up/down attaches a score to the run. Confirm it shows up on the trace from b9.</li>
+      <li>Pick a sampling rate for your own traffic and write one sentence defending it on cost. Then sketch the rule that always judges flagged runs.</li>
+      <li>Write down one data-drift signal and one concept-drift signal you could actually compute for your system, plus a first-guess alert threshold.</li>
+      <li>Read: LangSmith's online-evaluations and attach-user-feedback guides, and AWS's note on data drift vs concept drift. Then start the LangChain course to take Recall from one-shot answers to a tool-using agent.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers the core online-eval and drift surface. One honest gap: there is no single authoritative re-index cadence, so freshness is presented as a design decision, not a number.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LangSmith · online evaluations</span><span class="note">Part 1 · continuous, reference-free, sampled eval on production traces</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LangSmith · attach user feedback</span><span class="note">Part 1 · create_feedback, thumbs up=1 / down=0 on any run</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">AWS · data drift vs concept drift guidance</span><span class="note">Part 2 · input-distribution shift vs changed input-to-output relationship</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Re-index / freshness cadence</span><span class="note">Part 2 · no single number; presented as a design trade-off</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · The defining feature of online evaluation versus offline is...</p>
+      <button class="qopt" type="button">A · It runs faster</button>
+      <button class="qopt" type="button">B · It uses a larger golden set</button>
+      <button class="qopt" type="button">C · It runs continuously on production traces with no reference answers, on a sampled slice of traffic</button>
+      <p class="qwhy">Online eval has no answer key - it judges live traffic reference-free, and samples (e.g. 10%) to control cost while still seeing trends.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · The refund policy changed but the indexed chunk was never updated, so answers are now wrong while inputs look normal. This is...</p>
+      <button class="qopt" type="button">A · Concept drift - the inputs look similar but the right answer has changed underneath</button>
+      <button class="qopt" type="button">B · Data drift - the input distribution shifted</button>
+      <button class="qopt" type="button">C · A parsing bug</button>
+      <p class="qwhy">Concept drift is when the input-to-desired-output relationship changes: the questions look the same, but the correct answer moved. Data drift is a shift in the inputs themselves.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · A thumbs-down from a user is best captured as...</p>
+      <button class="qopt" type="button">A · A deleted trace</button>
+      <button class="qopt" type="button">B · A numeric feedback score (down=0) attached to that request's run, which can also trigger the expensive judge</button>
+      <button class="qopt" type="button">C · A new golden-set entry with a labeled correct answer</button>
+      <p class="qwhy">User feedback is a numeric score (up=1, down=0) attached via create_feedback to any run. Flagged runs are exactly where you spend the pricier LLM-judge.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 10 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Online eval</b><span>Continuous, on production traces, no reference answers. The offline loop minus the answer key.</span></div>
+      <div class="cheat-item"><b>Sampling</b><span>Rate like 0.1 scores 10% of traffic. A cost dial - turn it up when you suspect trouble.</span></div>
+      <div class="cheat-item"><b>User feedback</b><span>Numeric score via create_feedback: thumbs up=1, down=0, attached to any run.</span></div>
+      <div class="cheat-item"><b>Filter the judge</b><span>Cheap heuristics on the whole sample; reserve the LLM-judge for flagged runs.</span></div>
+      <div class="cheat-item"><b>Data drift</b><span>Input distribution shifts. Detect via input-embedding shift (Wasserstein) + threshold alert.</span></div>
+      <div class="cheat-item"><b>Concept drift</b><span>Inputs look similar but the right answer changed. Watch outcomes, not just inputs.</span></div>
+      <div class="cheat-item"><b>Two layers</b><span>Layer 1 says something moved; layer 2 LLM-judge classifies the cause.</span></div>
+      <div class="cheat-item"><b>Freshness = design</b><span>No universal re-index cadence. Decide it from how fast your source of truth changes.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 10 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="https://phoebefu6.github.io/learn-langchain-with-phoebe/">Next: orchestrate + evaluate agents → learn-langchain-with-phoebe</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

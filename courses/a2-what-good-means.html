@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader session 2 · What "good" actually means - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Leader session 2 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Leader track · Session 2 of 6</div>
+    <h1>What "good" actually means <span class="accent">before you can measure it</span></h1>
+    <p class="sub">Session 1 made the case that you have to measure. This one gives you the words for what you are measuring. "Is it good?" is not a single question - for the most common kind of AI system, the one that looks things up before it answers, quality splits into three distinct pieces, and each catches a different way the system can fail. Learn this vocabulary and you can sit in any AI review and say exactly where quality broke, instead of waving at "the answer was bad".</p>
+    <div class="chip-row">
+      <span class="chip level">🟢 easy</span>
+      <span class="chip audience">Leaders: C-level · managers · curious minds</span>
+      <span class="chip audience">No code, ever</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Concepts</span>
+      <span class="a3" style="flex:4">20-40 · Exercises</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Why "good" needs three words, not one</h2>
+    </div>
+    <p class="lede">Most business AI today is a lookup system: given a question, it first fetches relevant material - policy documents, past tickets, product specs - and then writes an answer from what it found. This is called retrieval-augmented generation, RAG for short, and you do not need the acronym, just the shape: find, then answer. The reason it matters for leaders is simple. When the answer is wrong, there are two very different places it could have gone wrong, and if you cannot name which one, you cannot fix it or even ask the right question. This hour gives you the naming.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - read after class</span>
+      <span class="pill peach">★ Try it now prompt</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you walk out with today</strong>
+      The RAG Triad - three named checks that together are strong evidence an answer is not hallucinated - the split between retrieval quality and answer quality, a one-line diagnostic for which half broke, and five questions to put to your data team this week.
+    </div>
+  </section>
+
+  <section class="section" id="triad">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the three checks of quality</span>
+      <h2>The RAG Triad <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">For a find-then-answer system, quality is not one thing - it is a triangle of three checks, and each corner catches a different failure. When all three pass together, you have strong evidence the answer is grounded in real material rather than invented. This is the single most useful mental model in the whole course.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The RAG Triad: a triangle linking the question, the retrieved context, and the answer, with Context Relevance, Groundedness, and Answer Relevance on the three sides">
+        <style>
+          .a2tT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a2tI { font: 700 14px Inter, sans-serif; fill: #1E293B; }
+          .a2tW { font: 400 12.5px Inter, sans-serif; fill: #FEE2E2; }
+          .a2tS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .a2tL { font: 700 13px Inter, sans-serif; fill: #B91C1C; }
+          .a2tN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .a2tLine { stroke: #DC2626; stroke-width: 2.5; fill: none; }
+        </style>
+        <rect x="360" y="30" width="180" height="66" rx="14" fill="#B91C1C"/>
+        <text class="a2tT" x="380" y="60">Question</text>
+        <text class="a2tW" x="380" y="80">what the user asked</text>
+        <rect x="70" y="250" width="200" height="66" rx="14" fill="#7F1D1D"/>
+        <text class="a2tT" x="90" y="280">Context</text>
+        <text class="a2tW" x="90" y="300">chunks we retrieved</text>
+        <rect x="620" y="250" width="200" height="66" rx="14" fill="#DC2626"/>
+        <text class="a2tT" x="640" y="280">Answer</text>
+        <text class="a2tW" x="640" y="300">what we replied</text>
+        <line class="a2tLine" x1="390" y1="98" x2="200" y2="248"/>
+        <line class="a2tLine" x1="510" y1="98" x2="700" y2="248"/>
+        <line class="a2tLine" x1="272" y1="283" x2="618" y2="283"/>
+        <rect x="150" y="150" width="200" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a2tL" x="164" y="167">Context Relevance</text>
+        <rect x="540" y="150" width="196" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a2tL" x="554" y="167">Answer Relevance</text>
+        <rect x="352" y="298" width="184" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a2tL" x="366" y="315">Groundedness</text>
+        <text class="a2tS" x="150" y="196">right chunks found?</text>
+        <text class="a2tS" x="558" y="196">answers the question?</text>
+        <text class="a2tS" x="356" y="342" style="fill:#64748B">answer supported by context?</text>
+        <rect x="70" y="30" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a2tN" x="94" y="42">All three corners pass = strong evidence the answer is not hallucinated.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the RAG Triad: three checks that together catch hallucination</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Context Relevance - did we even find the right material?<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Context Relevance asks a question about the <em>lookup</em> step, before a single word of the answer is written: of the material the system pulled up to answer with, how much of it actually relates to what the user asked?</p>
+        <ul>
+          <li><strong>Plain English:</strong> "Did we fetch the right pages?" If someone asks about refund timing and the system retrieves the shipping policy, context relevance is low - the answer was doomed before it started.</li>
+          <li><strong>The failure it catches:</strong> the system confidently answering from the wrong source material. A perfect writer cannot save a wrong document.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Groundedness - is every claim actually backed by the material?<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Groundedness is the anti-hallucination check. It asks: is each statement in the answer actually supported by the material that was retrieved, or did the model add things from thin air?</p>
+        <ul>
+          <li><strong>How it is scored, in plain terms:</strong> break the answer into its individual claims, check each claim against the retrieved context, and score the fraction that are supported. Nine of ten claims backed by the documents is a groundedness of 0.9. This "break into claims, check each" method is worth remembering - it is exactly how the machine does it too.</li>
+          <li><strong>The failure it catches:</strong> the fluent invention - a plausible detail, number, or policy that appears nowhere in the source. This is the failure that quietly misinforms customers.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Answer Relevance - did we actually answer the question asked?<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Answer Relevance closes the loop back to the user. An answer can be built from the right documents and be perfectly grounded in them, and still miss - because it answered a slightly different question, or buried the point, or trailed off into a related topic.</p>
+        <ul>
+          <li><strong>Plain English:</strong> "Was this a reply to what they actually asked?" Correct and grounded but off-target is still a bad answer.</li>
+          <li><strong>The failure it catches:</strong> the technically-true non-answer - accurate, sourced, and unhelpful.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Why three, not one</strong>
+          Each corner guards a different door: right material in, honest use of that material, on-target reply out. A single "is it good?" score hides which door was left open. The Triad names it.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="split">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers where quality breaks</span>
+      <h2>Retrieval quality vs answer quality <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Step back from the three corners and there are really two halves to a find-then-answer system: the half that finds the information, and the half that writes with it. Measuring both is not optional - because either half can pass while the other fails, and the two failures need completely different fixes.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two buckets: retrieval metrics measure whether the right information was found, generation metrics measure whether it was used well; both must pass for a good answer">
+        <style>
+          .a2qT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a2qW { font: 400 12.5px Inter, sans-serif; fill: #FEE2E2; }
+          .a2qI { font: 700 14px Inter, sans-serif; fill: #1E293B; }
+          .a2qS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .a2qX { font: 600 13px Inter, sans-serif; fill: #64748B; }
+          .a2qN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .a2qArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#a2qAh); }
+        </style>
+        <defs>
+          <marker id="a2qAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="60" y="70" width="300" height="120" rx="16" fill="#7F1D1D"/>
+        <text class="a2qT" x="84" y="102">RETRIEVAL metrics</text>
+        <text class="a2qW" x="84" y="128">Did we find the right info?</text>
+        <text class="a2qW" x="84" y="150">Context Relevance lives here.</text>
+        <text class="a2qW" x="84" y="172">Wrong docs = doomed answer.</text>
+        <rect x="520" y="70" width="300" height="120" rx="16" fill="#DC2626"/>
+        <text class="a2qT" x="544" y="102">GENERATION metrics</text>
+        <text class="a2qW" x="544" y="128">Did we use it well?</text>
+        <text class="a2qW" x="544" y="150">Groundedness + Answer</text>
+        <text class="a2qW" x="544" y="172">Relevance live here.</text>
+        <text class="a2qX" x="378" y="122">find</text>
+        <text class="a2qX" x="372" y="150">then</text>
+        <text class="a2qX" x="370" y="178">answer</text>
+        <line class="a2qArr" x1="362" y1="130" x2="518" y2="130"/>
+        <rect x="60" y="230" width="760" height="48" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a2qI" x="84" y="259">Good answer needs BOTH. Bad retrieval dooms a great writer; great retrieval cannot save a bad one.</text>
+        <rect x="60" y="292" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a2qN" x="84" y="304">The diagnostic: low groundedness points at generation; missing info points at retrieval.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - two halves of quality: finding the info vs using it well</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why you must measure both halves<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>It is tempting to measure just the final answer - that is what the user sees, after all. But a single answer score cannot tell you which half to fix, and worse, it can lull you.</p>
+        <ul>
+          <li><strong>Great retrieval + bad answer = still bad.</strong> The system found the perfect document and then wrote a muddled, off-target reply. The retrieval score looks great; the customer is unhappy.</li>
+          <li><strong>Bad retrieval dooms even a great generator.</strong> The best writer in the world, handed the wrong documents, produces a confident wrong answer. No amount of writing skill recovers from being fed the wrong facts.</li>
+          <li><strong>Two halves, two teams, two fixes.</strong> Fixing retrieval means better search and indexing. Fixing generation means better prompting and instructions. If you only know "the answer was bad", you do not know which team to send it to.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The one-line diagnostic every leader should keep<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Here is the takeaway to write on a sticky note. When an answer is bad, the Triad tells you where to look:</p>
+        <ul>
+          <li><strong>Low groundedness</strong> - the answer contains claims the documents do not support - means the <em>generation</em> half is the problem. The right info may have been there; the model invented or drifted. Fix the writing side.</li>
+          <li><strong>Missing information</strong> - the right material was never retrieved, so low context relevance - means the <em>retrieval</em> half is the problem. Fix the search side; no prompt tweak will conjure a document that was never found.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The two-week wild goose chase.</strong> A team (anonymized) spent two weeks rewriting prompts to fix a bot that kept giving incomplete answers. Quality barely moved. When they finally looked at the retrieval half, they found the search was only ever pulling the first page of each policy - the answers were incomplete because the material was incomplete. The prompt was never the problem. The Triad would have pointed them at retrieval on day one.</p>
+        </div>
+        <div class="callout tip">
+          <strong>Ask the two-part question</strong>
+          Never accept "the answer was bad" as a diagnosis. Ask: "Was the right information found, and if so, was it used faithfully?" That single sentence routes the fix to the correct half.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Where the Triad comes from, and its cousins<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The RAG Triad framing was popularized by DeepLearning.AI's short course on building and evaluating advanced RAG, taught with the open-source TruLens tool, which scores Context Relevance, Groundedness, and Answer Relevance on real traffic. A parallel open-source framework, RAGAS, offers a similar family of metrics under slightly different names - faithfulness for groundedness, and so on. You do not need to pick a tool today. You need the concept: three checks, two halves, and a diagnostic that tells you which half broke. The builder track puts real numbers on all three.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise-1">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 1 of 2</span>
+      <h2>Score a real answer on the Triad <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">You do not need code to grade the Triad - just judgment. Here is one question, the material the system retrieved, and the answer it gave. Rate each corner pass or fail, and say which half broke.</p>
+    <div class="callout example">
+      <span class="ex-pill">Real world</span>
+      <p><strong>Question:</strong> "How many vacation days do first-year employees get?"<br>
+      <strong>Retrieved context:</strong> "The employee parking policy allows two reserved spaces per department. Badge access is granted on the first day."<br>
+      <strong>Answer given:</strong> "First-year employees receive 15 vacation days per year."</p>
+    </div>
+    <div class="steps">
+      <div class="step"><p><strong>Context Relevance - pass or fail?</strong> Does the retrieved material relate to the vacation question? Decide, and note what that tells you about the lookup step.</p></div>
+      <div class="step"><p><strong>Groundedness - pass or fail?</strong> Is the "15 days" claim supported by the retrieved context? Check the answer's claim against the material in front of you.</p></div>
+      <div class="step"><p><strong>Answer Relevance - pass or fail?</strong> Taken alone, does the answer address the question that was asked?</p></div>
+      <div class="step"><p><strong>Which half broke?</strong> You should find context relevance failed (wrong material), groundedness failed (the number is invented - it appears nowhere), and answer relevance passed on its face. Wrong material plus a confident invented number - the failure started in retrieval and the model papered over it. This is the classic hallucination pattern.</p></div>
+    </div>
+    <div class="prompt-box good"><span class="label">★ Your Triad-scoring partner (paste into any chat AI)</span>You are teaching me to grade the RAG Triad. I will give you a question, the retrieved context, and an answer. Score each of the three - Context Relevance (does the context relate to the question?), Groundedness (is every claim in the answer supported by the context?), and Answer Relevance (does the answer address the question?) - as pass or fail with one sentence each. Then tell me whether the failure, if any, is a retrieval problem or a generation problem. Here is the first case: [paste question, context, answer]</div>
+  </section>
+
+  <section class="section" id="exercise-2">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 2 of 2</span>
+      <h2>Sort the complaints <span class="tag demo">★ 8 min · your next AI review</span></h2>
+    </div>
+    <p class="lede">Real quality complaints arrive as vague grumbles. The skill is sorting each into "retrieval problem" or "answer problem" - because that routes it to the right fix. Sort these six.</p>
+    <div class="steps">
+      <div class="step"><p>"It made up a discount that does not exist." → Retrieval or answer? (The claim is unsupported - that is a groundedness failure, an <strong>answer problem</strong>.)</p></div>
+      <div class="step"><p>"It said it could not find anything about our return policy, but we have a whole page on it." → (The right document was never fetched - a <strong>retrieval problem</strong>.)</p></div>
+      <div class="step"><p>"Everything it said was true, but it never actually answered my question." → (Low answer relevance - an <strong>answer problem</strong>.)</p></div>
+      <div class="step"><p>"It answered about the wrong product entirely." → (Wrong material pulled up - a <strong>retrieval problem</strong>.)</p></div>
+      <div class="step"><p>"The facts were right but it added a warranty term that is not in our policy." → (An invented claim on top of good material - a groundedness failure, an <strong>answer problem</strong>.)</p></div>
+      <div class="step"><p>"It only ever quotes the summary and misses the detailed clauses." → (Incomplete material retrieved - a <strong>retrieval problem</strong>.)</p></div>
+    </div>
+    <div class="callout tip">
+      <strong>The pattern to notice</strong>
+      Invented, off-target, or misused facts point at the answer half. Missing, wrong, or incomplete material points at the retrieval half. Sorting complaints this way, in the meeting, is the fastest way to route a fix to the team that can actually make it.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session a3 <span class="tag exercise">◐ 30 min total</span></h2>
+    </div>
+    <ul>
+      <li>Take three real bad answers from an AI system you know, and score each on the Triad - context relevance, groundedness, answer relevance - pass or fail.</li>
+      <li>For each, write one sentence: "This is a retrieval problem" or "This is an answer problem." Notice the split.</li>
+      <li>Bring the most surprising one to your next AI review and ask the team to confirm your diagnosis.</li>
+      <li>Optional: skim the builder track's b2 to see the same three numbers scored automatically - you do not need the code, just the shape.</li>
+    </ul>
+    <div class="callout win">
+      <strong>★ Questions to ask your data team this week</strong>
+      <ol>
+        <li>For our main AI system, do we measure retrieval quality and answer quality separately, or only the final answer?</li>
+        <li>Do we track something like groundedness - the fraction of the answer's claims actually supported by the retrieved material?</li>
+        <li>When an answer is wrong, can we tell whether the right information was found but misused, or never found at all?</li>
+        <li>Do we check that the retrieved documents were even relevant to the question, before judging the answer?</li>
+        <li>Would passing all three - context relevance, groundedness, answer relevance - give us confidence the answer is not hallucinated?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">The leader track teaches from published engineering guidance and course curricula - no vendor marketing. This page covers:</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">DeepLearning.AI · Building &amp; Evaluating Advanced RAG (RAG Triad via TruLens)</span><span class="note">Part 1-2 · Context Relevance, Groundedness, Answer Relevance · all three pass = low hallucination</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">RAGAS · RAG evaluation metrics</span><span class="note">Part 2 · faithfulness = groundedness · a parallel metric family</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · The three corners of the RAG Triad are...</p>
+      <button class="qopt" type="button">A · Speed, cost, and popularity</button>
+      <button class="qopt" type="button">B · Accuracy, fluency, and tone</button>
+      <button class="qopt" type="button">C · Context Relevance, Groundedness, and Answer Relevance</button>
+      <p class="qwhy">Context Relevance (right material found?), Groundedness (answer supported by that material?), and Answer Relevance (does it address the question?). All three passing is strong evidence the answer is not hallucinated.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Groundedness is scored, in plain terms, by...</p>
+      <button class="qopt" type="button">A · Breaking the answer into individual claims and checking what fraction are supported by the retrieved context</button>
+      <button class="qopt" type="button">B · Counting how many words the answer has</button>
+      <button class="qopt" type="button">C · Asking the user if they liked it</button>
+      <p class="qwhy">Break the answer into claims, check each against the context, and the score is the fraction supported. Nine of ten claims backed = groundedness of 0.9. It is the anti-hallucination check.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · An answer is wrong and its groundedness is low. The diagnostic says...</p>
+      <button class="qopt" type="button">A · It is a retrieval problem - fix the search</button>
+      <button class="qopt" type="button">B · It is a generation problem - the model invented or drifted from the material it had</button>
+      <button class="qopt" type="button">C · Nothing can be concluded</button>
+      <p class="qwhy">Low groundedness means claims are not supported by the retrieved context - the answer half misused or invented. Missing context, by contrast, points at the retrieval half.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 2 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Find, then answer</b><span>Most business AI looks material up first, then writes from it. Quality can break in either step.</span></div>
+      <div class="cheat-item"><b>The RAG Triad</b><span>Context Relevance, Groundedness, Answer Relevance - three checks, one per failure mode.</span></div>
+      <div class="cheat-item"><b>Context Relevance</b><span>Did we fetch the right material? A perfect writer cannot save a wrong document.</span></div>
+      <div class="cheat-item"><b>Groundedness</b><span>Is every claim backed by the material? Break into claims, check each, score the fraction supported.</span></div>
+      <div class="cheat-item"><b>Answer Relevance</b><span>Did we reply to what was actually asked? Correct-but-off-target is still bad.</span></div>
+      <div class="cheat-item"><b>Two halves</b><span>Retrieval (found the info?) vs generation (used it well?). Measure both, not just the final answer.</span></div>
+      <div class="cheat-item"><b>The diagnostic</b><span>Low groundedness → generation problem. Missing info → retrieval problem. Route the fix accordingly.</span></div>
+      <div class="cheat-item"><b>Three green = trust</b><span>All three corners passing is strong evidence the answer is grounded, not hallucinated.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Leader session 2 of 6 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="a3-offline-online.html">Next: Offline vs online evaluation →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

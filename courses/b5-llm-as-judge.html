@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 5 · LLM-as-judge - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 5 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 5 of 10</div>
+    <h1>LLM-as-judge: <span class="accent">an automated grader you can trust, carefully</span></h1>
+    <p class="sub">Most of the metrics in b4 were LLM judges under the hood. This session opens the hood. You will learn the three ways an LLM can grade an answer - pointwise, pairwise, and reference-guided - write real judge prompts for Recall, and then meet the three biases that make a naive judge lie to you: position, verbosity, and self-preference. Most importantly you will learn to calibrate: swap positions, use a different model, and validate against a small human-labeled set. A judge is a measurement instrument, and today you learn to trust it only as far as you have checked it.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Builder track</span>
+      <span class="chip audience">Practitioners · some Python</span>
+      <span class="chip audience">Hands-on · concept + code</span>
+      <span class="chip time">~45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-24 · Three judging modes</span>
+      <span class="a3" style="flex:4">24-40 · Biases + calibration</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>The grader is a model too</h2>
+    </div>
+    <p class="lede">You cannot hand-grade every answer a production system gives, and string matching is too brittle for open-ended text. So you hire another LLM to grade - the LLM-as-judge pattern that powers RAGAS faithfulness, most rubric scores, and pairwise model comparisons. It scales beautifully. It also inherits every quirk of the model doing the judging. Today we make Recall's judge, then spend equal time learning why a judge you have not calibrated is a number you should not believe.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      Working pointwise and pairwise judge prompts for Recall, a clear map of the three judging modes and when each fits, and a calibration routine - swap positions, use a different model, validate against humans - that turns a judge from a hunch into an instrument.
+    </div>
+  </section>
+
+  <section class="section" id="modes">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the three judging modes</span>
+      <h2>The three judging modes <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">An LLM judge can grade in three shapes, and picking the right one is half the battle. Pointwise scores one answer on a rubric. Pairwise picks the better of two. Reference-guided scores one answer against a gold answer. Each answers a different question and each has a different failure mode.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three judging modes side by side. Pointwise sends one answer plus a rubric to the judge and gets a score. Pairwise sends answer A and answer B and gets a winner. Reference-guided sends the answer plus a gold reference and gets a score.">
+        <style>
+          .b5jT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b5jI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b5jW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b5jS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b5jH { font: 700 12.5px Inter, sans-serif; fill: #B91C1C; }
+          .b5jN { font: 600 13px Inter, sans-serif; fill: #431407; }
+          .b5jArr { stroke: #CBD5E1; stroke-width: 2.2; fill: none; marker-end: url(#b5jAh); }
+        </style>
+        <defs>
+          <marker id="b5jAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <text class="b5jH" x="30" y="26">POINTWISE</text>
+        <rect x="30" y="38" width="150" height="30" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b5jS" x="44" y="58">one answer</text>
+        <rect x="30" y="74" width="150" height="30" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b5jS" x="44" y="94">rubric 1-5</text>
+        <rect x="210" y="46" width="110" height="50" rx="10" fill="#B91C1C"/>
+        <text class="b5jT" x="226" y="76">Judge</text>
+        <rect x="350" y="46" width="120" height="50" rx="10" fill="#7F1D1D"/>
+        <text class="b5jT" x="366" y="70">Score</text>
+        <text class="b5jW" x="366" y="88">e.g. 4 / 5</text>
+        <line class="b5jArr" x1="182" y1="71" x2="206" y2="71"/>
+        <line class="b5jArr" x1="322" y1="71" x2="346" y2="71"/>
+        <text class="b5jH" x="540" y="26">PAIRWISE</text>
+        <rect x="540" y="38" width="150" height="30" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b5jS" x="554" y="58">answer A</text>
+        <rect x="540" y="74" width="150" height="30" rx="6" fill="#FEE2E2" stroke="#DC2626"/>
+        <text class="b5jS" x="554" y="94">answer B</text>
+        <rect x="720" y="46" width="60" height="50" rx="10" fill="#B91C1C"/>
+        <text class="b5jT" x="732" y="76">Judge</text>
+        <rect x="810" y="46" width="60" height="50" rx="10" fill="#7F1D1D"/>
+        <text class="b5jT" x="824" y="70">Win</text>
+        <text class="b5jW" x="822" y="88">A or B</text>
+        <line class="b5jArr" x1="692" y1="71" x2="716" y2="71"/>
+        <line class="b5jArr" x1="782" y1="71" x2="806" y2="71"/>
+        <text class="b5jH" x="30" y="176">REFERENCE-GUIDED</text>
+        <rect x="30" y="188" width="150" height="30" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b5jS" x="44" y="208">the answer</text>
+        <rect x="30" y="224" width="150" height="30" rx="6" fill="#DC2626"/>
+        <text class="b5jW" x="44" y="244">gold reference</text>
+        <rect x="210" y="196" width="110" height="50" rx="10" fill="#B91C1C"/>
+        <text class="b5jT" x="226" y="226">Judge</text>
+        <rect x="350" y="196" width="180" height="50" rx="10" fill="#7F1D1D"/>
+        <text class="b5jT" x="366" y="220">Score vs gold</text>
+        <text class="b5jW" x="366" y="238">grounded rubric</text>
+        <line class="b5jArr" x1="182" y1="221" x2="206" y2="221"/>
+        <line class="b5jArr" x1="322" y1="221" x2="346" y2="221"/>
+        <rect x="560" y="188" width="310" height="66" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b5jI" x="578" y="214">Pointwise: absolute score. Pairwise:</text>
+        <text class="b5jI" x="578" y="234">relative winner. Reference: anchored.</text>
+        <rect x="30" y="330" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b5jN" x="54" y="342">Pairwise agrees with humans most; reference-guided is the most stable; pointwise is the easiest to run at scale.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - pointwise scores one, pairwise picks the better of two, reference-guided scores against a gold answer</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Pointwise: score one answer on a rubric<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Pointwise (also called single-answer grading) hands the judge one answer and a rubric and asks for a score, say 1 to 5 or 1 to 10. It is the simplest to run at scale - one call per answer - which is why it powers dashboards and CI gates.</p>
+        <ul>
+          <li><strong>When to use it.</strong> Continuous monitoring, per-answer scoring across thousands of live responses, any time you need an absolute number rather than a comparison.</li>
+          <li><strong>The weakness.</strong> Absolute scores drift. Without an anchor, a judge's idea of "a 4" wobbles between runs and models, so pointwise is the mode most in need of a clear rubric and calibration.</li>
+          <li><strong>Make the rubric concrete.</strong> Define what each score level means in plain language and give an example. A vague rubric produces a vague, unstable number.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Pairwise + reference-guided<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The other two modes trade scale for reliability.</p>
+        <ul>
+          <li><strong>Pairwise.</strong> Show the judge two answers to the same question and ask which is better. Humans are far more consistent choosing between two options than assigning an absolute score, and so are LLM judges. This is the mode behind model-vs-model comparisons and A/B prompt tests. Its own weakness is position bias, which we defuse in Part 2.</li>
+          <li><strong>Reference-guided.</strong> Give the judge a gold answer and ask it to score the candidate against that reference. Anchoring to a known-good answer stabilizes the score and reduces drift dramatically. The cost is that you need references, so it lives in offline golden-set evaluation.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Which mode for which job</strong>
+          Comparing two models or two prompts? Pairwise. Monitoring one system's answers over time on a dashboard? Pointwise, with a tight rubric. Have gold answers and want the most stable score? Reference-guided. Most mature suites use pairwise to choose and pointwise to monitor.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>A pointwise and a pairwise judge prompt<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The prompt is the judge. Here is a pointwise rubric grader for Recall's answers, then a pairwise comparator. Note the two habits baked in from the start: ask for reasoning before the score (chain-of-thought), and demand a structured output you can parse.</p>
+        <div class="prompt-box good"><span class="label">Python · pointwise judge prompt (rubric 1-5)</span>POINTWISE = """You are grading a support assistant's answer.
+
+Question: {question}
+Retrieved context: {context}
+Answer: {answer}
+
+Score the answer 1-5 using this rubric:
+  5 - fully correct, grounded in the context, directly answers the question
+  4 - correct and grounded, minor omission
+  3 - mostly correct, one unsupported or vague claim
+  2 - partially correct, a clear unsupported claim
+  1 - wrong, off-topic, or contradicts the context
+
+First write one sentence of reasoning. Then output JSON only:
+{{"reasoning": "...", "score": &lt;1-5&gt;}}"""
+
+def judge_pointwise(client, question, context, answer):
+    prompt = POINTWISE.format(question=question, context=context, answer=answer)
+    resp = client.grade(prompt)          # your LLM call, temperature 0
+    return json.loads(resp)["score"]</div>
+        <div class="prompt-box good"><span class="label">Python · pairwise judge prompt (pick the better answer)</span>PAIRWISE = """Compare two answers to the same question.
+
+Question: {question}
+Answer A: {answer_a}
+Answer B: {answer_b}
+
+Decide which answer is more correct, grounded, and helpful.
+First give one sentence of reasoning. Then output JSON only:
+{{"reasoning": "...", "winner": "A" | "B" | "tie"}}"""
+
+def judge_pairwise(client, question, a, b):
+    prompt = PAIRWISE.format(question=question, answer_a=a, answer_b=b)
+    return json.loads(client.grade(prompt))["winner"]</div>
+        <div class="callout tip">
+          <strong>Two defaults that pay off immediately</strong>
+          Set the judge's temperature to 0 for repeatability, and always ask for reasoning before the score. Chain-of-thought judging is both more accurate and auditable - when a score looks wrong you can read why the judge decided it, instead of arguing with a bare number.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="bias">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the biases + calibration</span>
+      <h2>The biases + calibration <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">A judge is a model, so it has systematic tilts. Three of them show up again and again in the literature: position bias, verbosity bias, and self-preference bias. Left unchecked they quietly corrupt your scores. The good news is each has a known fix.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three judge biases and their fixes. Position bias favors the first answer, fixed by swapping positions and requiring a consistent winner. Verbosity bias favors the longer answer, fixed by a length-aware rubric and reference-guided scoring. Self-preference bias favors the judge's own model family, fixed by using a different model to judge.">
+        <style>
+          .b5bT { font: 700 13.5px Inter, sans-serif; fill: #FFFFFF; }
+          .b5bI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b5bW { font: 400 11px Inter, sans-serif; fill: #FEE2E2; }
+          .b5bS { font: 400 11px Inter, sans-serif; fill: #334155; }
+          .b5bH { font: 700 12.5px Inter, sans-serif; fill: #B91C1C; }
+          .b5bN { font: 600 13px Inter, sans-serif; fill: #431407; }
+          .b5bArr { stroke: #CBD5E1; stroke-width: 2.2; fill: none; marker-end: url(#b5bAh); }
+        </style>
+        <defs>
+          <marker id="b5bAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="30" y="40" width="240" height="110" rx="12" fill="#7F1D1D"/>
+        <text class="b5bT" x="48" y="68">Position bias</text>
+        <text class="b5bW" x="48" y="90">favors the first / left</text>
+        <text class="b5bW" x="48" y="108">answer, whatever it says</text>
+        <text class="b5bW" x="48" y="134">Fix: swap A/B, keep win</text>
+        <text class="b5bW" x="48" y="146">only if consistent</text>
+        <rect x="320" y="40" width="240" height="110" rx="12" fill="#B91C1C"/>
+        <text class="b5bT" x="338" y="68">Verbosity bias</text>
+        <text class="b5bW" x="338" y="90">favors the longer answer</text>
+        <text class="b5bW" x="338" y="108">even if not better</text>
+        <text class="b5bW" x="338" y="134">Fix: length-aware rubric,</text>
+        <text class="b5bW" x="338" y="146">reference-guided scoring</text>
+        <rect x="610" y="40" width="240" height="110" rx="12" fill="#DC2626"/>
+        <text class="b5bT" x="628" y="68">Self-preference</text>
+        <text class="b5bW" x="628" y="90">favors its own model</text>
+        <text class="b5bW" x="628" y="108">family and style</text>
+        <text class="b5bW" x="628" y="134">Fix: judge with a</text>
+        <text class="b5bW" x="628" y="146">DIFFERENT model</text>
+        <rect x="30" y="200" width="820" height="66" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b5bI" x="48" y="228">Over it all: chain-of-thought before scoring, and validate the judge against a small human-labeled set.</text>
+        <text class="b5bS" x="48" y="250">Trust the judge only as far as it agrees with humans you have checked - the MT-Bench study found roughly 85% GPT-4-to-human agreement.</text>
+        <line class="b5bArr" x1="150" y1="152" x2="150" y2="198"/>
+        <line class="b5bArr" x1="440" y1="152" x2="440" y2="198"/>
+        <line class="b5bArr" x1="730" y1="152" x2="730" y2="198"/>
+        <rect x="30" y="310" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b5bN" x="54" y="322">Every bias has a fix. An uncalibrated judge is a broken instrument, not a shortcut.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - three judge biases (position, verbosity, self-preference) each with its fix, over a base of chain-of-thought and human validation</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The three biases<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Named in the MT-Bench study (Zheng et al. 2023), these are the tilts a naive judge brings to the table.</p>
+        <ul>
+          <li><strong>Position bias.</strong> In pairwise judging the model tends to favor whichever answer it sees first (or on the left), independent of quality. Present the same two answers in the other order and the winner can flip.</li>
+          <li><strong>Verbosity bias.</strong> Judges reward longer, more elaborate answers even when the extra length adds nothing - or actively pads with unsupported claims. Length reads as thoroughness to the judge.</li>
+          <li><strong>Self-enhancement (self-preference) bias.</strong> A judge tends to score answers from its own model family or stylistic house higher. Grading a model's output with the same model quietly inflates the score.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The metric that got gamed by length.</strong> A team (anonymized) optimized a support assistant against a pointwise LLM judge and celebrated a steady climb in scores. When they finally read the transcripts, the model had simply learned to write longer, more padded answers - the judge's verbosity bias rewarded the extra words, users found them worse, and complaint volume had actually risen. The number went up because the model learned the judge, not the job.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Calibrating the judge<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Each bias has a fix, and together they turn a judge into an instrument you can defend.</p>
+        <ul>
+          <li><strong>Swap positions and require consistency.</strong> Run every pairwise comparison twice, A-then-B and B-then-A, and only count a win if the judge picks the same answer both times. Disagreements become ties. This neutralizes position bias directly.</li>
+          <li><strong>Reference-guided scoring.</strong> Anchoring to a gold answer curbs both verbosity and drift - the judge grades against a target, not against its own vague sense of quality.</li>
+          <li><strong>Chain-of-thought before the score.</strong> Force reasoning first; it improves agreement with humans and makes the score auditable.</li>
+          <li><strong>Use a DIFFERENT model to judge.</strong> Anthropic's guidance is blunt: use a different model to evaluate than the model used to generate. A cross-family judge removes self-preference bias.</li>
+          <li><strong>Validate against a small human-labeled set.</strong> Hand-label 30 to 50 answers, then check how often the judge agrees. The MT-Bench study found strong LLM judges reach roughly 85% agreement with human preferences - on par with or above human-to-human agreement - but you only know your judge's number once you measure it on your own data.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The one-line rule</strong>
+          Trust an LLM judge exactly as far as you have validated it against humans, and no further. A judge with an unknown agreement rate is a thermometer with an unknown offset - it produces confident numbers that may all be wrong by the same amount.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Write a judge, then test it for position bias <span class="tag demo">★ 12 min · your judge prompt</span></h2>
+    </div>
+    <p class="lede">Writing the prompt is easy; the discipline is checking that the prompt is not lying to you. Do both.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Write a pointwise judge for Recall.</strong> Start from the 1-5 rubric prompt above and adapt it to one Recall question. Make each score level concrete - what does a 3 look like for a refund question versus a 5? Ask for reasoning before the score.</p></div>
+      <div class="step"><p><strong>Turn it pairwise.</strong> Take two candidate answers to that question - one tight and correct, one longer and padded with an unsupported claim. Prompt the judge to pick the better one, order answer A then answer B, and record the winner.</p></div>
+      <div class="step"><p><strong>Swap the order.</strong> Run the exact same pair again, this time B then A. Did the winner stay the same? If it flipped, you just watched position bias in action on your own judge. If the padded answer won either way, you have caught verbosity bias too.</p></div>
+      <div class="step"><p><strong>Reflect.</strong> In one line: what is your judge's consistency rate on this pair, and what would you change - swap-and-require-consistency, a length-aware rubric, or a different judge model - to trust it in a CI gate?</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's judge after b5</strong>
+      Recall now has an automated grader you can actually defend - you know its three modes, you have watched its biases move real scores, and you have a calibration routine to keep it honest. In b6 we stop hand-rolling judges and run the full RAGAS suite over Recall end to end.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b6 <span class="tag exercise">◐ 40 min total</span></h2>
+    </div>
+    <ul>
+      <li>Take your pairwise judge and run it over 10 answer pairs in both orders. Report its position-consistency rate - the share of pairs where the winner survived the swap.</li>
+      <li>Hand-label 20 Recall answers on a 1-5 scale, run your pointwise judge on the same 20, and compute the agreement rate. Compare it to the ~85% MT-Bench benchmark.</li>
+      <li>Re-run one batch with a judge from a different model family than the one that generated the answers, and note whether scores shift - evidence of self-preference bias.</li>
+      <li>Read: Zheng et al. 2023 (MT-Bench / "Judging LLM-as-a-Judge") on modes and biases, and Anthropic's grading guidance on using a different model to evaluate.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from the primary literature and vendor guidance. This page covers ~80% of their working content on LLM-as-judge - hosted judge runners and full leaderboards land in later sessions.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Zheng et al. 2023 · MT-Bench (Judging LLM-as-a-Judge)</span><span class="note">Part 1-2 · pointwise/pairwise/reference-guided modes, position/verbosity/self-preference biases, ~85% human agreement</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Anthropic · grading and evaluation guidance</span><span class="note">Part 2 · use a different model to evaluate than the one used to generate</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">RAGAS · LLM-judge-based metrics</span><span class="note">Judges seen in b4; run as a full suite in b6</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · You want to compare two candidate prompts for Recall and pick the better one. The most reliable judging mode is...</p>
+      <button class="qopt" type="button">A · Pointwise, because absolute scores are always comparable</button>
+      <button class="qopt" type="button">B · There is no difference between the modes</button>
+      <button class="qopt" type="button">C · Pairwise, because judges (like humans) choose between two options more consistently than they assign absolute scores</button>
+      <p class="qwhy">Pairwise picks the better of two and agrees with humans most, which is why it drives model and prompt comparisons. Just guard it against position bias by swapping order and requiring a consistent winner.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Position bias in a pairwise judge is best defused by...</p>
+      <button class="qopt" type="button">A · Running each comparison in both orders and only counting a win if the judge is consistent</button>
+      <button class="qopt" type="button">B · Always putting the longer answer first</button>
+      <button class="qopt" type="button">C · Using a higher temperature</button>
+      <p class="qwhy">Position bias means the judge favors whichever answer it sees first. Swapping A/B and requiring the same winner both times turns order-dependent picks into ties, neutralizing the bias.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · Anthropic's guidance on self-preference bias is to...</p>
+      <button class="qopt" type="button">A · Trust the judge more when it grades its own model's output</button>
+      <button class="qopt" type="button">B · Use a different model to evaluate than the model used to generate</button>
+      <button class="qopt" type="button">C · Never use an LLM as a judge at all</button>
+      <p class="qwhy">A judge tends to score its own family higher. Grading with a different model family removes that inflation - and validating against a small human-labeled set (roughly 85% agreement is the MT-Bench benchmark) tells you how far to trust it.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 5 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>LLM-as-judge</b><span>Use another LLM to grade open-ended answers at scale. Powers RAGAS, rubric scores, and model comparisons.</span></div>
+      <div class="cheat-item"><b>Pointwise</b><span>Score one answer on a rubric (e.g. 1-5 or 1-10). Easiest at scale; absolute scores drift, so anchor with a tight rubric.</span></div>
+      <div class="cheat-item"><b>Pairwise</b><span>Pick the better of two answers. Most consistent with humans. Guard against position bias.</span></div>
+      <div class="cheat-item"><b>Reference-guided</b><span>Score against a gold answer. Most stable, least drift. Needs references, so it is offline.</span></div>
+      <div class="cheat-item"><b>Position bias</b><span>Favors the first/left answer. Fix: swap order, count a win only if consistent both ways.</span></div>
+      <div class="cheat-item"><b>Verbosity bias</b><span>Favors longer answers even when not better. Fix: length-aware rubric, reference-guided scoring.</span></div>
+      <div class="cheat-item"><b>Self-preference bias</b><span>Favors the judge's own model family. Fix: judge with a DIFFERENT model family.</span></div>
+      <div class="cheat-item"><b>Calibration</b><span>Chain-of-thought before scoring, temperature 0, validate against 30-50 human labels. MT-Bench: ~85% GPT-4-human agreement.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 5 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b6-ragas.html">Next: RAGAS in practice →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

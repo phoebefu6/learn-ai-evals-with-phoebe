@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 4 · Generation metrics - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 4 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 4 of 10</div>
+    <h1>Generation metrics: <span class="accent">grading the answer, not the search</span></h1>
+    <p class="sub">Sessions b1 to b3 measured retrieval - did the right chunks come back. This one measures what the model does with them: the answer itself. You will meet the four workhorse generation metrics - faithfulness, response relevancy, noise sensitivity, and semantic similarity - see exactly what each one catches (and what it does not), and run faithfulness and relevancy over a sample of Recall's answers with RAGAS. By the end you can tell a hallucination apart from an off-topic answer apart from a merely differently-worded one, with a number for each.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Builder track</span>
+      <span class="chip audience">Practitioners · some Python</span>
+      <span class="chip audience">Medium · concept + code</span>
+      <span class="chip time">~45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-24 · Faithfulness + relevancy</span>
+      <span class="a3" style="flex:4">24-40 · Noise + similarity</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Two answers, both retrieved perfectly, one still wrong</h2>
+    </div>
+    <p class="lede">A retriever can hand the model the exact right chunk and the model can still blow it: it invents a detail the chunk never mentioned, or it wanders off and answers a slightly different question. Retrieval metrics are blind to both - the chunks were right. Generation metrics grade the sentence the user actually reads. Today we add four of them to Recall, our RAG assistant over corpora A, B, and C, and we are careful about the one trap that catches everyone: these metrics measure faithfulness and focus, not truth.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A working feel for four generation metrics, a RAGAS run that scores Recall's answers on faithfulness and response relevancy, and the judgment to read a low score correctly - is it a hallucination, an off-topic answer, noise leaking in, or just different wording?
+    </div>
+  </section>
+
+  <section class="section" id="faith">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers faithfulness + response relevancy</span>
+      <h2>Faithfulness + relevancy <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Two metrics, two different questions about one answer. Faithfulness asks: is every claim in the answer actually backed by the retrieved context? Response relevancy asks: does the answer stay on the topic the user asked about? Neither one asks whether the answer is <em>true</em> - that is a separate metric (b7). Getting this distinction into your bones is most of today.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two pipelines over one answer. Top: the answer is decomposed into claims, each claim is checked against the retrieved context, and the fraction supported becomes faithfulness. Bottom: an LLM writes N questions from the answer, each is compared by cosine similarity to the original question, and the mean becomes response relevancy.">
+        <style>
+          .b4gT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b4gI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b4gW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b4gS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b4gH { font: 700 12px Inter, sans-serif; fill: #B91C1C; }
+          .b4gN { font: 600 13px Inter, sans-serif; fill: #431407; }
+          .b4gArr { stroke: #CBD5E1; stroke-width: 2.2; fill: none; marker-end: url(#b4gAh); }
+        </style>
+        <defs>
+          <marker id="b4gAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <text class="b4gH" x="30" y="28">FAITHFULNESS · is every claim backed by context?</text>
+        <rect x="30" y="42" width="130" height="66" rx="10" fill="#B91C1C"/>
+        <text class="b4gT" x="46" y="72">Answer</text>
+        <text class="b4gW" x="46" y="92">the model wrote</text>
+        <rect x="240" y="36" width="150" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4gS" x="252" y="52">claim 1 · supported</text>
+        <rect x="240" y="66" width="150" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4gS" x="252" y="82">claim 2 · supported</text>
+        <rect x="240" y="96" width="150" height="24" rx="6" fill="#FEE2E2" stroke="#DC2626"/>
+        <text class="b4gS" x="252" y="112">claim 3 · unsupported</text>
+        <rect x="470" y="42" width="140" height="66" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4gI" x="486" y="70">Retrieved</text>
+        <text class="b4gI" x="486" y="88">context</text>
+        <rect x="690" y="42" width="160" height="66" rx="10" fill="#7F1D1D"/>
+        <text class="b4gT" x="706" y="70">Faithfulness</text>
+        <text class="b4gW" x="706" y="90">2 / 3 = 0.67</text>
+        <line class="b4gArr" x1="162" y1="75" x2="236" y2="75"/>
+        <line class="b4gArr" x1="392" y1="75" x2="466" y2="75"/>
+        <line class="b4gArr" x1="612" y1="75" x2="686" y2="75"/>
+        <text class="b4gH" x="30" y="212">RESPONSE RELEVANCY · does the answer stay on topic?</text>
+        <rect x="30" y="226" width="130" height="66" rx="10" fill="#B91C1C"/>
+        <text class="b4gT" x="46" y="256">Answer</text>
+        <text class="b4gW" x="46" y="276">the model wrote</text>
+        <rect x="240" y="220" width="150" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4gS" x="252" y="236">gen question 1</text>
+        <rect x="240" y="250" width="150" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4gS" x="252" y="266">gen question 2</text>
+        <rect x="240" y="280" width="150" height="24" rx="6" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4gS" x="252" y="296">gen question 3</text>
+        <rect x="470" y="226" width="140" height="66" rx="10" fill="#DC2626"/>
+        <text class="b4gT" x="486" y="254">Original</text>
+        <text class="b4gT" x="486" y="272">question</text>
+        <rect x="690" y="226" width="160" height="66" rx="10" fill="#7F1D1D"/>
+        <text class="b4gT" x="706" y="254">Relevancy</text>
+        <text class="b4gW" x="706" y="274">mean cosine</text>
+        <line class="b4gArr" x1="162" y1="259" x2="236" y2="259"/>
+        <line class="b4gArr" x1="392" y1="259" x2="466" y2="259"/>
+        <line class="b4gArr" x1="612" y1="259" x2="686" y2="259"/>
+        <rect x="30" y="352" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b4gN" x="54" y="364">Faithfulness reads the context; relevancy reads only the question. Neither one checks whether the answer is true.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - faithfulness decomposes the answer into claims and checks each against context; relevancy generates questions from the answer and compares them to the original</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Faithfulness: claims supported divided by total claims<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>RAGAS computes faithfulness in two LLM passes. First it breaks the answer into individual factual claims. Then, for each claim, it asks: can this be inferred from the retrieved context? The score is simply the fraction that can.</p>
+        <ul>
+          <li><strong>The formula.</strong> Faithfulness = (claims supported by context) / (total claims). All three claims backed gives 1.0; the answer that adds one invented detail to two good ones scores 0.67.</li>
+          <li><strong>It is a hallucination detector.</strong> A low score means the model said something the context did not support - the textbook definition of a RAG hallucination. This is the single most useful generation metric for a support bot.</li>
+          <li><strong>No reference needed.</strong> Faithfulness compares the answer only to the context that was retrieved. You do not need a gold answer, which makes it cheap to run on live traffic.</li>
+          <li><strong>It is not accuracy.</strong> An answer can be perfectly faithful to a context that is itself wrong or outdated. Faithful means "grounded in what we gave it", not "correct".</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Response relevancy: N questions back from the answer<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Response relevancy (renamed from Answer Relevancy in RAGAS v0.2+) measures whether the answer actually addresses what was asked. The clever trick: it works backwards. An LLM reads the answer and writes N questions (default 3) that this answer would be a good reply to. Each generated question is embedded and compared by cosine similarity to the real question. The score is the mean.</p>
+        <ul>
+          <li><strong>The intuition.</strong> If the answer is on topic, the questions you can reconstruct from it look like the question that was asked. If the answer rambled, the reconstructed questions drift away and cosine similarity drops.</li>
+          <li><strong>It catches off-topic, incomplete, and evasive answers.</strong> A response that dodges the question, over-answers, or trails into a tangent scores low even when every sentence is faithful.</li>
+          <li><strong>It measures on-topic, NOT accuracy.</strong> A confidently wrong answer that stays squarely on the question can still score high on relevancy. Relevancy is about focus, not correctness.</li>
+          <li><strong>No reference needed either.</strong> Like faithfulness, it uses only the answer and the original question, so it runs on production traffic.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Faithfulness and relevancy are a pair, not a ranking</strong>
+          Faithfulness catches the answer that invents things; relevancy catches the answer that wanders. An answer can be faithful but irrelevant (grounded, but not what you asked) or relevant but unfaithful (on topic, but made up). You want both high. Read them together.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Scoring Recall's answers with RAGAS<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>In RAGAS you assemble a dataset of samples - each with the question, the model's answer, and the retrieved contexts - then hand a list of metrics to <code>evaluate()</code>. Faithfulness and ResponseRelevancy need no reference, so this runs on any sample of Recall's live answers.</p>
+        <div class="prompt-box good"><span class="label">Python · faithfulness + response relevancy over a sample</span>from ragas import evaluate, EvaluationDataset
+from ragas.metrics import Faithfulness, ResponseRelevancy
+
+# one dict per answer we want to grade
+samples = [
+    {
+        "user_input": "How do I get a refund after cancelling?",
+        "response":   "Cancel in Settings, then refunds post in 5 to 7 days. "
+                      "Refunds over $500 need manager approval.",   # last claim invented
+        "retrieved_contexts": [
+            "To cancel, open Settings &gt; Billing. Refunds are issued "
+            "to the original card within 5-7 business days.",
+        ],
+    },
+    # ... more Recall answers across corpora A / B / C
+]
+
+dataset = EvaluationDataset.from_list(samples)
+
+result = evaluate(
+    dataset=dataset,
+    metrics=[Faithfulness(), ResponseRelevancy()],   # both reference-free
+)
+print(result)
+# {'faithfulness': 0.71, 'answer_relevancy': 0.88}
+df = result.to_pandas()          # per-row scores to find the worst answers</div>
+        <p>The manager-approval sentence has no support in the context, so this sample's faithfulness lands below 1.0 while its relevancy stays high - the answer is on topic, it just added a detail. That signature, high relevancy plus dented faithfulness, is exactly a hallucination.</p>
+        <div class="callout tip">
+          <strong>Reference-free is the point</strong>
+          Because neither metric needs a gold answer, you can run this nightly over a random sample of yesterday's real Recall traffic. That is your early-warning system for hallucination drift long before b7's correctness metrics, which do need references.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="noise">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers noise sensitivity + semantic similarity</span>
+      <h2>Noise sensitivity + semantic similarity <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Two more metrics for two more failure shapes. Noise sensitivity asks how easily irrelevant retrieved context knocks the model into a wrong claim. Semantic similarity asks how close the answer is in meaning to a known-good reference - forgiving different wording where an exact-match check would not.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 380" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two more metrics. Top: noise sensitivity counts incorrect claims over total claims when noisy context is present, lower is better, and it needs ground truth. Bottom: semantic similarity embeds the answer and a reference and reports their cosine similarity.">
+        <style>
+          .b4nT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b4nI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b4nW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b4nS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b4nH { font: 700 12px Inter, sans-serif; fill: #B91C1C; }
+          .b4nN { font: 600 13px Inter, sans-serif; fill: #431407; }
+          .b4nArr { stroke: #CBD5E1; stroke-width: 2.2; fill: none; marker-end: url(#b4nAh); }
+        </style>
+        <defs>
+          <marker id="b4nAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <text class="b4nH" x="30" y="28">NOISE SENSITIVITY · lower is better · needs ground truth</text>
+        <rect x="30" y="42" width="150" height="70" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4nI" x="46" y="70">Relevant +</text>
+        <text class="b4nI" x="46" y="90">noisy context</text>
+        <rect x="260" y="42" width="150" height="70" rx="10" fill="#B91C1C"/>
+        <text class="b4nT" x="276" y="70">Answer</text>
+        <text class="b4nW" x="276" y="92">claims made</text>
+        <rect x="490" y="42" width="150" height="70" rx="10" fill="#DC2626"/>
+        <text class="b4nT" x="506" y="70">Check vs</text>
+        <text class="b4nT" x="506" y="90">ground truth</text>
+        <rect x="720" y="42" width="130" height="70" rx="10" fill="#7F1D1D"/>
+        <text class="b4nT" x="736" y="68">Noise sens.</text>
+        <text class="b4nW" x="736" y="90">wrong / total</text>
+        <line class="b4nArr" x1="182" y1="77" x2="256" y2="77"/>
+        <line class="b4nArr" x1="412" y1="77" x2="486" y2="77"/>
+        <line class="b4nArr" x1="642" y1="77" x2="716" y2="77"/>
+        <text class="b4nH" x="30" y="202">SEMANTIC SIMILARITY · needs a reference answer</text>
+        <rect x="30" y="216" width="150" height="70" rx="10" fill="#B91C1C"/>
+        <text class="b4nT" x="46" y="246">Answer</text>
+        <text class="b4nW" x="46" y="268">embed &#8594; vector</text>
+        <rect x="30" y="300" width="150" height="52" rx="10" fill="#DC2626"/>
+        <text class="b4nT" x="46" y="332">Reference</text>
+        <rect x="300" y="250" width="220" height="66" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b4nI" x="316" y="278">cosine of the</text>
+        <text class="b4nI" x="316" y="298">two vectors</text>
+        <rect x="620" y="250" width="230" height="66" rx="10" fill="#7F1D1D"/>
+        <text class="b4nT" x="636" y="278">Semantic similarity</text>
+        <text class="b4nW" x="636" y="300">0.0 far &#8594; 1.0 same meaning</text>
+        <line class="b4nArr" x1="182" y1="270" x2="296" y2="278"/>
+        <line class="b4nArr" x1="182" y1="326" x2="296" y2="292"/>
+        <line class="b4nArr" x1="522" y1="283" x2="616" y2="283"/>
+        <rect x="30" y="360" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b4nN" x="54" y="372">Noise sensitivity stress-tests robustness; semantic similarity forgives wording. Both need a reference, so they are offline metrics.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - noise sensitivity counts wrong claims under noisy context; semantic similarity is the cosine of answer and reference embeddings</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Noise sensitivity: how easily noise knocks it wrong<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Real retrieval hands the model a mix - some relevant chunks and some near-miss noise. Noise sensitivity measures how often that noise leaks into a wrong claim. It is the fraction of claims in the answer that are incorrect, given the ground truth.</p>
+        <ul>
+          <li><strong>The formula.</strong> Noise sensitivity = (incorrect claims) / (total claims). Because it counts mistakes, <em>lower is better</em> - the opposite direction from faithfulness and relevancy. A robust model reads past the noise and scores near 0.</li>
+          <li><strong>It needs ground truth.</strong> To label a claim incorrect you need to know the right answer, so this is an offline metric you run against a golden set, not on raw live traffic.</li>
+          <li><strong>When it is useful.</strong> Reach for it when your retriever returns a lot of borderline chunks and you want to know whether the generator is disciplined enough to ignore them. It isolates a robustness problem that faithfulness alone can miss.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Semantic similarity: meaning, not wording<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Sometimes you have a reference answer and want to know how close the model got - but exact string matching punishes every valid paraphrase. Semantic similarity embeds both the answer and the reference and reports the cosine similarity between the two vectors.</p>
+        <ul>
+          <li><strong>The formula.</strong> Semantic similarity = cosine(embed(answer), embed(reference)). 1.0 means the same meaning; values near 0 mean unrelated. It is smooth and forgiving of rewording.</li>
+          <li><strong>It needs a reference.</strong> There must be a known-good answer to compare against, so it belongs to your offline golden-set evaluation.</li>
+          <li><strong>When it is useful.</strong> A quick, cheap proxy for "did the answer land near the target meaning" when you have references but do not want a full LLM-judge correctness call. It is a component of answer correctness in b7, not the whole thing.</li>
+          <li><strong>The caveat.</strong> High similarity is not the same as correct. Two answers can be semantically close yet disagree on the one fact that matters, and embeddings will not always separate them.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The paraphrase that failed a string check.</strong> A team (anonymized) graded a support assistant with exact-match against a reference answer and watched scores crater - not because the bot was wrong, but because it wrote "we will refund you within a week" where the reference said "refunds post in 5-7 business days". Swapping to semantic similarity recovered the signal: cosine 0.93, clearly the same meaning. Exact match had been measuring wording, not helpfulness.</p>
+        </div>
+        <div class="callout tip">
+          <strong>Direction check before you alert on a metric</strong>
+          Faithfulness, response relevancy, and semantic similarity all read "higher is better". Noise sensitivity reads "lower is better". Wire your dashboards and CI gates with that flip in mind, or you will page yourself for a model that got more robust.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Score a faithful vs an unfaithful answer by hand <span class="tag demo">★ 10 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Do the decomposition yourself once and faithfulness stops being a black box. Take one Recall question and two candidate answers to it.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Pin the context.</strong> Write out the one or two retrieved chunks Recall was given for the question - say the refund policy chunk: "Refunds are issued to the original card within 5-7 business days."</p></div>
+      <div class="step"><p><strong>Decompose answer A into claims.</strong> Answer A: "Cancel in Settings, then your refund posts to your original card in about a week." Break it into atomic claims: (1) cancel in Settings, (2) refund goes to original card, (3) takes about a week. Check each against the context. All three are supported. Faithfulness = 3/3 = 1.0.</p></div>
+      <div class="step"><p><strong>Decompose answer B into claims.</strong> Answer B: "Cancel in Settings, refunds post in 5-7 days, and amounts over $500 need manager sign-off." Claims: (1) cancel in Settings - supported, (2) 5-7 days - supported, (3) over $500 needs sign-off - NOT in the context. Faithfulness = 2/3 = 0.67.</p></div>
+      <div class="step"><p><strong>Reflect.</strong> Both answers are on topic, so response relevancy would score both high. Only faithfulness separates them - and the invented sign-off rule is exactly the kind of confident hallucination that gets a support bot in trouble. In one line: which metric would have caught it, and would it have caught it without a reference answer?</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's answers after b4</strong>
+      Recall's answers now carry four numbers, not just its retrieval score. You can tell a hallucination (low faithfulness) from an off-topic reply (low relevancy) from a noise-fragile generator (high noise sensitivity) from a valid paraphrase (high semantic similarity). In b5 we look under the hood of the LLM judge that produces several of these - and at how it can be fooled.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b5 <span class="tag exercise">◐ 40 min total</span></h2>
+    </div>
+    <ul>
+      <li>Run RAGAS <code>Faithfulness()</code> and <code>ResponseRelevancy()</code> over five of your own system's answers (or five Recall samples). Find the answer with the biggest gap between the two scores and explain in one line what failure that gap describes.</li>
+      <li>Write one answer that is deliberately faithful but irrelevant (grounded in the context but not what was asked) and confirm relevancy drops while faithfulness stays high.</li>
+      <li>Take a reference answer and reword it completely without changing its meaning; compute semantic similarity and note how far above an exact-match score it lands.</li>
+      <li>Read: the RAGAS docs for faithfulness, response relevancy, noise sensitivity, and semantic similarity, and skim the TruLens groundedness leg of the RAG Triad.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers ~80% of their working content on generation metrics - the correctness metric that combines several of these lands in b7.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · faithfulness + response relevancy</span><span class="note">Part 1 · claims supported / total; N generated questions vs input; both reference-free</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · noise sensitivity + semantic similarity</span><span class="note">Part 2 · incorrect claims / total (lower better, needs truth); cosine of answer vs reference</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">TruLens · RAG Triad groundedness</span><span class="note">Named as the sibling of faithfulness; full context in a2 and b6</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · RAGAS faithfulness is computed as...</p>
+      <button class="qopt" type="button">A · The cosine similarity between the answer and the question</button>
+      <button class="qopt" type="button">B · The fraction of claims in the answer that are supported by the retrieved context</button>
+      <button class="qopt" type="button">C · Whether the answer exactly matches a reference string</button>
+      <p class="qwhy">Faithfulness decomposes the answer into claims and scores the share that can be inferred from the context: supported / total. It is the hallucination detector, and it needs no reference.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · Response relevancy measures...</p>
+      <button class="qopt" type="button">A · Whether the answer is factually correct</button>
+      <button class="qopt" type="button">B · How many documents were retrieved</button>
+      <button class="qopt" type="button">C · Whether the answer stays on the topic that was asked - on-topic, not accuracy</button>
+      <p class="qwhy">Relevancy has an LLM generate N questions from the answer and compares them by cosine to the original question. A confidently wrong but on-topic answer can still score high, so it measures focus, not truth.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · For noise sensitivity, a lower score is better because...</p>
+      <button class="qopt" type="button">A · It counts incorrect claims over total claims, so fewer mistakes means a lower, better number</button>
+      <button class="qopt" type="button">B · It is a similarity score and similarity should be minimized</button>
+      <button class="qopt" type="button">C · Lower always means better for every eval metric</button>
+      <p class="qwhy">Noise sensitivity is (incorrect claims) / (total claims) under noisy context, and it needs ground truth to label claims. Because it counts errors, lower is better - the reverse of faithfulness and relevancy.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 4 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Generation vs retrieval</b><span>Generation metrics grade the answer the user reads, not which chunks came back. Retrieval can be perfect and the answer still wrong.</span></div>
+      <div class="cheat-item"><b>Faithfulness</b><span>Claims supported by context / total claims. Hallucination detector. LLM judge, no reference. Not the same as accuracy.</span></div>
+      <div class="cheat-item"><b>Response relevancy</b><span>Mean cosine of N (default 3) LLM-generated questions vs the original question. On-topic, NOT accuracy. Reference-free. Formerly Answer Relevancy.</span></div>
+      <div class="cheat-item"><b>Noise sensitivity</b><span>Incorrect claims / total claims under noisy context. Lower is better. Needs ground truth, so it is offline.</span></div>
+      <div class="cheat-item"><b>Semantic similarity</b><span>Cosine of answer embedding vs reference embedding. Forgives wording. Needs a reference. High is not the same as correct.</span></div>
+      <div class="cheat-item"><b>The pair</b><span>Faithfulness catches invention; relevancy catches wandering. Read them together - you want both high.</span></div>
+      <div class="cheat-item"><b>Direction flip</b><span>Faithfulness, relevancy, similarity: higher is better. Noise sensitivity: lower is better. Wire alerts accordingly.</span></div>
+      <div class="cheat-item"><b>Reference or not</b><span>Faithfulness + relevancy run on live traffic. Noise sensitivity + semantic similarity need a golden set.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 4 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b5-llm-as-judge.html">Next: LLM-as-judge →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

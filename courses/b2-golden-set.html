@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 2 · Building a golden set - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 2 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 2 of 10</div>
+    <h1>Building a golden set: <span class="accent">the data your score depends on</span></h1>
+    <p class="sub">Last session Recall got its first number. But a score is only as honest as the golden set behind it - feed it lazy questions and you get confident, meaningless numbers. This session is about building the eval dataset well: how big, how varied, how to cover the edge cases, and how to structure entries so a machine can grade them. You will write real golden entries for Recall, learn to generate candidates with an LLM (and why you must still curate them), and leave with a set you can actually trust.</p>
+    <div class="chip-row">
+      <span class="chip level">🟢 Builder track · easy</span>
+      <span class="chip audience">Practitioners · some Python</span>
+      <span class="chip audience">Golden set craft</span>
+      <span class="chip time">Session 2 of 10</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-22 · Concepts</span>
+      <span class="a3" style="flex:4">22-40 · Build a set</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Garbage golden set, garbage score</h2>
+    </div>
+    <p class="lede">In b1 we trusted the twelve golden questions without asking where they came from. That trust is exactly what today interrogates. A golden set is the ground truth your whole eval stands on, and it is the single easiest thing to get quietly wrong. This session gives you the four qualities of a set worth trusting, shows you how to scale one with synthetic generation, and drills the discipline that keeps generation honest: a human curates before the numbers get believed.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A clear standard for a trustworthy golden set (size, diversity, edge cases, gradeable structure), a working synthetic generator that drafts candidate question/answer pairs from your own docs, the habit of curating before trusting, and Recall's golden set upgraded from twelve seed questions to a real dataset.
+    </div>
+  </section>
+
+  <section class="section" id="trustworthy">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers what makes a golden set trustworthy</span>
+      <h2>The four qualities of a golden set worth trusting <span class="tag concept">10 min live</span></h2>
+    </div>
+    <p class="lede">A golden example is small: a question, the reference answer you would accept, and optionally the reference context (the chunk that should support it). The craft is not in any single row - it is in the shape of the whole set. Four qualities separate a set that measures reality from one that flatters your system.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A single golden entry has three fields - question, reference answer, reference context - and a trustworthy set of these entries has four qualities: right size, diversity, edge cases, and structure for auto-grading">
+        <style>
+          .b2gT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b2gI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .b2gW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .b2gS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .b2gN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b2gArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b2gAh); }
+        </style>
+        <defs>
+          <marker id="b2gAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <text class="b2gI" x="30" y="34">One golden entry</text>
+        <rect x="30" y="46" width="230" height="46" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b2gS" x="46" y="66">question</text>
+        <text class="b2gS" x="46" y="84">"how do I get a refund?"</text>
+        <rect x="30" y="100" width="230" height="46" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b2gS" x="46" y="120">reference answer</text>
+        <text class="b2gS" x="46" y="138">"cancel within 14 days"</text>
+        <rect x="30" y="154" width="230" height="46" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b2gS" x="46" y="174">reference context</text>
+        <text class="b2gS" x="46" y="192">chunk C-refund</text>
+        <line class="b2gArr" x1="262" y1="146" x2="320" y2="146"/>
+        <text class="b2gI" x="330" y="34">A set of them is trustworthy when it is:</text>
+        <rect x="330" y="46" width="250" height="56" rx="10" fill="#B91C1C"/>
+        <text class="b2gT" x="346" y="70">1 · Right size</text>
+        <text class="b2gW" x="346" y="90">volume over per-item polish</text>
+        <rect x="600" y="46" width="250" height="56" rx="10" fill="#DC2626"/>
+        <text class="b2gT" x="616" y="70">2 · Diverse</text>
+        <text class="b2gW" x="616" y="90">mirrors the real task mix</text>
+        <rect x="330" y="112" width="250" height="56" rx="10" fill="#DC2626"/>
+        <text class="b2gT" x="346" y="136">3 · Edge cases</text>
+        <text class="b2gW" x="346" y="156">incl. ambiguous ones</text>
+        <rect x="600" y="112" width="250" height="56" rx="10" fill="#7F1D1D"/>
+        <text class="b2gT" x="616" y="136">4 · Gradeable</text>
+        <text class="b2gW" x="616" y="156">structured for a machine</text>
+        <rect x="330" y="200" width="520" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b2gS" x="346" y="222">Miss any one and the score lies: too small, skewed,</text>
+        <text class="b2gS" x="346" y="242">soft on hard cases, or impossible to grade automatically.</text>
+        <rect x="30" y="292" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b2gN" x="54" y="304">The set, not the row, is the artifact. Design the shape of the whole thing.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - one golden entry and the four qualities of a trustworthy set</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Right size: volume over per-item polish<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The instinct is to hand-craft a handful of perfect questions. The better instinct, at least once you are automating the grade, is more questions at slightly lower per-item polish.</p>
+        <ul>
+          <li><strong>Anthropic's guidance is blunt about this.</strong> Prioritize volume over quality: more questions with slightly lower-signal automated grading beats fewer, hand-graded ones. Coverage catches more regressions than polish does.</li>
+          <li><strong>Statistics needs a denominator.</strong> A Hit Rate over twelve questions swings wildly when one flips. Over a hundred, one flip barely moves the number - and you can actually tell whether a change helped.</li>
+          <li><strong>Automated grading is what makes volume affordable.</strong> If every item needs a human to grade, you cap out fast. Structure for machine grading (Part 2, quality 4) and volume stops being expensive.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Diversity: mirror the real task distribution<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A set that over-represents easy questions gives a high score that means nothing in production. The mix of your golden set should look like the mix of questions your system actually gets.</p>
+        <ul>
+          <li><strong>Mirror the real-world task distribution.</strong> If a third of Recall's real traffic is Jira incident lookups (corpus B), roughly a third of the golden set should be too. Match topics, phrasings, and difficulty to reality.</li>
+          <li><strong>Sample from real logs when you have them.</strong> The truest distribution is the one your users already produced. Pull real queries, strip anything sensitive, and let them seed the set.</li>
+          <li><strong>Cover all three corpora.</strong> Recall spans personal notes (A), Jira incidents (B), and the company KB (C). A golden set that ignores one corpus cannot catch a regression that only hits that corpus.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Edge cases, including the deliberately ambiguous<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The average question is not where systems break. Dedicate part of the set to the hard tail on purpose.</p>
+        <ul>
+          <li><strong>Reserve cases for edge behavior.</strong> Empty results, questions spanning two corpora, near-duplicate chunks, out-of-scope questions the system should decline - these are where scores should drop, and where you want to know.</li>
+          <li><strong>Include ambiguous cases where even humans would struggle to reach consensus.</strong> Anthropic recommends this deliberately: a question with no single clean answer stress-tests how your system and your grader handle genuine uncertainty.</li>
+          <li><strong>Label edge cases so you can slice.</strong> Tag them, so you can report the score on the hard tail separately from the easy body. A flat average hides a system that aces the easy and fails the hard.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Why ambiguous cases earn their keep</strong>
+          An ambiguous golden question forces a decision you would otherwise never make: what is the right behavior when there is no clean right answer? Often the correct answer is that the system should ask a clarifying question or decline - and only an ambiguous case in the golden set will ever test that.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Structure for automated grading<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The final quality is mechanical but decisive: the set has to be gradeable by a machine, or volume and CI are both off the table.</p>
+        <ul>
+          <li><strong>Pick a grading mode per item.</strong> Multiple-choice (exact option match), string match (expected substring or id), code-graded (a function checks the output), or LLM-graded (a model judges against a rubric). Retrieval golden sets are usually string/id match - cheap and deterministic.</li>
+          <li><strong>Make the expected field unambiguous.</strong> For Recall's retriever the expected field is a chunk id (like C-refund), not free text - so grading is a set membership check, not a fuzzy comparison.</li>
+          <li><strong>Save the hardest grading for last.</strong> LLM-graded items are powerful but pricey and need their own validation (that is b5 and b6). Start with the cheap deterministic modes wherever the task allows.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="synthetic">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers synthetic vs curated sets</span>
+      <h2>Synthetic vs curated: generate, then curate <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Writing a hundred golden questions by hand is slow. The modern move is to let an LLM draft candidates from your own documents, then have a human curate: keep the good, fix the salvageable, cut the rest. Generation gives you volume; curation gives you trust. You need both.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A source chunk feeds an LLM or RAGAS generator that produces candidate question-answer-context triples, a human curates them by keeping, fixing, or cutting, and the survivors become the golden set">
+        <style>
+          .b2sT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b2sI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .b2sW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .b2sS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .b2sN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b2sArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b2sAh); }
+        </style>
+        <defs>
+          <marker id="b2sAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="110" width="150" height="80" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b2sI" x="40" y="140">Source chunk</text>
+        <text class="b2sS" x="40" y="162">a doc from</text>
+        <text class="b2sS" x="40" y="180">corpus A/B/C</text>
+        <rect x="224" y="110" width="170" height="80" rx="12" fill="#B91C1C"/>
+        <text class="b2sT" x="240" y="140">LLM / RAGAS</text>
+        <text class="b2sW" x="240" y="162">generate triples:</text>
+        <text class="b2sW" x="240" y="180">Q / answer / context</text>
+        <rect x="444" y="110" width="170" height="80" rx="12" fill="#D97706"/>
+        <text class="b2sT" x="460" y="140">Human curates</text>
+        <text class="b2sW" x="460" y="162">keep · fix · cut</text>
+        <text class="b2sW" x="460" y="180">before trusting</text>
+        <rect x="664" y="110" width="190" height="80" rx="12" fill="#7F1D1D"/>
+        <text class="b2sT" x="680" y="140">Golden set</text>
+        <text class="b2sW" x="680" y="162">survivors only,</text>
+        <text class="b2sW" x="680" y="180">now trusted</text>
+        <line class="b2sArr" x1="176" y1="150" x2="220" y2="150"/>
+        <line class="b2sArr" x1="396" y1="150" x2="440" y2="150"/>
+        <line class="b2sArr" x1="616" y1="150" x2="660" y2="150"/>
+        <rect x="24" y="240" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b2sN" x="48" y="252">Never ship a generated set unvalidated. Generation scales the draft; humans license the trust.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - generate candidate triples, then curate down to a trusted set</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode self">Self-study</span>A simple prompt-based generator<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The core idea is small: hand the model a chunk, ask it for questions a real user would ask that this chunk answers, and get back the expected answer and the source id along with each question. Here is a minimal generator over Recall's corpora.</p>
+        <div class="prompt-box good"><span class="label">Python · generate candidate Q/A pairs from a chunk</span>import json
+from anthropic import Anthropic
+
+client = Anthropic()
+
+GEN_PROMPT = """You are helping build an evaluation set for a RAG assistant.
+Read the SOURCE chunk below. Write {n} questions a real user might ask
+that this chunk - and only this chunk - answers well.
+For each, give the short reference answer grounded in the chunk.
+Return JSON: a list of objects with keys "question" and "reference_answer".
+
+SOURCE (id={chunk_id}):
+{chunk_text}
+"""
+
+def generate_candidates(chunk_id, chunk_text, n=3):
+    msg = client.messages.create(
+        model="claude-sonnet-4-5",
+        max_tokens=1024,
+        messages=[{
+            "role": "user",
+            "content": GEN_PROMPT.format(n=n, chunk_id=chunk_id,
+                                         chunk_text=chunk_text),
+        }],
+    )
+    pairs = json.loads(msg.content[0].text)
+    # attach the source id as the reference context / expected id
+    for p in pairs:
+        p["reference_context"] = chunk_id
+        p["expected"] = chunk_id
+    return pairs
+
+candidates = []
+for cid, text in recall_chunks.items():      # your corpus A/B/C chunks
+    candidates += generate_candidates(cid, text, n=3)
+
+print(len(candidates), "candidates drafted - now curate")</div>
+        <div class="callout tip">
+          <strong>Do not skip the curation pass</strong>
+          The output above is a <em>draft</em>, not a golden set. Read every candidate: cut leading or trivial questions, fix answers that drift from the chunk, drop near-duplicates, and hand-write the ambiguous edge cases the model will not think to produce. The generator saves typing, not judgment.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>RAGAS testset generation<span class="mini">3 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>When you want more than a per-chunk prompt, RAGAS automates the whole thing. It builds a knowledge graph from your documents, then generates a mix of question types so the set is not all one shape.</p>
+        <div class="prompt-box good"><span class="label">Python · RAGAS TestsetGenerator</span>from ragas.testset import TestsetGenerator
+from langchain_anthropic import ChatAnthropic
+from langchain_community.document_loaders import DirectoryLoader
+
+# load Recall's docs (corpus A/B/C on disk)
+docs = DirectoryLoader("recall_corpora/").load()
+
+generator = TestsetGenerator.from_langchain(
+    llm=ChatAnthropic(model="claude-sonnet-4-5"),
+)
+
+# builds a knowledge graph, then a mix of single-hop and multi-hop queries
+dataset = generator.generate_with_langchain_docs(
+    docs,
+    testset_size=60,        # how many golden examples to draft
+)
+
+df = dataset.to_pandas()    # question / reference / contexts columns
+df.head()</div>
+        <ul>
+          <li><strong>Knowledge graph first.</strong> RAGAS builds a graph from your docs and uses it to write questions that need one chunk (single-hop) or several (multi-hop).</li>
+          <li><strong>A deliberate mix.</strong> The default query distribution is roughly half single-hop and half multi-hop, split between abstract and specific multi-hop questions - so your set exercises both simple lookups and reasoning across chunks.</li>
+          <li><strong>testset_size is yours to set.</strong> Ask for 60 or 600. Then - same rule - curate before you trust the numbers it produces.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Validate the generator against humans<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>OpenAI's guidance on evals is consistent on one point: an LLM can generate synthetic eval data and even grade it, but you validate that generated set (or model-graded eval) against human judgment before you trust it at scale.</p>
+        <ul>
+          <li><strong>Sample and check.</strong> Have a human review a random slice of the generated set. If the answers or expected ids are wrong too often, the whole set is suspect - fix the prompt or the source, do not paper over it with volume.</li>
+          <li><strong>Agreement is the gate.</strong> Only once a human agrees with the generator on a good sample should you scale generation up and lean on the numbers. Trust is earned per set, not assumed.</li>
+          <li><strong>This applies double to LLM graders.</strong> The same validate-against-humans rule governs the model-graded metrics in b5 and b6, where the model is not just writing questions but scoring answers.</li>
+        </ul>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="scorecard">
+    <div class="section-kicker">
+      <span class="klabel">Part 3 · covers the b1 set, scored</span>
+      <h2>The seed set, scored again <span class="tag demo">★ 5 min live</span></h2>
+    </div>
+    <p class="lede">Here is Recall's original twelve-question seed set from b1, scored live. As you read the table, treat it as the set under review: which questions are too easy, which corpus is thin, where is the ambiguous case that should be here and is not? That reading is the work of this session.</p>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>★ Review the seed set as data<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Change k and watch the score, but keep your eye on the <em>questions</em> this time, not the metric. A trustworthy set would spread evenly across corpora A, B, and C, include a couple of genuinely hard cases, and have at least one ambiguous entry. Judge this seed set against that bar.</p>
+        <div class="evalbox" data-k="3"
+             data-caption="Recall's b1 seed set, scored. Read it as a dataset under review: is the mix representative, and where are the missing edge cases?"></div>
+        <div class="callout tip">
+          <strong>Honesty note - what this scorecard really does</strong>
+          Retrieval here uses the same <em>simplified</em> lexical embedder as the RAG course playground, so it runs with zero network. But the evaluation math - Hit Rate@k, MRR, Precision@1 over a golden set - is exactly what you compute in production. You are watching the real metric mechanic with a toy retriever.
+        </div>
+        <p>Notice how few questions there are: with twelve, a single flip moves Hit Rate by more than eight points. That volatility is the b1 set telling you it is a seed, not a finished golden set. Growing and diversifying it is your homework.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Turn 3 real questions into golden entries <span class="tag demo">★ 12 min · your own system</span></h2>
+    </div>
+    <p class="lede">The fastest way to internalize this is to build three real entries for a system you actually run - Recall, or your own.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Pull three real questions.</strong> Take three questions your system genuinely receives (from logs, from memory, from a teammate). Real phrasing, not tidy paraphrases.</p></div>
+      <div class="step"><p><strong>Write the reference answer and context.</strong> For each, write the short answer you would accept as correct, and name the chunk or doc id that should support it. That id is your gradeable expected field.</p></div>
+      <div class="step"><p><strong>Add one deliberately ambiguous case.</strong> Write a fourth entry where even you and a colleague would disagree on the single right answer. Note what the right behavior is - answer, decline, or ask to clarify.</p></div>
+      <div class="step"><p><strong>Tag and file.</strong> Label the corpus and mark the ambiguous one as an edge case, so you can slice its score separately later. You now have four rows of a real golden set.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's golden set after b2</strong>
+      Recall's golden set is no longer a twelve-question seed you inherited - it is a set you can defend: sized for stable numbers, spread across all three corpora, salted with edge and ambiguous cases, and structured so a machine can grade every row. The score from b1 finally means something. In b3 we go deep on the retrieval metrics that read this set.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b3 <span class="tag exercise">◐ 45 min total</span></h2>
+    </div>
+    <ul>
+      <li>Grow one golden set to at least 40 entries using the prompt-based generator over your own chunks, then curate every candidate by hand - keep a tally of how many you cut and why.</li>
+      <li>Deliberately add three ambiguous entries where consensus is hard, and label them as edge cases.</li>
+      <li>Check your distribution: does the topic mix of your set roughly match the topic mix of real traffic? Adjust until it does.</li>
+      <li>Read: Anthropic's guide on developing tests, and skim the RAGAS testset generation docs for the default query distribution.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers ~80% of their working content on golden-set construction - the rest (full RAGAS metric suites, hosted grading) lands in later sessions.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Anthropic · developing tests (empirical evals)</span><span class="note">Part 1 · volume over quality · mirror the task distribution · structure for auto-grading · ambiguous edge cases</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · testset generation</span><span class="note">Part 2 · knowledge graph · single-hop + multi-hop mix · testset_size</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">OpenAI · evals (synthetic data + validation)</span><span class="note">Part 2 · generate then validate against humans before scaling</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · Anthropic's guidance on golden-set size is best summarized as...</p>
+      <button class="qopt" type="button">A · Fewer questions, each hand-graded to perfection</button>
+      <button class="qopt" type="button">B · Prioritize volume: more questions with slightly lower-signal automated grading beats fewer hand-graded ones</button>
+      <button class="qopt" type="button">C · Exactly twelve questions is ideal</button>
+      <p class="qwhy">Anthropic advises prioritizing volume over per-item polish, because coverage catches more regressions and automated grading makes volume affordable.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · Why deliberately include ambiguous cases where even humans disagree?</p>
+      <button class="qopt" type="button">A · To inflate the score</button>
+      <button class="qopt" type="button">B · Because they are easier to auto-grade</button>
+      <button class="qopt" type="button">C · They stress-test how the system and grader handle genuine uncertainty - where the right behavior may be to ask or decline</button>
+      <p class="qwhy">Ambiguous entries force a decision you would otherwise skip: what is correct when there is no clean answer. Often that is a clarifying question or a decline, and only an ambiguous case tests it.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · You used an LLM to generate a golden set. Before trusting its scores at scale you should...</p>
+      <button class="qopt" type="button">A · Validate the generated set against human judgment on a sample first</button>
+      <button class="qopt" type="button">B · Trust it immediately since the model wrote it</button>
+      <button class="qopt" type="button">C · Delete any question a human would find easy</button>
+      <p class="qwhy">OpenAI's guidance: LLMs can generate synthetic eval data, but you validate that data (and model-graded evals) against human judgment before relying on it at scale. Trust is earned per set.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 2 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Golden entry</b><span>question + reference answer + (optional) reference context. The set, not the row, is the artifact.</span></div>
+      <div class="cheat-item"><b>Right size</b><span>Volume over per-item polish (Anthropic). More auto-graded questions beats fewer hand-graded ones.</span></div>
+      <div class="cheat-item"><b>Diversity</b><span>Mirror the real task distribution - topics, phrasings, difficulty, and all three corpora.</span></div>
+      <div class="cheat-item"><b>Edge cases</b><span>Dedicate entries to the hard tail, including ambiguous cases where humans disagree.</span></div>
+      <div class="cheat-item"><b>Gradeable</b><span>Structure for automated grading: multiple-choice, string/id match, code-graded, or LLM-graded.</span></div>
+      <div class="cheat-item"><b>Generate then curate</b><span>LLM or RAGAS drafts triples; a human keeps, fixes, or cuts before the set is trusted.</span></div>
+      <div class="cheat-item"><b>RAGAS testset</b><span>Knowledge graph → single-hop + multi-hop mix; testset_size configurable.</span></div>
+      <div class="cheat-item"><b>Validate vs humans</b><span>OpenAI: validate any generated set or model grader against human judgment before scaling.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 2 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b3-retrieval-metrics.html">Next: Retrieval metrics →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/rag-corpora.js?v=1"></script>
+<script src="../assets/eval-live.js?v=1"></script>
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

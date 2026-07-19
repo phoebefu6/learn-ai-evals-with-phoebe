@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader session 3 · Offline vs online evaluation - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Leader session 3 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Leader track · Session 3 of 6</div>
+    <h1>Offline vs online evaluation <span class="accent">the gate and the smoke detector</span></h1>
+    <p class="sub">Session 2 gave you the words for quality. This one gives you the two moments you measure it. There are exactly two kinds of evaluation, and they answer different questions: one runs before you ship, against a fixed set of questions with known-good answers, and decides whether you launch. The other runs forever after you ship, on live traffic, with no answer key, and tells you when the world has drifted out from under you. Teams that only do the first ship a product that is correct on launch day and slowly wrong ever after. You need both, and by the end of this hour you will know exactly why.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 medium</span>
+      <span class="chip audience">Leaders: C-level · managers · curious minds</span>
+      <span class="chip audience">No code, ever</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Concepts</span>
+      <span class="a3" style="flex:4">20-40 · Exercises</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Two moments, two very different jobs</h2>
+    </div>
+    <p class="lede">Think of evaluation as two safety systems on a building. One is the inspection before anyone moves in - the gate that decides whether the building is fit to open. The other is the smoke detector that runs every hour after, catching the fire that starts long after the inspector left. Both are evaluation. Skip the inspection and you open something unsafe. Skip the smoke detector and you never find out when it goes wrong in use. AI systems need both, and most teams have only installed the inspection.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - read after class</span>
+      <span class="pill peach">★ Try it now prompt</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you walk out with today</strong>
+      The clean split between offline eval (before ship, fixed answer key, gates the launch and catches regressions) and online eval (after ship, live traffic, no answer key, catches drift), why neither replaces the other, how user thumbs up/down feeds the online signal, and five questions to put to your data team this week.
+    </div>
+  </section>
+
+  <section class="section" id="two-kinds">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the two kinds of eval</span>
+      <h2>Two kinds of eval <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Evaluation happens at two moments in a system's life. Offline eval runs before launch and again on every change, against a fixed set of questions with reference answers. Online eval runs continuously after launch, on real production traffic, with no reference answer to compare against. Same discipline, two entirely different setups.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 330" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Lifecycle: offline evaluation before ship against a fixed dataset, offline again on every change, then online evaluation after ship on sampled live traffic with no reference answers">
+        <style>
+          .a3oT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a3oW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .a3oS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .a3oX { font: 700 12px Inter, sans-serif; fill: #B91C1C; }
+          .a3oN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .a3oArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#a3oAh); }
+          .a3oLoop { stroke: #DC2626; stroke-width: 2.5; fill: none; marker-end: url(#a3oAh); }
+        </style>
+        <defs>
+          <marker id="a3oAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="40" y="90" width="220" height="96" rx="14" fill="#B91C1C"/>
+        <text class="a3oT" x="62" y="120">OFFLINE · before ship</text>
+        <text class="a3oW" x="62" y="144">fixed dataset with</text>
+        <text class="a3oW" x="62" y="162">reference answers</text>
+        <text class="a3oW" x="62" y="180">= the launch gate</text>
+        <rect x="330" y="90" width="220" height="96" rx="14" fill="#DC2626"/>
+        <text class="a3oT" x="352" y="120">OFFLINE · every change</text>
+        <text class="a3oW" x="352" y="144">re-run same dataset</text>
+        <text class="a3oW" x="352" y="162">on each tweak</text>
+        <text class="a3oW" x="352" y="180">= catches regressions</text>
+        <rect x="620" y="90" width="220" height="96" rx="14" fill="#7F1D1D"/>
+        <text class="a3oT" x="642" y="120">ONLINE · after ship</text>
+        <text class="a3oW" x="642" y="144">sampled live traffic,</text>
+        <text class="a3oW" x="642" y="162">no reference answer</text>
+        <text class="a3oW" x="642" y="180">= catches drift</text>
+        <text class="a3oX" x="270" y="80">SHIP</text>
+        <line class="a3oArr" x1="262" y1="138" x2="326" y2="138"/>
+        <line class="a3oArr" x1="552" y1="138" x2="616" y2="138"/>
+        <path class="a3oLoop" d="M440 90 C440 55, 400 55, 400 88" />
+        <text class="a3oS" x="360" y="52">repeat on every version</text>
+        <rect x="40" y="260" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a3oN" x="64" y="272">Offline gates the launch and guards every change. Online watches the world after ship.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the eval lifecycle: offline before and on every change, online forever after</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Offline eval - the launch gate you build once and re-run forever<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Offline eval runs before you ship. You assemble a fixed set of representative questions, each paired with a known-good reference answer, and you grade the system against that answer key. The score is the gate: high enough, you launch; not high enough, you do not.</p>
+        <ul>
+          <li><strong>The answer key is the whole point.</strong> Because you know the right answer for each question, grading is clean and repeatable. The same test run today and next month is directly comparable.</li>
+          <li><strong>It re-runs on every change.</strong> Swap a model, tweak a prompt, change how documents are fetched - re-run the exact same set. If the score drops, the change broke something. That is a regression, caught before a user ever sees it.</li>
+          <li><strong>Its blind spot:</strong> it only ever asks the questions you thought to put in the set. It cannot see the questions real users will actually ask tomorrow.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Online eval - the smoke detector on live traffic<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Online eval runs after you ship, continuously, on the real questions real users are asking right now. The defining difference: there is no answer key. Nobody wrote a reference answer for a question that was asked thirty seconds ago, so online eval grades differently - it checks the answer against the material it used, watches for signals like low groundedness, and folds in what users tell you.</p>
+        <ul>
+          <li><strong>No reference answers, ever.</strong> Live questions arrive without a known-good answer. So online grading leans on reference-free checks and on user feedback rather than an answer key.</li>
+          <li><strong>You sample, you do not grade everything.</strong> Grading every single production answer costs real money, so teams grade a slice - a sampling rate. A rate of 0.1 means one in ten answers gets evaluated: enough to spot a trend, cheap enough to run always.</li>
+          <li><strong>You can aim the sampling.</strong> Teams often focus grading on the answers users flagged as bad - a thumbs-down - so the budget goes where the trouble is.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Side by side - the same discipline, two setups<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The cleanest way to hold the difference is a table. Read it across each row and the split is obvious.</p>
+        <table class="clean">
+          <thead>
+            <tr><th></th><th>Offline eval</th><th>Online eval</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><strong>When</strong></td><td>Before ship, and on every change</td><td>Continuously, after ship</td></tr>
+            <tr><td><strong>On what data</strong></td><td>Fixed set of chosen questions</td><td>Real, live production traffic</td></tr>
+            <tr><td><strong>How graded</strong></td><td>Against known reference answers</td><td>No reference - reference-free checks + user feedback</td></tr>
+            <tr><td><strong>Catches what</strong></td><td>Regressions between versions</td><td>Live-quality issues and drift</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="both">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers why one is never enough</span>
+      <h2>Why you need both <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Offline is the gate before launch; online is the smoke detector after. Neither does the other's job. Offline cannot see the real world coming, and online cannot gate a launch that has not happened. A team with only one has a blind spot exactly where the other would have been looking.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Offline eval is the gate that decides whether you launch; online eval is the smoke detector that watches live traffic after launch; the world drifts, so both are needed">
+        <style>
+          .a3bT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a3bW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .a3bI { font: 700 14px Inter, sans-serif; fill: #1E293B; }
+          .a3bS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .a3bX { font: 700 13px Inter, sans-serif; fill: #B91C1C; }
+          .a3bN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .a3bArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#a3bAh); }
+        </style>
+        <defs>
+          <marker id="a3bAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="60" y="70" width="180" height="120" rx="16" fill="#B91C1C"/>
+        <text class="a3bT" x="82" y="112">OFFLINE</text>
+        <text class="a3bW" x="82" y="136">the gate</text>
+        <text class="a3bW" x="82" y="156">good enough</text>
+        <text class="a3bW" x="82" y="174">to open?</text>
+        <rect x="310" y="100" width="150" height="60" rx="12" fill="#1E293B"/>
+        <text class="a3bT" x="332" y="135">SHIP 🚀</text>
+        <rect x="540" y="70" width="270" height="120" rx="16" fill="#7F1D1D"/>
+        <text class="a3bT" x="562" y="112">ONLINE · smoke detector</text>
+        <text class="a3bW" x="562" y="136">watches live traffic,</text>
+        <text class="a3bW" x="562" y="156">catches the fire that</text>
+        <text class="a3bW" x="562" y="174">starts after launch</text>
+        <line class="a3bArr" x1="242" y1="130" x2="306" y2="130"/>
+        <line class="a3bArr" x1="462" y1="130" x2="536" y2="130"/>
+        <rect x="60" y="230" width="750" height="48" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a3bI" x="84" y="259">The world drifts: documents change, users ask new things, the model updates under you. Only online sees it.</text>
+        <rect x="60" y="292" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a3bN" x="84" y="304">Offline can't see the real world. Online can't gate a launch. You need both.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the gate and the smoke detector, each covering the other's blind spot</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why offline alone leaves you blind<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Offline eval is frozen in time. Your test set was written on a particular day, reflecting the questions and the world of that day. But the world does not hold still after you ship, and offline eval never notices.</p>
+        <ul>
+          <li><strong>The documents drift.</strong> A policy changes, a price updates, a product is discontinued - and the system keeps confidently quoting the old material. Your offline set, with its old answers, still passes.</li>
+          <li><strong>Users ask new things.</strong> Real traffic is full of questions nobody put in the test set. Offline eval literally cannot grade a question it does not contain.</li>
+          <li><strong>The model changes under you.</strong> When a provider updates the underlying model, behavior can shift without a single line of your own changing. Offline catches this only if you happen to re-run - online catches it live.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why online alone cannot gate a launch<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The reverse is just as true. Online eval is powerful, but it only exists once you are live - which is too late to decide whether you should have gone live.</p>
+        <ul>
+          <li><strong>No answer key yet.</strong> Before launch there is no production traffic and no way to know the right answers at scale. Online eval has nothing to grade until real users arrive.</li>
+          <li><strong>You cannot regression-test a change safely.</strong> Deciding whether a new prompt is better belongs in a controlled offline run against known answers - not by shipping it to customers and watching complaints.</li>
+          <li><strong>Feedback is a signal, not a gate.</strong> User thumbs up and down are gold for online monitoring, but you cannot ask users to grade a product that has not shipped.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The bot that aged badly.</strong> A team (anonymized) shipped a support bot that passed its offline eval cleanly - every reference answer matched. Three months later a refund policy changed. The offline set still had the old questions and old answers, so it kept passing. Meanwhile the live bot confidently quoted the retired rule to real customers for weeks. The only thing that could have caught it was online eval watching live traffic - and the team had not installed one. The first signal was a spike in complaints.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>User feedback - your cheapest online signal<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The simplest online eval is one you already have the ingredients for: the thumbs up and thumbs down next to an answer. Every user who reacts is grading your system for free, in the real world, on a real question.</p>
+        <ul>
+          <li><strong>It becomes a number.</strong> A thumbs up counts as 1, a thumbs down as 0. Averaged over traffic, that is a live quality signal you can chart and watch for dips - and it can be attached to any step of the process, not just the final answer.</li>
+          <li><strong>It aims the expensive grading.</strong> Rather than sampling answers at random, focus the deeper evaluation on the ones users flagged as bad. The complaints tell you where to look.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The leader move</strong>
+          If your product has no way for a user to say "that answer was wrong", you have switched off your cheapest smoke detector. Ask whether feedback is captured, and whether anyone is watching the trend - not just the individual thumbs.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise-1">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 1 of 2</span>
+      <h2>Offline catches this, online catches that <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Pick one AI use case you own or care about. For that case, sort what each kind of eval would catch - and, crucially, what only online would ever see.</p>
+    <div class="steps">
+      <div class="step"><p>Name the use case in one line, and the fixed set of questions you would put in its offline test - the handful you are sure it must get right.</p></div>
+      <div class="step"><p>List two things offline eval would catch for this case - for example, a prompt change that quietly made answers worse, or a model swap that dropped quality.</p></div>
+      <div class="step"><p>List two things <strong>only online eval</strong> would catch - for example, a source document changing after launch, or users asking a whole category of question you never anticipated.</p></div>
+      <div class="step"><p>Ask the hard one: if the most likely failure for this case is drift after launch, and you only have offline eval, how long would you stay blind? That gap is the case for building online.</p></div>
+    </div>
+    <div class="prompt-box good"><span class="label">★ Your eval-planning partner (paste into any chat AI)</span>I am planning evaluation for an AI use case. I will describe it. Sort the risks into two lists: (1) things offline evaluation would catch - failures visible when testing against a fixed set of questions with known answers, before or during changes; and (2) things only online evaluation would catch - failures that appear only on live production traffic after launch, like drift, new question types, or a model update. Then tell me, for this case, which of the two I most need and why. My use case is: [describe it]</div>
+  </section>
+
+  <section class="section" id="exercise-2">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 2 of 2</span>
+      <h2>Design your online signal <span class="tag demo">★ 8 min · your next AI review</span></h2>
+    </div>
+    <p class="lede">Online eval only works if you decide, in advance, what to watch and how much of it. Sketch the online signal for your use case in four decisions.</p>
+    <div class="steps">
+      <div class="step"><p><strong>What would you sample?</strong> You will not grade every answer - it costs too much. Decide the slice: a random one in ten, or every answer on a high-stakes topic? Name your sampling rate in plain terms.</p></div>
+      <div class="step"><p><strong>What feedback would you capture?</strong> Thumbs up/down is the minimum. Would you also capture a reason, a follow-up "did this solve it?", or an escalation-to-human signal? Each is a live grade.</p></div>
+      <div class="step"><p><strong>What would trigger a deeper look?</strong> Decide the rule: "grade every thumbs-down answer", or "when the weekly thumbs-up average drops below X, investigate". Aim the expensive grading at the trouble.</p></div>
+      <div class="step"><p><strong>Who watches the trend, and how often?</strong> A signal nobody looks at is not a smoke detector, it is a disconnected one. Name the owner and the cadence.</p></div>
+    </div>
+    <div class="callout tip">
+      <strong>Sampling is a budget dial, not a corner cut</strong>
+      A one-in-ten sampling rate is not laziness - it is how you afford to watch quality every single day instead of only when someone remembers. The trend on a sample tells you as much as grading everything, at a tenth of the cost.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session a4 <span class="tag exercise">◐ 30 min total</span></h2>
+    </div>
+    <ul>
+      <li>Finish the offline-vs-online sort for your top use case and keep it - a4 folds both into a single ship scorecard.</li>
+      <li>For a real AI product you use, hunt for the thumbs up/down - and ask whether anyone charts the trend, or just reads individual complaints.</li>
+      <li>Write down your best guess at how long your team would stay blind to a post-launch quality drop today. Bring the number to a review.</li>
+      <li>Optional: skim the builder track's b3 to see a sampling rate and a feedback score in action - you do not need the code, just the shape.</li>
+    </ul>
+    <div class="callout win">
+      <strong>★ Questions to ask your data team this week</strong>
+      <ol>
+        <li>Do we have an offline eval - a fixed set of questions with known answers we re-run before every change?</li>
+        <li>Do we have any online eval on live traffic, and if so, what sampling rate do we grade at?</li>
+        <li>If a source document changed after launch and the bot kept quoting the old one, how would we find out - and how fast?</li>
+        <li>Do we capture user feedback like thumbs up/down, and does anyone watch the trend rather than just individual complaints?</li>
+        <li>How long, honestly, would we stay blind to a quality drop in production - and what would shorten it?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">The leader track teaches from published engineering guidance and course curricula - no vendor marketing. This page covers:</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LangSmith · Evaluation concepts &amp; Online evaluations</span><span class="note">Part 1-2 · offline against a dataset with reference outputs · online on production traces, sampled, no reference · feedback scores</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Anthropic · Develop your tests</span><span class="note">Part 1 · build empirical evals before you trust the system · the launch gate</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · The defining difference between offline and online evaluation is...</p>
+      <button class="qopt" type="button">A · Offline is free and online costs money</button>
+      <button class="qopt" type="button">B · Offline grades against a fixed set with known reference answers; online grades live production traffic with no reference answer</button>
+      <button class="qopt" type="button">C · Offline uses one model and online uses another</button>
+      <p class="qwhy">Offline runs before ship against a fixed dataset with reference answers and catches regressions. Online runs continuously on live traffic where no reference answer exists, using reference-free checks and user feedback.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · A support bot passes its offline eval every week but starts giving wrong answers in production after a policy changes. What happened?</p>
+      <button class="qopt" type="button">A · The offline eval was broken</button>
+      <button class="qopt" type="button">B · The model got worse on its own</button>
+      <button class="qopt" type="button">C · The world drifted - the offline set still has the old questions and answers, so only online eval on live traffic would catch it</button>
+      <p class="qwhy">Offline eval is frozen to the day it was written. When documents change under a live system, the old test set keeps passing. Only online eval, watching real traffic, sees the drift.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · A sampling rate of 0.1 on online eval means...</p>
+      <button class="qopt" type="button">A · Roughly one in ten production answers gets evaluated - enough to spot trends, cheap enough to run continuously</button>
+      <button class="qopt" type="button">B · The system is 10% accurate</button>
+      <button class="qopt" type="button">C · Ten percent of users are unhappy</button>
+      <p class="qwhy">Grading every live answer is expensive, so teams grade a slice. A rate of 0.1 grades one in ten - the sampling rate is the budget dial that lets you watch quality every day. Grading can be aimed at feedback-flagged runs.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 3 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Two kinds</b><span>Offline = before ship, fixed answer key. Online = after ship, live traffic, no answer key.</span></div>
+      <div class="cheat-item"><b>Offline = the gate</b><span>Grades against known reference answers. Decides launch, and re-runs on every change.</span></div>
+      <div class="cheat-item"><b>Catches regressions</b><span>Re-run the same set after a tweak. Score drops = the change quietly broke something.</span></div>
+      <div class="cheat-item"><b>Online = smoke detector</b><span>Runs forever on production traffic. No reference answers - uses reference-free checks + feedback.</span></div>
+      <div class="cheat-item"><b>The world drifts</b><span>Documents change, users ask new things, the model updates under you. Only online sees it.</span></div>
+      <div class="cheat-item"><b>Sampling rate</b><span>Grade a slice, not everything. 0.1 = one in ten. The budget dial for continuous watching.</span></div>
+      <div class="cheat-item"><b>User feedback</b><span>Thumbs up = 1, down = 0. A free live signal, attachable to any step. Aim grading at the flags.</span></div>
+      <div class="cheat-item"><b>You need both</b><span>Offline can't see the real world. Online can't gate a launch. Trust needs the pair.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Leader session 3 of 6 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="a4-the-scorecard.html">Next: The ship scorecard →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

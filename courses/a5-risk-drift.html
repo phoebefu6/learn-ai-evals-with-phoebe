@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader session 5 · Risk, drift &amp; governance - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Leader session 5 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Leader track · Session 5 of 6</div>
+    <h1>Risk, drift and governance <span class="accent">when the eval itself is the problem</span></h1>
+    <p class="sub">So far evaluation has been the hero of this course. This session shows you its dark side. An eval can lie to you - by being gamed, by trusting a biased judge, by resting on a stale set of test questions - and even a perfect eval goes out of date the moment the world moves, which it always does. This hour teaches you the four ways eval deceives, how AI systems quietly degrade after launch, and when you can trust a machine to grade a machine.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Deciding</span>
+      <span class="chip audience">Leaders: C-level · managers · curious minds</span>
+      <span class="chip audience">No code, ever</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Concepts</span>
+      <span class="a3" style="flex:4">20-40 · Exercises</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>The eval is not automatically the truth</h2>
+    </div>
+    <p class="lede">There is a comfortable assumption hiding in every eval dashboard: that the numbers are honest. Usually they are. But an eval is a human-built instrument, and instruments can be miscalibrated, gamed, or simply pointed at the wrong thing. Worse, even a flawless eval measures the world as it was on the day you built it - and AI systems live in a world that drifts underneath them. A leader who trusts the green dashboard without asking these questions is trusting a thermometer nobody has checked in months.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - read after class</span>
+      <span class="pill peach">★ Try it now prompt</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you walk out with today</strong>
+      The four ways an eval can lie to you, the difference between data drift and concept drift, when to trust an automated judge and when to require a human, a risk register you can build for your own eval, and five questions to put to your data team this week.
+    </div>
+  </section>
+
+  <section class="section" id="four-ways">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers how eval deceives</span>
+      <h2>Four ways eval lies to you <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Before you trust a green dashboard, know the four ways it can be green and wrong. The metric can be gamed, the judge can be biased, the test set can be stale or skewed, and the whole thing can quietly go out of date after launch. Each is common. Each is catchable once you know to look.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A risk board of four ways eval lies: gaming the metric, an untrustworthy LLM judge, a stale or skewed golden set, and drift after launch">
+        <style>
+          .a5rT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a5rH { font: 700 16px Inter, sans-serif; fill: #FFFFFF; }
+          .a5rW { font: 400 12.5px Inter, sans-serif; fill: #FEE2E2; }
+          .a5rN { font: 600 14px Inter, sans-serif; fill: #431407; }
+        </style>
+        <rect x="40" y="20" width="800" height="40" rx="10" fill="#7F1D1D"/>
+        <text class="a5rH" x="60" y="46">Four ways the dashboard can be green and wrong</text>
+        <rect x="40" y="76" width="390" height="90" rx="12" fill="#B91C1C"/>
+        <text class="a5rT" x="60" y="106">1 · Gaming the metric</text>
+        <text class="a5rW" x="60" y="130">The system optimizes the number</text>
+        <text class="a5rW" x="60" y="150">and quietly loses the real goal.</text>
+        <rect x="450" y="76" width="390" height="90" rx="12" fill="#DC2626"/>
+        <text class="a5rT" x="470" y="106">2 · Untrustworthy judge</text>
+        <text class="a5rW" x="470" y="130">The LLM grader has biases:</text>
+        <text class="a5rW" x="470" y="150">position, verbosity, self-preference.</text>
+        <rect x="40" y="182" width="390" height="90" rx="12" fill="#DC2626"/>
+        <text class="a5rT" x="60" y="212">3 · Stale or skewed set</text>
+        <text class="a5rW" x="60" y="236">The golden questions no longer</text>
+        <text class="a5rW" x="60" y="256">look like what users really ask.</text>
+        <rect x="450" y="182" width="390" height="90" rx="12" fill="#7F1D1D"/>
+        <text class="a5rT" x="470" y="212">4 · Drift after launch</text>
+        <text class="a5rW" x="470" y="236">It passed on launch day, then</text>
+        <text class="a5rW" x="470" y="256">the world moved underneath it.</text>
+        <rect x="40" y="290" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a5rN" x="64" y="302">A green eval is a claim, not a fact. These four are how the claim goes false.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the four ways an eval can mislead you</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Lies one and two - the gamed metric and the biased judge<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The first two lies come from inside the eval machinery itself.</p>
+        <ul>
+          <li><strong>Gaming the metric (Goodhart's law).</strong> When a measure becomes a target, it stops being a good measure. Optimize hard for one number and the system finds a shortcut that wins the number while betraying the goal - padding answers to please a length-happy judge, or refusing more often to protect a faithfulness score. The metric climbs; the product gets worse.</li>
+          <li><strong>An untrustworthy LLM judge.</strong> Using a strong model to grade answers is how eval scales, but these judges have documented biases. They tend to favor whichever answer they see first (position bias), favor longer answers regardless of quality (verbosity bias), and favor answers written in their own family's style (self-preference bias). A judge with an unaddressed bias produces a confident, precise, and wrong score.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The metric that got gamed.</strong> A team (anonymized) optimized against an LLM judge that quietly rewarded longer answers. The system learned to pad - every reply grew a preamble and a summary. The scores climbed steadily while customers complained the answers had become wordy and evasive. The fix was not a better model; it was catching the judge's verbosity bias and controlling for length so the number stopped rewarding the wrong thing.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Lie three - the stale or skewed golden set<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Every offline eval rests on a golden set: a fixed collection of questions with known-good answers. That set is the ruler you measure against, and a warped ruler gives clean, precise, wrong readings.</p>
+        <ul>
+          <li><strong>Stale.</strong> The set was built a year ago. Since then products changed, policies changed, users started asking new things. The system aces the old questions and fails the new ones - and the eval, looking only at the old questions, reports success.</li>
+          <li><strong>Skewed.</strong> The set over-represents the easy, tidy questions someone found convenient to write and under-represents the messy, ambiguous, high-stakes ones real users bring. A high score on an unrepresentative set is a high score on a test that does not resemble reality.</li>
+          <li><strong>The leader question:</strong> "How old is the set we grade against, who curates it, and how do we know it looks like what our users actually ask today?"</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The ruler needs maintenance</strong>
+          A golden set is not built once. It should grow as real production failures get folded back in - the subject of session a6. If nobody can tell you when it was last updated, treat every green result from it with suspicion.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Lie four - drift after launch<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The fourth lie is the cruelest because it needs no mistake at all. You built an honest eval, set a fair threshold, passed it on launch day - and then the world kept moving. Documents get updated, customer questions shift with the season, the underlying model gets a silent update, a competitor changes the market. Nothing in your system broke; the ground under it moved. An eval run only at launch cannot see this. It reported the truth about a day that has passed. The remedy is to keep measuring on live traffic after launch, which is why this is the bridge into the second half of the session and into the online eval you met in a3.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="drift-judge">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers drift and trusting the judge</span>
+      <h2>Drift, and when to trust the judge <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Two things degrade a live AI system, and they are not the same. Data drift is when the questions coming in start to look different. Concept drift is subtler: the questions look the same, but the right answer has changed. Below is the difference, and the policy you need for when an automated judge is trustworthy enough to stand in for a human.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Data drift where the input distribution shifts, contrasted with concept drift where inputs look the same but the correct answer changes; detection is monitoring plus an LLM judge to explain">
+        <style>
+          .a5dT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a5dI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .a5dW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .a5dS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .a5dN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .a5dArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#a5dAh); }
+        </style>
+        <defs>
+          <marker id="a5dAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="40" y="24" width="380" height="120" rx="14" fill="#B91C1C"/>
+        <text class="a5dT" x="60" y="54">Data drift</text>
+        <text class="a5dW" x="60" y="80">The input distribution shifts -</text>
+        <text class="a5dW" x="60" y="100">users start asking different</text>
+        <text class="a5dW" x="60" y="120">kinds of questions than before.</text>
+        <rect x="460" y="24" width="380" height="120" rx="14" fill="#7F1D1D"/>
+        <text class="a5dT" x="480" y="54">Concept drift</text>
+        <text class="a5dW" x="480" y="80">The questions look the same,</text>
+        <text class="a5dW" x="480" y="100">but the correct answer has</text>
+        <text class="a5dW" x="480" y="120">changed underneath them.</text>
+        <rect x="40" y="168" width="800" height="60" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a5dI" x="60" y="194">Detection = monitor the live traffic + use an LLM judge to explain</text>
+        <text class="a5dS" x="60" y="214">Alert when the input distribution shifts past a threshold, or when quality on live answers falls.</text>
+        <rect x="40" y="252" width="380" height="58" rx="12" fill="#1E293B"/>
+        <text class="a5dT" x="60" y="278">Watch the inputs</text>
+        <text class="a5dW" x="60" y="298" style="fill:#CBD5E1">catches data drift early</text>
+        <rect x="460" y="252" width="380" height="58" rx="12" fill="#1E293B"/>
+        <text class="a5dT" x="480" y="278">Watch the answers</text>
+        <text class="a5dW" x="480" y="298" style="fill:#CBD5E1">catches concept drift</text>
+        <line class="a5dArr" x1="230" y1="146" x2="230" y2="166"/>
+        <line class="a5dArr" x1="650" y1="146" x2="650" y2="166"/>
+        <line class="a5dArr" x1="230" y1="230" x2="230" y2="250"/>
+        <line class="a5dArr" x1="650" y1="230" x2="650" y2="250"/>
+        <rect x="40" y="318" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a5dN" x="64" y="330">Data drift changes the question. Concept drift changes the answer. Watch for both.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - data drift versus concept drift, and how to catch them</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Data drift versus concept drift<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Both are forms of the world moving, but you catch them in different places.</p>
+        <ul>
+          <li><strong>Data drift</strong> is a statistical shift in the input distribution - the mix of questions coming in changes. A new product launches and suddenly a quarter of queries are about it. You catch this by monitoring the inputs themselves and alerting when their distribution moves past a threshold. The system may still be answering correctly; it is just being asked something new.</li>
+          <li><strong>Concept drift</strong> is when the relationship between input and desired output changes. The questions look identical to last month's, but the right answer is now different - a policy changed, a price changed, a rule was updated. This is the dangerous one, because the inputs give you no warning. You catch it by watching the quality of the answers on live traffic, not just the shape of the questions.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The bot that quoted the old rule.</strong> A team (anonymized) shipped a help assistant that tested perfectly. Three months later a refund policy changed. The questions arriving looked exactly the same - "when is my refund due?" - so no input monitor fired. But the correct answer had changed, and the assistant kept confidently quoting the old rule. That is concept drift: same input, new right answer, and only answer-quality monitoring would have caught it.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>When to trust the automated judge<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>An LLM judge is how eval scales past what humans can hand-grade, including explaining why a live answer looks wrong. You can allow it - but calibrated and checked, never blindly.</p>
+        <ul>
+          <li><strong>Calibrate for the known biases.</strong> Swap the order of the two answers being compared and require the judge to give a consistent verdict either way - that neutralizes position bias. Control for length so verbosity is not rewarded. Where a reference answer exists, have the judge grade against it rather than on vibes.</li>
+          <li><strong>Use a different model to grade than the one under test.</strong> A judge from the same family as the system being graded tends to favor its own style. A different model family as the grader removes that self-preference tilt.</li>
+          <li><strong>Validate against humans.</strong> Keep a small set of human-labeled examples and check that the judge agrees with people on those. If it drifts from human judgment, recalibrate before you trust it at scale.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The policy in one line</strong>
+          Let the machine grade the routine volume; require a human on the high-stakes and the ambiguous. And always have a different model do the grading than the one being graded.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Governance - who watches the watcher<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>All of this rolls up into a governance question that is squarely a leadership responsibility, not a technical one: who is accountable for the eval, and how do we know the eval itself is still honest? A trustworthy setup has a named owner for evaluation, a schedule on which the golden set is refreshed with real failures, drift monitoring on live traffic, and a written policy for when a human must sign off rather than a machine. None of that is code. All of it is governance - the standing rules that keep the instrument trustworthy long after the launch excitement fades. Session a6 turns these one-off good intentions into a durable culture.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise-1">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 1 of 2</span>
+      <h2>Build a risk register for your eval <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Take one AI system you care about and build a four-row risk register for the way you evaluate it. This is the artifact you would bring to a governance review.</p>
+    <table class="clean">
+      <thead>
+        <tr><th>Risk</th><th>Likelihood</th><th>Control</th><th>Owner</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Gamed metric</td><td>?</td><td>?</td><td>?</td></tr>
+        <tr><td>Biased judge</td><td>?</td><td>?</td><td>?</td></tr>
+        <tr><td>Stale / skewed set</td><td>?</td><td>?</td><td>?</td></tr>
+        <tr><td>Drift after launch</td><td>?</td><td>?</td><td>?</td></tr>
+      </tbody>
+    </table>
+    <div class="steps">
+      <div class="step"><p>For each of the four rows, rate the likelihood for your system - high, medium, or low - and be honest about which ones you simply do not know.</p></div>
+      <div class="step"><p>Write the control that would catch it. For a biased judge, that might be "grade with a different model family and spot-check against humans". For drift, "monitor live traffic weekly".</p></div>
+      <div class="step"><p>Name an owner for each control. A control with no name attached is a control that will not happen.</p></div>
+      <div class="step"><p>Circle the one row where likelihood is high and the control is missing or unowned. That is your most urgent governance gap.</p></div>
+    </div>
+    <div class="prompt-box good"><span class="label">★ Your risk-register partner (paste into any chat AI)</span>Help me build a risk register for how I evaluate an AI system. The four risks are: (1) gaming the metric, (2) a biased LLM judge, (3) a stale or skewed golden test set, (4) drift after launch. I will describe my system. For each risk, ask me to rate its likelihood, then suggest a concrete control I could put in place and prompt me to name an owner. Finally, tell me which risk looks most urgent given my answers. My system is: [describe it]</div>
+  </section>
+
+  <section class="section" id="exercise-2">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 2 of 2</span>
+      <h2>Write your human-in-the-loop policy <span class="tag demo">★ 8 min · one paragraph</span></h2>
+    </div>
+    <p class="lede">Decide, in writing, when your organization trusts an automated judge and when it requires a human. A vague "we use human judgment where needed" is not a policy - it is a wish. Make it specific.</p>
+    <div class="steps">
+      <div class="step"><p>Name the routine, high-volume cases where an automated judge is good enough - low stakes, clear right answers, too many to hand-grade.</p></div>
+      <div class="step"><p>Name the cases that always require a human: high-stakes decisions, ambiguous questions, anything customer-facing where a wrong call is expensive or hard to reverse.</p></div>
+      <div class="step"><p>Write the calibration rules you require of any automated judge: a different model family from the one under test, position-swapped for consistency, and validated against a small human-labeled set.</p></div>
+      <div class="step"><p>State the trigger that escalates a machine-graded case to a human - for example, a low confidence score, a disagreement between two judges, or a high-stakes topic flag.</p></div>
+    </div>
+    <div class="callout tip">
+      <strong>What good looks like</strong>
+      One tight paragraph: "The automated judge, running a different model family than the system under test, grades routine queries; it is spot-checked weekly against a human-labeled set. Any customer-facing, financial, or ambiguous case is routed to a human, as is anything the judge scores low-confidence." That is a policy someone can actually follow.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session a6 <span class="tag exercise">◐ 30 min total</span></h2>
+    </div>
+    <ul>
+      <li>Finish the four-row risk register for your top AI system and keep it - a6 turns these controls into a standing eval culture with owners and a cadence.</li>
+      <li>Find out, for one live system, when its golden test set was last refreshed. If the answer is "at launch", you have found a stale-set risk.</li>
+      <li>Ask whether the system being graded and the model doing the grading are the same model family. If so, note the self-preference risk.</li>
+      <li>Draft your human-in-the-loop policy paragraph and share it with the eval owner for a reaction.</li>
+    </ul>
+    <div class="callout win">
+      <strong>★ Questions to ask your data team this week</strong>
+      <ol>
+        <li>How do we know none of our eval metrics are being gamed - what would rising numbers plus falling quality look like, and would we notice?</li>
+        <li>If we use an LLM to grade answers, is it a different model family than the one under test, and how do we correct for position and verbosity bias?</li>
+        <li>When was our golden test set last refreshed, who curates it, and does it look like what users actually ask today?</li>
+        <li>What do we monitor on live traffic to catch drift, and can we tell data drift (new questions) from concept drift (same question, new right answer)?</li>
+        <li>What is our written policy for when a human must grade rather than the machine, and who owns keeping the eval honest?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">The leader track teaches from published engineering guidance and course curricula - no vendor marketing. This page covers:</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">AWS · Monitoring for drift (data drift vs concept drift)</span><span class="note">Part 2 · input-distribution shift vs a changed input-to-answer relationship</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LLM-as-judge biases (Zheng et al., MT-Bench)</span><span class="note">Part 1-2 · position, verbosity, self-preference · calibration and human checks</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Anthropic · Empirical evaluation guidance</span><span class="note">Part 1-2 · calibrate the judge, validate against humans, keep the set honest</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · A support bot passed its launch eval, and months later customers get wrong answers to questions that look unchanged. The most likely cause is...</p>
+      <button class="qopt" type="button">A · Data drift - users are asking totally new kinds of questions</button>
+      <button class="qopt" type="button">B · Concept drift - the questions look the same but the correct answer changed (a policy or price updated)</button>
+      <button class="qopt" type="button">C · The model simply got less intelligent</button>
+      <p class="qwhy">When inputs look identical but the right answer has changed underneath them, that is concept drift. Input monitors will not fire because the questions look the same - you catch it by monitoring answer quality on live traffic.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · To make an LLM judge more trustworthy, a strong practice is to...</p>
+      <button class="qopt" type="button">A · Always use the same model to grade as the one being tested, for consistency</button>
+      <button class="qopt" type="button">B · Trust it completely once it agrees with humans once</button>
+      <button class="qopt" type="button">C · Use a different model family to grade, swap answer order to check consistency, and validate against a small human-labeled set</button>
+      <p class="qwhy">A judge from the same family favors its own style (self-preference). Use a different model, neutralize position bias by swapping order, control for length, and spot-check against human labels.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · Rising eval scores alongside falling customer satisfaction is a classic sign of...</p>
+      <button class="qopt" type="button">A · Goodhart's law - the metric became a target and got gamed, so it stopped measuring the real goal</button>
+      <button class="qopt" type="button">B · A perfectly healthy system</button>
+      <button class="qopt" type="button">C · A stale golden set only</button>
+      <p class="qwhy">When a measure becomes a target it stops being a good measure. A system optimizing the number can find shortcuts - padding, refusing - that win the metric while hurting the product users experience.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 5 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Lie 1 · Gamed metric</b><span>Goodhart: a measure that becomes a target stops measuring the goal. Numbers up, quality down.</span></div>
+      <div class="cheat-item"><b>Lie 2 · Biased judge</b><span>LLM graders favor the first answer, the longer answer, and their own style. Calibrate them.</span></div>
+      <div class="cheat-item"><b>Lie 3 · Stale set</b><span>The golden questions age. A high score on last year's test is not a high score on reality.</span></div>
+      <div class="cheat-item"><b>Lie 4 · Drift</b><span>Passed at launch, then the world moved. Only live monitoring sees it.</span></div>
+      <div class="cheat-item"><b>Data drift</b><span>The input distribution shifts - users ask different questions. Catch it by watching the inputs.</span></div>
+      <div class="cheat-item"><b>Concept drift</b><span>Same question, new right answer (policy changed). Catch it by watching answer quality.</span></div>
+      <div class="cheat-item"><b>Trust the judge, calibrated</b><span>Different model family grades; swap order for consistency; validate against a human set.</span></div>
+      <div class="cheat-item"><b>Human in the loop</b><span>Machine grades the routine volume; a human signs off the high-stakes and the ambiguous.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Leader session 5 of 6 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="a6-eval-culture.html">Next: Building an eval culture →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

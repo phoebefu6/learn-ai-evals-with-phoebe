@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader session 1 · Why evaluate at all? - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Leader session 1 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Leader track · Session 1 of 6</div>
+    <h1>Why evaluate at all? <span class="accent">Because vibes do not scale</span></h1>
+    <p class="sub">Every AI demo looks good - that is what a demo is for. Evaluation is the discipline that tells you whether the thing actually works, whether your last change helped or quietly broke it, and whether it is still working a month after launch. This session gives you the one argument that unlocks an eval budget: an AI system you cannot measure is one you cannot safely ship, and "it seemed fine in the demo" is the most expensive sentence in the room.</p>
+    <div class="chip-row">
+      <span class="chip level">🟢 Leader track</span>
+      <span class="chip audience">Leaders: C-level · managers · curious minds</span>
+      <span class="chip audience">No code, ever</span>
+      <span class="chip time">Start here</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Concepts</span>
+      <span class="a3" style="flex:4">20-40 · Exercises</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Why this hour is worth your calendar</h2>
+    </div>
+    <p class="lede">A language model always answers. It answers when it knows, and it answers - just as fluently, just as confidently - when it is guessing. That single fact is why AI projects that dazzle in the demo can fail quietly in production: nobody could tell the difference between a right answer and a convincing wrong one, because nobody was measuring. Evaluation is how you replace "it seems fine" with a number you can defend. It is the least glamorous part of an AI project and the one that decides whether you can trust it.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - read after class</span>
+      <span class="pill peach">★ Try it now prompt</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you walk out with today</strong>
+      The one-line case for an eval budget, the three questions evaluation answers (ship? better or worse? still working?), a cost-of-a-wrong-answer exercise you can run on your own use case, and five questions to put to your data team this week.
+    </div>
+  </section>
+
+  <section class="section" id="the-trap">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers why demos deceive</span>
+      <h2>The confidence trap <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">The model's fluency is the same whether it is right or wrong. Without evaluation, a right answer and a confident wrong one are indistinguishable - and the wrong ones are the expensive ones. This picture is the whole reason eval exists.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Two identical-looking confident answers, one correct and one wrong; without evaluation you cannot tell them apart, and the wrong one reaches the customer">
+        <style>
+          .e1tT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .e1tI { font: 700 14px Inter, sans-serif; fill: #1E293B; }
+          .e1tW { font: 400 12.5px Inter, sans-serif; fill: #FEE2E2; }
+          .e1tS { font: 400 12.5px Inter, sans-serif; fill: #334155; }
+          .e1tX { font: 600 13px Inter, sans-serif; fill: #64748B; }
+          .e1tN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .e1tArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#e1tAh); }
+        </style>
+        <defs>
+          <marker id="e1tAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="40" y="40" width="200" height="60" rx="12" fill="#B91C1C"/>
+        <text class="e1tT" x="60" y="66">User question</text>
+        <text class="e1tT" x="60" y="86" style="font-weight:400;fill:#FEE2E2">"When is my refund due?"</text>
+        <rect x="330" y="30" width="240" height="70" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="e1tI" x="350" y="56">"Within 5-7 business days."</text>
+        <text class="e1tS" x="350" y="80">confident · fluent · CORRECT</text>
+        <rect x="330" y="150" width="240" height="70" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="e1tI" x="350" y="176">"Within 30 business days."</text>
+        <text class="e1tS" x="350" y="200">confident · fluent · WRONG</text>
+        <rect x="650" y="90" width="190" height="70" rx="12" fill="#1E293B"/>
+        <text class="e1tT" x="670" y="120">Looks identical.</text>
+        <text class="e1tT" x="670" y="142" style="font-weight:400;fill:#CBD5E1">Which reached the customer?</text>
+        <line class="e1tArr" x1="242" y1="70" x2="326" y2="64"/>
+        <line class="e1tArr" x1="242" y1="72" x2="326" y2="184"/>
+        <line class="e1tArr" x1="572" y1="65" x2="646" y2="110"/>
+        <line class="e1tArr" x1="572" y1="185" x2="646" y2="135"/>
+        <rect x="40" y="250" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="e1tN" x="64" y="262">Evaluation is the only thing that separates these two. Without it, you ship both.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the confidence trap: fluency is not correctness</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Why a great demo proves almost nothing<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A demo is a curated sample of one. Someone picked the questions, saw the answers, and showed you the good run. That tells you the system <em>can</em> be right - not how often it is right, not where it fails, not what it does on the messy inputs real users bring.</p>
+        <ul>
+          <li><strong>Selection bias is built in.</strong> Nobody demos the failure. The demo is the highlight reel, and you are being asked to fund the whole season.</li>
+          <li><strong>The failures are silent.</strong> A wrong answer does not throw an error. It just quietly misinforms a customer, misprices a quote, or misroutes a ticket - and looks exactly like a right answer while doing it.</li>
+          <li><strong>Evaluation is the anti-demo.</strong> Instead of one hand-picked question, you run a hundred representative ones and count. That count is the thing you can actually stand behind.</li>
+        </ul>
+        <div class="prompt-box good"><span class="label">★ Try it now (any chat AI)</span>Explain to a skeptical executive why a successful AI demo is weak evidence that the system is production-ready, using the idea of a highlight reel. Then give me three questions that executive should ask the team to see past the demo.</div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The cost of a confident wrong answer<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Not all errors cost the same, and that is the leadership lens on evaluation. A wrong answer in a brainstorming tool is a shrug. A wrong answer in a refund policy, a medical summary, or a financial figure is a refund issued incorrectly, a compliance incident, a lost customer. Evaluation is how you buy down the risk on the answers that matter.</p>
+        <ul>
+          <li><strong>Frequency times severity.</strong> A rare error on a trivial task is fine. A rare error on a high-stakes task may not be. Eval lets you measure the frequency so you can weigh it against the severity you already understand.</li>
+          <li><strong>"Good enough" is a number, not a feeling.</strong> 95% correct might be plenty for draft suggestions and nowhere near enough for automated payouts. Evaluation turns that judgment into a threshold you set on purpose.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The support bot that aged badly.</strong> A team (anonymized) shipped a help bot that tested beautifully on launch day. Three months later a policy changed, the underlying documents drifted, and the bot kept confidently quoting the old rule. No error was ever thrown; the first signal was a rise in complaints. An online eval on live traffic would have caught it in a day - the subject of session a3.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Why you cannot outsource this to "the model is smart now"<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A fair objection: models are so capable now, do we really need to measure? Yes - and more, not less. Capability raises the stakes: a more fluent model produces more convincing wrong answers, and gets trusted with higher-value decisions. Capability does not remove the need to measure; it raises the cost of not measuring. Anthropic's own guidance to builders is blunt about it - define success criteria, then build empirical evaluations against them, before you trust the system. The smarter the tool, the more that discipline earns.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="three-questions">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers what evaluation is for</span>
+      <h2>The three questions evaluation answers <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Evaluation is not one activity - it answers three different questions at three different moments. A leader who knows the three can tell whether a team is doing all of it or just the easy part.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three questions across the lifecycle: before shipping, is it good enough; on every change, did this help or hurt; in production, is it still good">
+        <style>
+          .e1qT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .e1qI { font: 700 14px Inter, sans-serif; fill: #1E293B; }
+          .e1qW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .e1qS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .e1qN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .e1qArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#e1qAh); }
+        </style>
+        <defs>
+          <marker id="e1qAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="30" y="90" width="240" height="90" rx="14" fill="#B91C1C"/>
+        <text class="e1qT" x="50" y="120">1 · Ship it?</text>
+        <text class="e1qW" x="50" y="144">Before launch: is it</text>
+        <text class="e1qW" x="50" y="162">good enough, measured?</text>
+        <rect x="320" y="90" width="240" height="90" rx="14" fill="#DC2626"/>
+        <text class="e1qT" x="340" y="120">2 · Better or worse?</text>
+        <text class="e1qW" x="340" y="144">Every change: did this</text>
+        <text class="e1qW" x="340" y="162">help or quietly break it?</text>
+        <rect x="610" y="90" width="240" height="90" rx="14" fill="#7F1D1D"/>
+        <text class="e1qT" x="630" y="120">3 · Still good?</text>
+        <text class="e1qW" x="630" y="144">In production: is it</text>
+        <text class="e1qW" x="630" y="162">holding up on real traffic?</text>
+        <text class="e1qS" x="60" y="215">offline eval</text>
+        <text class="e1qS" x="350" y="215">regression eval</text>
+        <text class="e1qS" x="640" y="215">online eval</text>
+        <line class="e1qArr" x1="272" y1="135" x2="316" y2="135"/>
+        <line class="e1qArr" x1="562" y1="135" x2="606" y2="135"/>
+        <rect x="30" y="250" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="e1qN" x="54" y="262">Most teams do #1 once and stop. The trustworthy ones do all three, forever.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the three questions eval answers across the lifecycle</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Ship it, changed it, still good - the whole discipline in three moments<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <ul>
+          <li><strong>Ship it? (offline eval)</strong> Before launch, run the system against a fixed set of representative questions with known good answers, and measure. This is the gate: a number you decide is high enough to ship.</li>
+          <li><strong>Better or worse? (regression eval)</strong> Every prompt tweak, model swap, or retrieval change gets re-run against that same set. AI systems are famous for a "fix" in one place silently breaking three others. The eval catches it before your users do.</li>
+          <li><strong>Still good? (online eval)</strong> After launch, sample real production traffic and keep measuring. The world drifts - documents change, users ask new things, the model gets updated under you - and only online eval sees it.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The tell</strong>
+          When a team says "we evaluated it", ask <em>which</em> of the three. Most have done the first once. The gap between "we tested it at launch" and "we measure it continuously" is the gap between a demo and a product.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>"Can't the model just grade itself?" - a preview<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Often, yes - and it is one of the most useful and most dangerous ideas in the field. Using a strong model as an automated judge (LLM-as-judge) is how eval scales past what humans can hand-grade. It genuinely works: on public benchmarks a top model agrees with human preferences around 85% of the time. But it has known blind spots - it can favor longer answers, favor whichever answer it sees first, and favor its own style.</p>
+        <ul>
+          <li><strong>The leader takeaway:</strong> LLM-as-judge is legitimate and necessary at scale, but it must be calibrated and spot-checked against humans - not trusted blindly. Session a5 covers when to trust it; the builder track b5 shows how.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The metric that got gamed.</strong> A team (anonymized) optimized against an LLM judge that quietly rewarded longer answers. The system learned to pad. The scores climbed; the customers complained the answers had gotten wordy and vague. The fix was not a better model - it was catching the judge's verbosity bias and controlling for length.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise-1">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 1 of 2</span>
+      <h2>Price a wrong answer <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Evaluation earns its budget when you can say what a wrong answer costs. Do it for your own use case - no code, a pen, and honest numbers.</p>
+    <div class="steps">
+      <div class="step"><p>Name one AI use case you own or are considering. Write the single most consequential question a user could ask it.</p></div>
+      <div class="step"><p>Write what a <strong>confident wrong answer</strong> to that question actually causes - in money, risk, or trust. Be concrete: "a refund issued that should not have been", not "a bad experience".</p></div>
+      <div class="step"><p>Estimate how often the system would need to be wrong for that cost to be unacceptable. That number is your ship threshold - the thing eval will measure against.</p></div>
+      <div class="step"><p>Ask: does anyone currently know the real error rate? If the answer is "no", you have just found the business case for this whole course.</p></div>
+    </div>
+    <div class="prompt-box good"><span class="label">★ Your risk-pricing partner (paste into any chat AI)</span>You are helping me price the risk of an AI use case. I will describe it. Ask me: (1) the highest-stakes question a user could ask, (2) what a confident wrong answer to it would cost in money, risk, or trust, and (3) how often wrong is too often. Then summarize my ship threshold in one sentence and tell me what I would need to measure to know if I have met it. My use case is: [describe it]</div>
+  </section>
+
+  <section class="section" id="exercise-2">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 2 of 2</span>
+      <h2>The "how would we know" audit <span class="tag demo">★ 8 min · your next AI review</span></h2>
+    </div>
+    <p class="lede">Four questions that reveal, in one meeting, whether a team is actually measuring or just hoping.</p>
+    <div class="steps">
+      <div class="step"><p><strong>"How good is it, as a number, and against what set of questions?"</strong> A shrug or a demo in reply means there is no offline eval.</p></div>
+      <div class="step"><p><strong>"When you changed the prompt last week, how did you know it did not break anything?"</strong> This is the regression-eval question. "We tried a few things" is not an answer.</p></div>
+      <div class="step"><p><strong>"If it started giving worse answers in production tomorrow, how long until we noticed?"</strong> The honest answer for most teams is "when customers complain". Online eval shortens that to hours.</p></div>
+      <div class="step"><p><strong>"Who owns the eval, and does it run automatically?"</strong> If eval is a person's occasional side task, it will lapse. It needs an owner and a schedule.</p></div>
+    </div>
+    <div class="callout tip">
+      <strong>Keep it curious, not accusatory</strong>
+      Good teams welcome these - measuring is their pride. The questions only sting where the measuring is not happening, which is exactly what you needed to find out.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session a2 <span class="tag exercise">◐ 30 min total</span></h2>
+    </div>
+    <ul>
+      <li>Finish pricing the wrong answer for your top use case, and keep the sheet - a4 turns it into a ship scorecard.</li>
+      <li>Run the risk-pricing prompt on a second use case and compare the two thresholds - notice how different "good enough" is for each.</li>
+      <li>Use at least two of the "how would we know" questions in a real AI review this week.</li>
+      <li>Optional: skim the builder track's b1 - you do not need the code, but seeing the live scorecard makes "measure it" concrete.</li>
+    </ul>
+    <div class="callout win">
+      <strong>★ Questions to ask your data team this week</strong>
+      <ol>
+        <li>For our top AI use case, what is the measured error rate, and against what set of questions?</li>
+        <li>When we last changed a prompt or model, how did we confirm we did not make it worse?</li>
+        <li>If quality dropped in production tomorrow, how long until we would know - and how?</li>
+        <li>Who owns evaluation, and does it run on a schedule or only when someone remembers?</li>
+        <li>What is our ship threshold for this use case - the number that says "good enough to trust"?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">The leader track teaches from published engineering guidance and course curricula - no vendor marketing. This page covers:</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Anthropic · Define your success criteria</span><span class="note">Part 1 · "good enough" is a measurable threshold, set on purpose</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Anthropic · Create strong empirical evaluations</span><span class="note">Part 1-2 · measure before you trust · define criteria first</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">LLM-as-judge (Zheng et al., MT-Bench)</span><span class="note">Part 2 · ~85% human agreement + the biases · full depth in a5 / b5</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · A vendor's AI demo is flawless. The best reason this is weak evidence is...</p>
+      <button class="qopt" type="button">A · The demo used an older model</button>
+      <button class="qopt" type="button">B · A demo is a hand-picked highlight reel - it shows the system CAN be right, not how often it is</button>
+      <button class="qopt" type="button">C · Demos are always faked</button>
+      <p class="qwhy">Selection bias is built into any demo. Evaluation is the anti-demo: run many representative questions and count, rather than showing one good run.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · The three questions evaluation answers across a system's life are...</p>
+      <button class="qopt" type="button">A · How fast, how cheap, how popular</button>
+      <button class="qopt" type="button">B · Which model, which vendor, which cloud</button>
+      <button class="qopt" type="button">C · Ship it (good enough?), better or worse (did a change help?), still good (holding up in production?)</button>
+      <p class="qwhy">Offline eval gates the launch, regression eval guards every change, online eval watches production. Most teams do the first once and stop.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · Using a strong model as an automated judge (LLM-as-judge) is...</p>
+      <button class="qopt" type="button">A · Legitimate and necessary to scale eval, but it has biases (length, position, self-preference) and must be calibrated and spot-checked</button>
+      <button class="qopt" type="button">B · Always more reliable than humans, so no checking needed</button>
+      <button class="qopt" type="button">C · Never acceptable</button>
+      <p class="qwhy">LLM judges reach ~85% agreement with humans and are how eval scales - but they favor longer answers, first-seen answers, and their own style, so they need calibration and human spot-checks.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 1 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>The core case</b><span>A model always answers - fluently, whether right or wrong. Eval is the only thing that tells the two apart.</span></div>
+      <div class="cheat-item"><b>Demos deceive</b><span>A demo is a highlight reel. It shows the system CAN be right, not how often it is. Eval counts.</span></div>
+      <div class="cheat-item"><b>Cost of wrong</b><span>Frequency times severity. Eval measures the frequency; you already know the severity.</span></div>
+      <div class="cheat-item"><b>"Good enough" is a number</b><span>Not a feeling. A ship threshold you set on purpose for each use case.</span></div>
+      <div class="cheat-item"><b>Three questions</b><span>Ship it? (offline) · better or worse? (regression) · still good? (online).</span></div>
+      <div class="cheat-item"><b>The tell</b><span>Ask which of the three a team does. Most do the first once. Trust needs all three, forever.</span></div>
+      <div class="cheat-item"><b>LLM-as-judge</b><span>Scales eval, ~85% human agreement - but biased (length/position/self) and must be calibrated.</span></div>
+      <div class="cheat-item"><b>The audit question</b><span>"If quality dropped in production tomorrow, how long until we noticed?"</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Leader session 1 of 6 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="a2-what-good-means.html">Next: What "good" means →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

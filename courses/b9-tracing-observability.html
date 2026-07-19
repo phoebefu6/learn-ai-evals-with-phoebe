@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 9 · Tracing &amp; observability - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 9 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 9 of 10</div>
+    <h1>Tracing and observability: <span class="accent">seeing inside a run</span></h1>
+    <p class="sub">Recall now has a golden set, judges, and a regression suite - but when an answer is wrong, you still cannot see why. A RAG request is not one call; it is a retriever, then an LLM, then a parser, each with its own inputs, outputs, latency, and tokens. This session opens the box. You will learn the trace / span / run vocabulary, wire LangSmith tracing with two env vars and one decorator, then meet the tool landscape - LangSmith, Langfuse, Phoenix - and attach scores to individual spans so you can critique retrieval and generation separately. By the end, a bad Recall answer is an inspectable timeline, not a mystery.</p>
+    <div class="chip-row">
+      <span class="chip level">🔴 Builder track · hardest</span>
+      <span class="chip audience">Practitioners · Python</span>
+      <span class="chip audience">LangSmith · Langfuse · Phoenix</span>
+      <span class="chip time">Session 9 of 10</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:3">3-18 · Concepts</span>
+      <span class="a3" style="flex:5">18-40 · Build-along</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>A score tells you what; a trace tells you why</h2>
+    </div>
+    <p class="lede">Everything so far measures the <em>outcome</em> of a Recall request - was the retrieved chunk right, was the answer grounded, did the suite regress. None of it shows the <em>path</em>. When Recall returns a confidently wrong answer, the question is always the same: which step broke? Did the retriever miss, or did it find the right chunk and the LLM ignore it? You cannot answer that from a score. You answer it from a trace - a recorded timeline of every step in the request, with the exact inputs and outputs each one saw.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A working mental model of trace / span / run, LangSmith tracing turned on over Recall with two env vars and one decorator, a map of the tracing-platform landscape (LangSmith, Langfuse, Phoenix, and where promptfoo fits), and the habit of attaching scores to individual spans so a wrong answer becomes an inspectable, per-step timeline.
+    </div>
+  </section>
+
+  <section class="section" id="tracespan">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers trace, span, and run</span>
+      <h2>Trace, span, run <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">One user question to Recall is not one event - it fans out into a small tree of work. Retrieve the chunks. Call the LLM with those chunks. Parse the model's output into a clean answer. Each of those is a <strong>span</strong>: one unit of work, with its own inputs, outputs, latency, and token count. The whole tree, for that one request, is a <strong>trace</strong>. In LangSmith the word <strong>run</strong> means the same thing as a span - a single logged step.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="One Recall request becomes a trace: a root request span branches into a retriever span, an LLM span, and a parser span, each recording inputs, outputs, latency and tokens">
+        <style>
+          .b9tT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b9tI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b9tW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b9tS { font: 400 11px Inter, sans-serif; fill: #334155; }
+          .b9tN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b9tArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b9tAh); }
+        </style>
+        <defs>
+          <marker id="b9tAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="330" y="24" width="220" height="66" rx="12" fill="#7F1D1D"/>
+        <text class="b9tT" x="352" y="52">Trace · one request</text>
+        <text class="b9tW" x="352" y="74">"how do I get a refund?"</text>
+        <rect x="40" y="170" width="230" height="96" rx="12" fill="#B91C1C"/>
+        <text class="b9tT" x="60" y="198">Retriever span</text>
+        <text class="b9tW" x="60" y="220">in: query · out: 3 chunks</text>
+        <text class="b9tW" x="60" y="238">latency 40ms</text>
+        <text class="b9tW" x="60" y="256">tokens: -</text>
+        <rect x="325" y="170" width="230" height="96" rx="12" fill="#DC2626"/>
+        <text class="b9tT" x="345" y="198">LLM span</text>
+        <text class="b9tW" x="345" y="220">in: query + chunks</text>
+        <text class="b9tW" x="345" y="238">out: draft answer</text>
+        <text class="b9tW" x="345" y="256">latency 1.2s · tok 480</text>
+        <rect x="610" y="170" width="230" height="96" rx="12" fill="#B91C1C"/>
+        <text class="b9tT" x="630" y="198">Parser span</text>
+        <text class="b9tW" x="630" y="220">in: draft · out: JSON</text>
+        <text class="b9tW" x="630" y="238">latency 5ms</text>
+        <text class="b9tW" x="630" y="256">tokens: -</text>
+        <line class="b9tArr" x1="420" y1="92" x2="180" y2="166"/>
+        <line class="b9tArr" x1="440" y1="92" x2="440" y2="166"/>
+        <line class="b9tArr" x1="460" y1="92" x2="700" y2="166"/>
+        <rect x="40" y="300" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b9tN" x="64" y="312">A trace is a tree of spans for one request. The root is the whole call; each child is a step you can open and read.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - one Recall request as a trace of three spans</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Span, trace, run - the three words<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The whole vocabulary of observability is three nested nouns. Get these and every tracing tool reads the same.</p>
+        <ul>
+          <li><strong>Span</strong> = one unit of work: an LLM call, a retrieval, a parse, a tool call. It records its own inputs, outputs, latency, and (for model calls) tokens. A span can have child spans.</li>
+          <li><strong>Trace</strong> = the collection of all spans for one operation - one user request to Recall, top to bottom. It is a tree: a root span with children, laid out on a timeline.</li>
+          <li><strong>Run</strong> = LangSmith's word for a span. When the LangSmith docs say "run", read "span". A run can be a child of another run, which is how the tree gets built.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Why observability matters for LLM apps<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Traditional software is mostly deterministic - same input, same output, and a stack trace when it breaks. LLM apps are neither. They are <strong>non-deterministic</strong> (the same prompt can give different answers) and <strong>multi-step</strong> (retrieve, generate, parse, maybe loop). When the final answer is bad, there is no stack trace pointing at the guilty line.</p>
+        <ul>
+          <li><strong>The failure is between steps.</strong> A wrong Recall answer might be a retrieval miss, a grounding failure, or a parser bug - three completely different fixes. Without a trace you are guessing which.</li>
+          <li><strong>Observability turns the black box into a timeline.</strong> A trace shows the exact chunks the retriever returned and the exact prompt the LLM saw. You read down the tree and the broken step is obvious.</li>
+          <li><strong>It is the substrate for everything else.</strong> Datasets, online eval (b10), and feedback all hang off traces. Turn tracing on first; the rest attaches to it.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Turn tracing on with two env vars and one decorator<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>LangSmith is the fastest thing to wire up because it needs almost nothing from your code. Set two environment variables and it captures every LangChain call automatically. For your own plain functions, add the <code>@traceable</code> decorator and each call becomes a span in the tree.</p>
+        <div class="prompt-box good"><span class="label">bash · turn tracing on</span>export LANGSMITH_TRACING=true
+export LANGSMITH_API_KEY="ls-..."      # from smith.langchain.com
+# optional: export LANGSMITH_PROJECT="recall-prod"</div>
+        <div class="prompt-box good"><span class="label">Python · @traceable makes each step a span</span>from langsmith import traceable
+
+@traceable(run_type="retriever")
+def retrieve(query: str) -&gt; list[str]:
+    return recall_retriever(query)          # returns chunk ids, best first
+
+@traceable(run_type="llm")
+def generate(query: str, chunks: list[str]) -&gt; str:
+    return llm.invoke(build_prompt(query, chunks))
+
+@traceable                                   # the parent span
+def recall_answer(query: str) -&gt; str:
+    chunks = retrieve(query)                 # child span
+    return generate(query, chunks)           # child span
+
+recall_answer("how do I get a refund?")      # one trace, three spans</div>
+        <div class="callout tip">
+          <strong>The decorator builds the tree for you</strong>
+          Because <code>retrieve</code> and <code>generate</code> are called <em>inside</em> <code>recall_answer</code>, LangSmith nests their spans under it automatically - you get the retriever span and the LLM span as children of the request, no manual parent-child wiring. Inputs and outputs are captured from the function arguments and return value.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="tools">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the tools + attaching scores</span>
+      <h2>The tools, and attaching scores to spans <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Tracing is a small standard with several implementations. LangSmith is hosted; Langfuse and Phoenix are open source and self-hostable. They all speak the same trace / span idea, and they all let you attach a <strong>score</strong> (also called feedback) to any span - which is the bridge back to everything you learned about judges. A score on the retriever span critiques retrieval; a score on the LLM span critiques generation. Same request, two independent verdicts.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Three tracing platforms - LangSmith hosted, Langfuse open source with observe decorator, Phoenix open source on OpenTelemetry - all let you attach scores to spans, while promptfoo sits apart as an eval-first CLI">
+        <style>
+          .b9sT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b9sI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b9sW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b9sS { font: 400 11px Inter, sans-serif; fill: #334155; }
+          .b9sN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b9sArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b9sAh); }
+        </style>
+        <defs>
+          <marker id="b9sAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="30" y="30" width="200" height="94" rx="12" fill="#B91C1C"/>
+        <text class="b9sT" x="50" y="58">LangSmith</text>
+        <text class="b9sW" x="50" y="80">hosted · @traceable</text>
+        <text class="b9sW" x="50" y="100">tight LangChain fit</text>
+        <rect x="255" y="30" width="200" height="94" rx="12" fill="#DC2626"/>
+        <text class="b9sT" x="275" y="58">Langfuse</text>
+        <text class="b9sW" x="275" y="80">OSS · @observe</text>
+        <text class="b9sW" x="275" y="100">self-hostable</text>
+        <rect x="480" y="30" width="200" height="94" rx="12" fill="#DC2626"/>
+        <text class="b9sT" x="500" y="58">Phoenix</text>
+        <text class="b9sW" x="500" y="80">OSS · OpenTelemetry</text>
+        <text class="b9sW" x="500" y="100">OpenInference spans</text>
+        <rect x="705" y="30" width="145" height="94" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b9sI" x="723" y="58">promptfoo</text>
+        <text class="b9sS" x="723" y="80">eval-first CLI</text>
+        <text class="b9sS" x="723" y="100">no live-trace UI</text>
+        <rect x="255" y="200" width="370" height="70" rx="12" fill="#7F1D1D"/>
+        <text class="b9sT" x="275" y="230">Scores / feedback attach to any span</text>
+        <text class="b9sW" x="275" y="252">retriever span vs LLM span, judged separately</text>
+        <line class="b9sArr" x1="130" y1="126" x2="360" y2="196"/>
+        <line class="b9sArr" x1="355" y1="126" x2="410" y2="196"/>
+        <line class="b9sArr" x1="580" y1="126" x2="480" y2="196"/>
+        <rect x="30" y="300" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b9sN" x="54" y="312">Hosted or OSS, the spans are the same. Scores hang off spans - which is how a judge grades retrieval and generation apart.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the tracing-platform landscape and where scores attach</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Hosted vs open source<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>All three do tracing well. The choice is about where the data lives and how much you want to run yourself.</p>
+        <ul>
+          <li><strong>LangSmith (hosted).</strong> A managed service by the LangChain team. Two env vars and <code>@traceable</code> and you are tracing. Tightest fit if you already use LangChain, and it has a built-in <code>evaluate()</code> runner (below).</li>
+          <li><strong>Langfuse (open source, self-hostable).</strong> Same trace model, with an <code>@observe</code> decorator. Traces hold observations; you attach scores and build datasets. Pick it when data must stay on your own infrastructure.</li>
+          <li><strong>Phoenix (open source, by Arize).</strong> Built on <strong>OpenTelemetry / OpenInference</strong>, so instrumentation is portable and vendor-neutral. Runs LLM, code, and human evals over the captured spans. Pick it when you want an open standard under the traces.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          A team ships Recall with LangSmith for a quick start, then a healthcare client requires all telemetry on-premises. Because both speak the same span model, they re-instrument with Phoenix on OpenTelemetry and keep every dashboard and score concept - only the backend moved.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Tracing platforms vs promptfoo<span class="mini">2 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>promptfoo (from earlier sessions) is not a tracing platform, and the difference is worth naming so you reach for the right tool.</p>
+        <ul>
+          <li><strong>promptfoo is eval-first.</strong> It is a CLI that runs a fixed set of prompts against your golden cases and prints pass or fail. Perfect for a pre-deploy gate and CI. It does not give you a live-trace UI of production requests.</li>
+          <li><strong>LangSmith / Langfuse / Phoenix are trace-first.</strong> They capture what actually happened in real (or replayed) requests, span by span, and let you inspect, score, and monitor over time.</li>
+          <li><strong>You want both.</strong> promptfoo guards the merge (b8); a tracing platform watches production (b10). One is a gate, the other is a window.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Run an eval over a dataset with LangSmith<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Once tracing is on, LangSmith's <code>evaluate()</code> runs your system over a stored dataset and applies evaluators to each result - the same golden-set loop from b1, now hosted and traced. You create a dataset, write an evaluator function that returns a score, and hand both to <code>client.evaluate()</code> along with the target function.</p>
+        <div class="prompt-box good"><span class="label">Python · dataset + evaluator + client.evaluate</span>from langsmith import Client
+
+client = Client()
+
+# 1. a dataset of golden examples
+dataset = client.create_dataset("recall-golden")
+client.create_examples(
+    dataset_id=dataset.id,
+    inputs=[{"query": "how do I get a refund?"}],
+    outputs=[{"expected": "C-refund"}],
+)
+
+# 2. an evaluator: returns a score for one result
+def hit_at_k(run, example) -&gt; dict:
+    got = run.outputs["chunks"][:3]
+    ok = example.outputs["expected"] in got
+    return {"key": "hit@3", "score": int(ok)}
+
+# 3. the target: your system as a function
+def target(inputs: dict) -&gt; dict:
+    return {"chunks": retrieve(inputs["query"])}
+
+# 4. run it - each example becomes a traced run with a score
+results = client.evaluate(
+    target,
+    data="recall-golden",
+    evaluators=[hit_at_k],
+)</div>
+        <div class="callout tip">
+          <strong>Attach user feedback to any child run</strong>
+          Scores are not only for offline evaluators. In production you can attach a score to any child run - critique the retriever span and the LLM span with separate keys (say <code>retrieval_ok</code> and <code>grounded</code>) so a single bad answer produces two independent verdicts. That per-step feedback is exactly what b10's online eval samples and alerts on.
+        </div>
+        <table class="clean">
+          <thead>
+            <tr><th>Tool</th><th>Model</th><th>Focus</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>LangSmith</td><td>Hosted · <code>@traceable</code>, <code>evaluate()</code></td><td>Traces + hosted eval, tight LangChain fit</td></tr>
+            <tr><td>Langfuse</td><td>OSS, self-hostable · <code>@observe</code></td><td>Traces/observations, scores, datasets on your infra</td></tr>
+            <tr><td>Phoenix</td><td>OSS · OpenTelemetry / OpenInference</td><td>Portable spans; LLM, code, and human evals</td></tr>
+            <tr><td>promptfoo</td><td>Eval-first CLI (no live-trace UI)</td><td>Pre-deploy gate over golden cases</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Sketch the spans of one Recall request <span class="tag demo">★ 10 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Before you inspect a real trace, predict one. This is the skill: knowing what the tree <em>should</em> look like so a missing or wrong span jumps out.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Draw the tree.</strong> Take one Recall question and draw the root request span with its children: retriever span, LLM span, parser span. Nest them the way <code>@traceable</code> would.</p></div>
+      <div class="step"><p><strong>Fill in each span.</strong> For every span write its inputs, outputs, latency, and (for the LLM) tokens. Be specific: the retriever's output is a list of chunk ids; the LLM's input is query plus those chunks.</p></div>
+      <div class="step"><p><strong>Now the answer is wrong.</strong> Pick a failure. If the retriever span shows the wrong chunks, it is a retrieval bug. If it shows the <em>right</em> chunks but the LLM span's answer ignores them, it is a grounding bug. Which span would you open first, and what would you read?</p></div>
+      <div class="step"><p><strong>Place the scores.</strong> Mark where a <code>retrieval_ok</code> score and a <code>grounded</code> score attach. Confirm they land on different spans - that separation is why tracing beats a single end-to-end pass/fail.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall observable after b9</strong>
+      Recall is now observable. Every request is a trace you can open, every step is a span with its own inputs and outputs, and scores attach per step so retrieval and generation are judged apart. A wrong answer is no longer a mystery - it is a timeline with one broken node. In b10 we point that instrument at live production traffic.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b10 <span class="tag exercise">◐ 45 min total</span></h2>
+    </div>
+    <ul>
+      <li>Set <code>LANGSMITH_TRACING=true</code> and <code>LANGSMITH_API_KEY</code>, add <code>@traceable</code> to your retrieve/generate/answer functions, run three questions, and open the traces. Confirm you see three spans nested under each request.</li>
+      <li>On one trace, attach two scores - a <code>retrieval_ok</code> on the retriever span and a <code>grounded</code> on the LLM span - and confirm they show up on different runs.</li>
+      <li>Build a small LangSmith dataset from your b1 golden set and run <code>client.evaluate()</code> with one evaluator. Read the per-example scores.</li>
+      <li>Read: LangSmith observability + <code>evaluate()</code> docs, the Langfuse tracing guide, and the Arize Phoenix quickstart. Note which one you would self-host and why.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers the core tracing and observability surface across four tools - the full metric-store and dashboard depth stays in each product's own guides.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LangSmith · observability + evaluate()</span><span class="note">Part 1-2 · env vars, @traceable, create_dataset, client.evaluate</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Langfuse · tracing (OSS, self-hostable)</span><span class="note">Part 2 · @observe, traces/observations, scores, datasets</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Arize Phoenix · OpenTelemetry / OpenInference</span><span class="note">Part 2 · portable spans, LLM + code + human evals</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">promptfoo · eval-first CLI</span><span class="note">Part 2 · contrast only; gate vs window</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · In LangSmith terms, a "run" is...</p>
+      <button class="qopt" type="button">A · The entire batch of nightly evaluations</button>
+      <button class="qopt" type="button">B · The same thing as a span - one logged unit of work, which can be a child of another run</button>
+      <button class="qopt" type="button">C · A single environment variable</button>
+      <p class="qwhy">In LangSmith, "run" is the word for a span: one unit of work (an LLM call, a retrieval, a parse) that can nest under a parent run to form the trace tree.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · The main reason observability matters more for LLM apps than for ordinary software is...</p>
+      <button class="qopt" type="button">A · LLM apps are always slower</button>
+      <button class="qopt" type="button">B · Traces are legally required</button>
+      <button class="qopt" type="button">C · They are non-deterministic and multi-step, so a bad answer has no stack trace - only a trace shows which step failed</button>
+      <p class="qwhy">LLM apps give different outputs for the same input and chain several steps together. Without a per-step trace you cannot tell whether retrieval, generation, or parsing broke.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · Which statement is true of the tool landscape?</p>
+      <button class="qopt" type="button">A · LangSmith is hosted; Langfuse and Phoenix are open source and self-hostable; promptfoo is an eval-first CLI with no live-trace UI</button>
+      <button class="qopt" type="button">B · All four are hosted-only services</button>
+      <button class="qopt" type="button">C · promptfoo is the only one that captures production traces</button>
+      <p class="qwhy">LangSmith is the hosted option, Langfuse and Phoenix are OSS and self-hostable (Phoenix on OpenTelemetry), and promptfoo is an eval-first CLI - a pre-deploy gate, not a live-trace window.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 9 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Span</b><span>One unit of work - LLM call, retrieval, parse - with its own inputs, outputs, latency, tokens.</span></div>
+      <div class="cheat-item"><b>Trace</b><span>The tree of all spans for one request. Root span plus children on a timeline.</span></div>
+      <div class="cheat-item"><b>Run == span</b><span>LangSmith's word for a span. When docs say "run", read "span".</span></div>
+      <div class="cheat-item"><b>Turn it on</b><span>LANGSMITH_TRACING=true + LANGSMITH_API_KEY, then @traceable on your functions.</span></div>
+      <div class="cheat-item"><b>Why it matters</b><span>LLM apps are non-deterministic and multi-step. A trace shows which step broke; a score cannot.</span></div>
+      <div class="cheat-item"><b>Hosted vs OSS</b><span>LangSmith hosted; Langfuse (@observe) and Phoenix (OpenTelemetry) OSS and self-hostable.</span></div>
+      <div class="cheat-item"><b>vs promptfoo</b><span>promptfoo is an eval-first CLI - a gate. Tracing platforms are the production window.</span></div>
+      <div class="cheat-item"><b>Scores on spans</b><span>Attach feedback to any child run - critique retrieval and generation separately.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 9 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b10-online-drift.html">Next: Online eval and drift →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

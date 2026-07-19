@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>learn evals with phoebe - a two-track course on trusting AI systems</title>
+<link rel="stylesheet" href="assets/style.css?v=1">
+<style>
+  .stats-row { display: flex; gap: 2.4rem; margin-top: 1.5rem; flex-wrap: wrap; }
+  .stat b { display: block; font-size: 2.1rem; font-weight: 800; line-height: 1.05; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: .72rem; opacity: .85; text-transform: uppercase; letter-spacing: .09em; font-weight: 600; }
+
+  .course-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(17rem, 1fr)); gap: 1rem; margin-top: 1.5rem; }
+  .course-card {
+    border: 1px solid var(--hairline);
+    border-top: 4px solid var(--diff, var(--indigo));
+    border-radius: var(--radius);
+    padding: 1.2rem 1.3rem 1.1rem;
+    display: flex; flex-direction: column; gap: .5rem;
+    text-decoration: none; color: var(--ink); background: #fff;
+    transition: box-shadow .15s ease, border-color .15s ease, transform .15s ease;
+    position: relative;
+  }
+  .course-card:hover { border-color: var(--indigo-soft); border-top-color: var(--diff, var(--indigo)); box-shadow: 0 8px 28px rgba(185,28,28,.14); transform: translateY(-3px); }
+  .course-card .cicon { font-size: 1.7rem; line-height: 1; }
+  .course-card .cnum { font-size: .72rem; font-weight: 700; color: var(--indigo); text-transform: uppercase; letter-spacing: .1em; }
+  .course-card h3 { font-size: 1.05rem; font-weight: 800; line-height: 1.3; }
+  .course-card p { font-size: .85rem; color: var(--muted); flex: 1; }
+  .course-card .meta { display: flex; gap: .4rem; flex-wrap: wrap; }
+
+  .diff-legend { display: flex; gap: 1rem; margin-top: 1.6rem; font-size: .74rem; color: var(--muted); font-weight: 600; flex-wrap: wrap; }
+  .diff-legend i { display: inline-block; width: .85rem; height: .35rem; border-radius: 999px; margin-right: .35rem; vertical-align: middle; }
+
+  .paths { margin-top: 2.6rem; }
+  .paths h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: .3rem; }
+  .paths .plede { color: var(--muted); font-size: .92rem; margin-bottom: .8rem; }
+  .path { display: flex; gap: .55rem; align-items: center; padding: .75rem 0; border-bottom: .5px solid var(--hairline); flex-wrap: wrap; }
+  .path:last-child { border-bottom: none; }
+  .path b { min-width: 15.5rem; font-size: .9rem; }
+  .path .pstep { background: var(--indigo-50); color: var(--indigo); border-radius: 999px; padding: .16rem .68rem; font-weight: 700; font-size: .8rem; text-decoration: none; transition: all .12s ease; }
+  .path .pstep:hover { background: var(--indigo); color: #fff; }
+  .path .parr { color: var(--faint); font-weight: 700; }
+
+  .rp-card { border: 1px solid var(--hairline); border-left: 4px solid var(--indigo); border-radius: var(--radius); padding: 1rem 1.2rem; background: linear-gradient(180deg,#fff,var(--indigo-50)); margin-top: 1.2rem; }
+  .rp-card h4 { font-size: 1rem; font-weight: 800; margin-bottom: .3rem; }
+  .rp-card p { font-size: .86rem; color: var(--muted); line-height: 1.6; }
+
+  .mm-section { margin-top: 1.6rem; }
+  .mm-section h2 { font-size: 1.3rem; font-weight: 800; margin-bottom: .2rem; }
+  .mm-section .mm-lede { color: var(--muted); font-size: .92rem; margin-bottom: .4rem; }
+  .mm-wrap { border: 1px solid var(--hairline); border-radius: var(--radius); background: linear-gradient(180deg,#fff,#FDF3F3); padding: .6rem; overflow-x: auto; }
+  .mm-svg { width: 100%; height: auto; display: block; max-width: 60rem; margin: 0 auto; min-width: 34rem; }
+  .mm-link { cursor: pointer; text-decoration: none; }
+  .mm-node rect { transition: opacity .15s ease, filter .15s ease; }
+  .mm-node text { pointer-events: none; }
+  .mm-link:hover .mm-node rect { filter: brightness(1.06); }
+  .mm-edge { transition: opacity .15s ease; }
+</style>
+</head>
+<body>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe</div>
+    <h1>Two tracks from "it seems fine" to a number you can trust</h1>
+    <p class="sub">Anyone can demo an AI system. Evaluation is how you know it actually works - and keep knowing after it ships. A leader track teaches what "good" means, offline vs online eval, and the scorecard to demand before you trust an answer - no code. A builder track builds the whole eval discipline: golden sets, retrieval and generation metrics, LLM-as-judge, RAGAS, regression suites in CI, tracing, and drift monitoring. The running project grades Recall, the RAG assistant from the RAG course. Taught from RAGAS, Anthropic, LangSmith, and DeepLearning.AI.</p>
+    <div class="stats-row">
+      <div class="stat"><b data-count="2">2</b><span>tracks</span></div>
+      <div class="stat"><b data-count="16">16</b><span>sessions</span></div>
+      <div class="stat"><b data-count="1">1</b><span>live scorecard</span></div>
+      <div class="stat"><b data-count="45">45</b><span>min per session</span></div>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section">
+    <div class="paths" style="margin-top:0">
+      <h2>The leader track 🤝 <span style="font-size:.85rem;font-weight:600;color:var(--muted)">· for C-level, managers &amp; curious minds · 6 x 45 min · no code, ever</span></h2>
+      <p class="plede">Thinking mode: why evaluation is the thing that lets you ship AI with confidence, what the metrics actually mean, and the scorecard to insist on - each session ends with questions to ask your data team.</p>
+    </div>
+    <div class="course-grid">
+      <a class="course-card" href="courses/a1-why-evaluate.html" style="--diff:#34D399">
+        <span class="cicon">🤔</span><span class="cnum">Leader 1 · easy</span>
+        <h3>Why evaluate at all?</h3>
+        <p>Vibes do not scale. The cost of a confident wrong answer, and why eval is what turns a demo into something you can ship.</p>
+        <span class="meta"><span class="pill amber">▶ Leaders start here</span></span>
+      </a>
+      <a class="course-card" href="courses/a2-what-good-means.html" style="--diff:#34D399">
+        <span class="cicon">🎯</span><span class="cnum">Leader 2 · easy</span>
+        <h3>What "good" actually means</h3>
+        <p>The RAG Triad, retrieval quality vs answer quality, and the handful of metrics a leader must be able to recognize.</p>
+        <span class="meta"><span class="pill light">The vocabulary</span></span>
+      </a>
+      <a class="course-card" href="courses/a3-offline-online.html" style="--diff:#FBBF24">
+        <span class="cicon">🔀</span><span class="cnum">Leader 3 · medium</span>
+        <h3>Offline vs online evaluation</h3>
+        <p>Test against a fixed set before you ship; monitor live traffic after. When each applies and what each catches.</p>
+        <span class="meta"><span class="pill light">Two kinds of eval</span></span>
+      </a>
+      <a class="course-card" href="courses/a4-the-scorecard.html" style="--diff:#FBBF24">
+        <span class="cicon">📋</span><span class="cnum">Leader 4 · medium</span>
+        <h3>The scorecard to demand</h3>
+        <p>The five numbers to require before trusting or shipping an AI system - and how to read them without a data-science degree.</p>
+        <span class="meta"><span class="pill light">Scorecard session</span></span>
+      </a>
+      <a class="course-card" href="courses/a5-risk-drift.html" style="--diff:#FB923C">
+        <span class="cicon">⚠️</span><span class="cnum">Leader 5 · deciding</span>
+        <h3>Risk, drift &amp; governance</h3>
+        <p>Regressions, model updates, drift, gaming the metric, and when you can (and cannot) trust an LLM to grade an LLM.</p>
+        <span class="meta"><span class="pill light">Risk exercise</span></span>
+      </a>
+      <a class="course-card" href="courses/a6-eval-culture.html" style="--diff:#FB923C">
+        <span class="cicon">🏛️</span><span class="cnum">Leader 6 · deciding</span>
+        <h3>Building an eval culture</h3>
+        <p>Who owns eval, eval-driven development, the roadmap from vibes to a gate, and where this is heading for agents.</p>
+        <span class="meta"><span class="pill light">Roadmap exercise</span></span>
+      </a>
+    </div>
+
+    <div class="paths">
+      <h2>The builder track 🛠️ <span style="font-size:.85rem;font-weight:600;color:var(--muted)">· for practitioners · 10 x 45 min · Python + a browser scorecard</span></h2>
+      <p class="plede">You build the whole eval discipline and point it at <strong>Recall</strong>, the RAG assistant from the RAG course. Every metric is felt in the live scorecard before you write the Python.</p>
+    </div>
+    <div class="course-grid">
+      <a class="course-card" href="courses/b1-first-metric.html" style="--diff:#34D399">
+        <span class="cicon">📏</span><span class="cnum">Builder 1 · easy</span>
+        <h3>Your first metric</h3>
+        <p>Hit Rate and MRR over a golden set, live in the browser. Watch the score move with k, and learn rank over threshold.</p>
+        <span class="meta"><span class="pill amber">▶ Builders start here</span></span>
+      </a>
+      <a class="course-card" href="courses/b2-golden-set.html" style="--diff:#34D399">
+        <span class="cicon">🗃️</span><span class="cnum">Builder 2 · easy</span>
+        <h3>Building a golden set</h3>
+        <p>Size, diversity, synthetic vs curated, the edge cases to include - and structuring questions for automated grading.</p>
+        <span class="meta"><span class="pill light">Grade Recall</span></span>
+      </a>
+      <a class="course-card" href="courses/b3-retrieval-metrics.html" style="--diff:#FBBF24">
+        <span class="cicon">🎣</span><span class="cnum">Builder 3 · medium</span>
+        <h3>Retrieval metrics</h3>
+        <p>Context precision and recall, hit rate, MRR, and NDCG - the numbers that tell you the retriever is doing its job.</p>
+        <span class="meta"><span class="pill light">Score the retriever</span></span>
+      </a>
+      <a class="course-card" href="courses/b4-generation-metrics.html" style="--diff:#FBBF24">
+        <span class="cicon">✍️</span><span class="cnum">Builder 4 · medium</span>
+        <h3>Generation metrics</h3>
+        <p>Faithfulness, response relevancy, noise sensitivity - measuring whether the answer is grounded, on-topic, and robust.</p>
+        <span class="meta"><span class="pill light">Score the answer</span></span>
+      </a>
+      <a class="course-card" href="courses/b5-llm-as-judge.html" style="--diff:#FB923C">
+        <span class="cicon">⚖️</span><span class="cnum">Builder 5 · hands-on</span>
+        <h3>LLM-as-judge</h3>
+        <p>Pointwise, pairwise, reference-guided. Position, verbosity, and self-preference bias - and how to calibrate around them.</p>
+        <span class="meta"><span class="pill light">The judge, judged</span></span>
+      </a>
+      <a class="course-card" href="courses/b6-ragas.html" style="--diff:#FB923C">
+        <span class="cicon">🧬</span><span class="cnum">Builder 6 · hands-on</span>
+        <h3>RAGAS in practice</h3>
+        <p>Run the metric suite over Recall, generate a test set, and read the results - the framework the whole field reaches for.</p>
+        <span class="meta"><span class="pill light">The suite</span></span>
+      </a>
+      <a class="course-card" href="courses/b7-answer-correctness.html" style="--diff:#FB923C">
+        <span class="cicon">✅</span><span class="cnum">Builder 7 · hands-on</span>
+        <h3>Answer correctness</h3>
+        <p>Factual correctness (claim F1) plus semantic similarity against a reference - grading against ground truth.</p>
+        <span class="meta"><span class="pill light">Vs ground truth</span></span>
+      </a>
+      <a class="course-card" href="courses/b8-regression-suites.html" style="--diff:#F87171">
+        <span class="cicon">🚦</span><span class="cnum">Builder 8 · hardest</span>
+        <h3>Regression eval suites</h3>
+        <p>The eval suite as a test suite. Threshold gates in CI so a prompt or retrieval change cannot quietly break Recall.</p>
+        <span class="meta"><span class="pill light">Eval in CI</span></span>
+      </a>
+      <a class="course-card" href="courses/b9-tracing-observability.html" style="--diff:#F87171">
+        <span class="cicon">🔬</span><span class="cnum">Builder 9 · hardest</span>
+        <h3>Tracing &amp; observability</h3>
+        <p>Trace, span, run. LangSmith, Langfuse, and Phoenix - turning a black-box bad answer into an inspectable timeline.</p>
+        <span class="meta"><span class="pill light">See inside</span></span>
+      </a>
+      <a class="course-card" href="courses/b10-online-drift.html" style="--diff:#F87171">
+        <span class="cicon">📡</span><span class="cnum">Builder 10 · hardest</span>
+        <h3>Online eval &amp; drift</h3>
+        <p>Sampling live traffic, user feedback as scores, catching data and concept drift - and keeping Recall honest in production.</p>
+        <span class="meta"><span class="pill light">In production</span></span>
+      </a>
+    </div>
+    <div class="diff-legend">
+      <span><i style="background:#34D399"></i>easy - everyone</span>
+      <span><i style="background:#FBBF24"></i>medium</span>
+      <span><i style="background:#FB923C"></i>hands-on / deciding</span>
+      <span><i style="background:#F87171"></i>hardest</span>
+    </div>
+
+    <div class="paths">
+      <h2>The running project: grade Recall 📊</h2>
+      <div class="rp-card">
+        <h4>Evaluate the RAG assistant you already met</h4>
+        <p>The builder track points every technique at Recall, the retrieval assistant from <a href="https://phoebefu6.github.io/learn-rag-with-phoebe/">learn-rag-with-phoebe</a>, over the same three corpora. The RAG course ended by asking "is it good?" - this course answers it with numbers. The live scorecard runs a real 12-question golden-set evaluation in your browser (Hit Rate, MRR, Precision@1) - change k and watch the misses appear.</p>
+      </div>
+    </div>
+
+    <div class="paths">
+      <h2>Choose your path 🗺️</h2>
+      <p class="plede">Two doors, one course. Leaders never see code; builders never trust a metric they have not first watched move.</p>
+      <div class="path"><b>🤝 Leader (no code, ever)</b>
+        <a class="pstep" href="courses/a1-why-evaluate.html">a1</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a2-what-good-means.html">a2</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a3-offline-online.html">a3</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a4-the-scorecard.html">a4</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a5-risk-drift.html">a5</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a6-eval-culture.html">a6</a>
+      </div>
+      <div class="path"><b>🛠️ Builder (grade Recall)</b>
+        <a class="pstep" href="courses/b1-first-metric.html">b1</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b2-golden-set.html">b2</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b3-retrieval-metrics.html">b3</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b4-generation-metrics.html">b4</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b5-llm-as-judge.html">b5</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b6-ragas.html">b6</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b7-answer-correctness.html">b7</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b8-regression-suites.html">b8</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b9-tracing-observability.html">b9</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b10-online-drift.html">b10</a>
+      </div>
+      <div class="path"><b>🌱 Curious follower (a taste)</b>
+        <a class="pstep" href="courses/a1-why-evaluate.html">a1</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a2-what-good-means.html">a2</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b1-first-metric.html">b1</a>
+      </div>
+      <div class="path"><b>🚀 Full journey (RAG then evals)</b>
+        <a class="pstep" href="https://phoebefu6.github.io/learn-rag-with-phoebe/">RAG ↗</a><span class="parr">→</span>
+        <a class="pstep" href="courses/a1-why-evaluate.html">a1-a6</a><span class="parr">→</span>
+        <a class="pstep" href="courses/b1-first-metric.html">b1-b10</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section mm-section">
+    <h2>The knowledge map 🧠</h2>
+    <p class="mm-lede">Both tracks at a glance - hover a session to spotlight its concepts, click any node to jump in.</p>
+    <div class="mm-wrap"><div id="mindmap"></div></div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>learn-evals-with-phoebe · by Phoebe Fu · sources: RAGAS, Anthropic, LangSmith, DeepLearning.AI &amp; TruLens</span>
+    <span>📚 Part of <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a> - the shelf of every course</span>
+  </footer>
+</main>
+
+<script>
+window.MINDMAP_DATA = {
+  title: "Learn\nEvals",
+  centerColor: "#7F1D1D",
+  sessions: [
+    { label: "Why\nevaluate", href: "courses/a1-why-evaluate.html", color: "#34D399",
+      concepts: [ { label: "Vibes don't scale", href: "courses/a1-why-evaluate.html" }, { label: "Cost of wrong", href: "courses/a1-why-evaluate.html" } ] },
+    { label: "What good\nmeans", href: "courses/a2-what-good-means.html", color: "#34D399",
+      concepts: [ { label: "RAG Triad", href: "courses/a2-what-good-means.html" }, { label: "Retrieval vs answer", href: "courses/a2-what-good-means.html" } ] },
+    { label: "Offline vs\nonline", href: "courses/a3-offline-online.html", color: "#FBBF24",
+      concepts: [ { label: "Test set first", href: "courses/a3-offline-online.html" }, { label: "Monitor live", href: "courses/a3-offline-online.html" } ] },
+    { label: "The\nscorecard", href: "courses/a4-the-scorecard.html", color: "#FBBF24",
+      concepts: [ { label: "Five numbers", href: "courses/a4-the-scorecard.html" }, { label: "Read it plainly", href: "courses/a4-the-scorecard.html" } ] },
+    { label: "Risk +\ndrift", href: "courses/a5-risk-drift.html", color: "#FB923C",
+      concepts: [ { label: "Regressions", href: "courses/a5-risk-drift.html" }, { label: "Gaming metrics", href: "courses/a5-risk-drift.html" }, { label: "Trust the judge?", href: "courses/a5-risk-drift.html" } ] },
+    { label: "Eval\nculture", href: "courses/a6-eval-culture.html", color: "#FB923C",
+      concepts: [ { label: "Who owns it", href: "courses/a6-eval-culture.html" }, { label: "Eval-driven dev", href: "courses/a6-eval-culture.html" } ] },
+    { label: "First\nmetric", href: "courses/b1-first-metric.html", color: "#34D399",
+      concepts: [ { label: "Hit Rate + MRR", href: "courses/b1-first-metric.html" }, { label: "Golden set", href: "courses/b1-first-metric.html" }, { label: "Rank vs threshold", href: "courses/b1-first-metric.html" } ] },
+    { label: "Golden\nset", href: "courses/b2-golden-set.html", color: "#34D399",
+      concepts: [ { label: "Size + diversity", href: "courses/b2-golden-set.html" }, { label: "Synthetic vs curated", href: "courses/b2-golden-set.html" }, { label: "Edge cases", href: "courses/b2-golden-set.html" } ] },
+    { label: "Retrieval\nmetrics", href: "courses/b3-retrieval-metrics.html", color: "#FBBF24",
+      concepts: [ { label: "Precision + recall", href: "courses/b3-retrieval-metrics.html" }, { label: "MRR", href: "courses/b3-retrieval-metrics.html" }, { label: "NDCG", href: "courses/b3-retrieval-metrics.html" } ] },
+    { label: "Generation\nmetrics", href: "courses/b4-generation-metrics.html", color: "#FBBF24",
+      concepts: [ { label: "Faithfulness", href: "courses/b4-generation-metrics.html" }, { label: "Relevancy", href: "courses/b4-generation-metrics.html" }, { label: "Noise sensitivity", href: "courses/b4-generation-metrics.html" } ] },
+    { label: "LLM-as-\njudge", href: "courses/b5-llm-as-judge.html", color: "#FB923C",
+      concepts: [ { label: "Pairwise + pointwise", href: "courses/b5-llm-as-judge.html" }, { label: "The biases", href: "courses/b5-llm-as-judge.html" }, { label: "Calibration", href: "courses/b5-llm-as-judge.html" } ] },
+    { label: "RAGAS", href: "courses/b6-ragas.html", color: "#FB923C",
+      concepts: [ { label: "The metric suite", href: "courses/b6-ragas.html" }, { label: "Test set gen", href: "courses/b6-ragas.html" } ] },
+    { label: "Answer\ncorrectness", href: "courses/b7-answer-correctness.html", color: "#FB923C",
+      concepts: [ { label: "Factual F1", href: "courses/b7-answer-correctness.html" }, { label: "Semantic sim", href: "courses/b7-answer-correctness.html" } ] },
+    { label: "Regression\nsuites", href: "courses/b8-regression-suites.html", color: "#F87171",
+      concepts: [ { label: "Eval = test suite", href: "courses/b8-regression-suites.html" }, { label: "CI threshold gate", href: "courses/b8-regression-suites.html" } ] },
+    { label: "Tracing +\nobservability", href: "courses/b9-tracing-observability.html", color: "#F87171",
+      concepts: [ { label: "Trace / span / run", href: "courses/b9-tracing-observability.html" }, { label: "LangSmith + Langfuse", href: "courses/b9-tracing-observability.html" } ] },
+    { label: "Online eval\n+ drift", href: "courses/b10-online-drift.html", color: "#F87171",
+      concepts: [ { label: "Sample live traffic", href: "courses/b10-online-drift.html" }, { label: "Data vs concept drift", href: "courses/b10-online-drift.html" }, { label: "User feedback", href: "courses/b10-online-drift.html" } ] }
+  ]
+};
+</script>
+<script src="assets/mindmap.js?v=1"></script>
+<script src="assets/app.js?v=1"></script>
+</body>
+</html>

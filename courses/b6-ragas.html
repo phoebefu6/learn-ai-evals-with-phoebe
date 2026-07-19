@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 6 · RAGAS in practice - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 6 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 6 of 10</div>
+    <h1>RAGAS in practice: <span class="accent">the whole suite over Recall</span></h1>
+    <p class="sub">You have met the metrics one at a time. Now you run them together. This session takes RAGAS end to end over Recall: build an EvaluationDataset of questions, answers, contexts, and ground truths, call evaluate() with the four core metrics, and read the results table like a diagnostician - a low number in one column tells you exactly which part of the pipeline to fix. You will also meet the Nvidia dual-judge trio and close the loop back to b2, where RAGAS testset generation gives you the golden set this all runs on. By the end you own a repeatable scorecard for the whole RAG system.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Builder track</span>
+      <span class="chip audience">Practitioners · some Python</span>
+      <span class="chip audience">Hands-on · concept + code</span>
+      <span class="chip time">~45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-24 · Suite + a sample</span>
+      <span class="a3" style="flex:4">24-40 · Trio + reading results</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>One call, four columns, a diagnosis</h2>
+    </div>
+    <p class="lede">Individual metrics answer individual questions. A metric suite answers the real one: where is my RAG pipeline weakest? RAGAS lets you score retrieval and generation in a single run and lays the numbers side by side, so a low faithfulness points at the generator while a low context recall points at the retriever. Today we assemble a dataset over Recall, run the suite, and practice the reading skill that turns four numbers into a fix list.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A RAGAS EvaluationDataset over Recall, one evaluate() call that scores faithfulness, response relevancy, context precision, and context recall together, familiarity with the Nvidia dual-judge trio, and the diagnostic habit of reading a results table to locate the weakest link in the pipeline.
+    </div>
+  </section>
+
+  <section class="section" id="suite">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the suite + a sample</span>
+      <h2>The suite + a sample <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">RAGAS runs on a dataset with a fixed shape. Each sample carries the question, the answer the system produced, the contexts it retrieved, and optionally a ground_truth reference. You pass that dataset and a list of metrics to evaluate(), and it returns a score per metric averaged over the samples - plus a per-row table you can mine for the worst answers.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The RAGAS flow. An EvaluationDataset of samples, each with question, answer, contexts, and ground truth, is passed to evaluate with a list of metrics, which returns a results table with one column per metric.">
+        <style>
+          .b6sT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b6sI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b6sW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b6sS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b6sH { font: 700 12.5px Inter, sans-serif; fill: #B91C1C; }
+          .b6sN { font: 600 13px Inter, sans-serif; fill: #431407; }
+          .b6sArr { stroke: #CBD5E1; stroke-width: 2.4; fill: none; marker-end: url(#b6sAh); }
+        </style>
+        <defs>
+          <marker id="b6sAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="30" y="40" width="200" height="170" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b6sH" x="48" y="66">EvaluationDataset</text>
+        <rect x="48" y="80" width="164" height="26" rx="6" fill="#FFFFFF" stroke="#FCA5A5"/>
+        <text class="b6sS" x="60" y="98">user_input (question)</text>
+        <rect x="48" y="112" width="164" height="26" rx="6" fill="#FFFFFF" stroke="#FCA5A5"/>
+        <text class="b6sS" x="60" y="130">response (answer)</text>
+        <rect x="48" y="144" width="164" height="26" rx="6" fill="#FFFFFF" stroke="#FCA5A5"/>
+        <text class="b6sS" x="60" y="162">retrieved_contexts</text>
+        <rect x="48" y="176" width="164" height="26" rx="6" fill="#FEE2E2" stroke="#DC2626"/>
+        <text class="b6sS" x="60" y="194">reference (ground truth)</text>
+        <rect x="300" y="90" width="150" height="70" rx="12" fill="#B91C1C"/>
+        <text class="b6sT" x="316" y="120">evaluate(</text>
+        <text class="b6sW" x="316" y="142">dataset, metrics)</text>
+        <rect x="520" y="40" width="330" height="170" rx="12" fill="#7F1D1D"/>
+        <text class="b6sT" x="538" y="66">Results table</text>
+        <text class="b6sW" x="538" y="92">faithfulness ........ 0.71</text>
+        <text class="b6sW" x="538" y="116">response relevancy .. 0.88</text>
+        <text class="b6sW" x="538" y="140">context precision ... 0.90</text>
+        <text class="b6sW" x="538" y="164">context recall ...... 0.55</text>
+        <text class="b6sW" x="538" y="192">+ per-row scores &#8594; .to_pandas()</text>
+        <line class="b6sArr" x1="232" y1="125" x2="296" y2="125"/>
+        <line class="b6sArr" x1="452" y1="125" x2="516" y2="125"/>
+        <rect x="30" y="316" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b6sN" x="54" y="328">Context recall and reference-based metrics need the ground_truth column; faithfulness and relevancy do not.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - an EvaluationDataset flows through evaluate() into a per-metric results table</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>The dataset shape<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Everything in RAGAS starts from the sample. Get the four fields right and the rest is a function call.</p>
+        <ul>
+          <li><strong>user_input</strong> - the question asked.</li>
+          <li><strong>response</strong> - the answer the system generated.</li>
+          <li><strong>retrieved_contexts</strong> - the list of chunks the retriever returned for that question.</li>
+          <li><strong>reference</strong> - the ground-truth answer. Optional, but required by any metric that checks correctness or completeness.</li>
+        </ul>
+        <p>Which metrics need that reference column is the thing to internalize now, because it decides whether a metric can run on live traffic or only on a golden set.</p>
+        <div class="callout tip">
+          <strong>Reference-free vs reference-based, at a glance</strong>
+          Faithfulness (claims vs context) and response relevancy (generated questions vs input) need no reference - run them on live answers. Context precision can run reference-free or reference-based depending on the variant. Context recall needs the reference to know what <em>should</em> have been retrieved. Plan your dataset around that split.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The four core metrics, together<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The workhorse RAGAS suite pairs two generation metrics with two retrieval metrics, so a single run covers both halves of the pipeline.</p>
+        <ul>
+          <li><strong>Faithfulness</strong> (generation) - claims supported by context / total claims. Hallucination check.</li>
+          <li><strong>Response relevancy</strong> (generation) - mean cosine of N generated questions vs the input. On-topic check. Formerly Answer Relevancy.</li>
+          <li><strong>Context precision</strong> (retrieval) - ranking quality of the retrieved chunks: are the relevant ones near the top?</li>
+          <li><strong>Context recall</strong> (retrieval) - completeness: did retrieval bring back everything the reference answer needed? Needs the ground truth.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Build a dataset and run evaluate()<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Here is the whole thing over three Recall answers: assemble the samples, wrap them in an EvaluationDataset, and call evaluate() with the four metrics. Note that context recall gets a reference and the two generation metrics do not need one.</p>
+        <div class="prompt-box good"><span class="label">Python · RAGAS suite over Recall</span>from ragas import evaluate, EvaluationDataset
+from ragas.metrics import (
+    Faithfulness, ResponseRelevancy,
+    LLMContextPrecisionWithReference, LLMContextRecall,
+)
+
+samples = [
+    {
+        "user_input": "How do I get a refund after cancelling?",
+        "response":   "Cancel in Settings; refunds post to your card in 5-7 days.",
+        "retrieved_contexts": [
+            "To cancel, open Settings &gt; Billing.",
+            "Refunds are issued to the original card within 5-7 business days.",
+        ],
+        "reference":  "Cancel under Settings &gt; Billing; the refund returns to the "
+                      "original card within 5-7 business days.",
+    },
+    # ... two more Recall answers across corpora A / B / C
+]
+
+dataset = EvaluationDataset.from_list(samples)
+
+result = evaluate(
+    dataset=dataset,
+    metrics=[
+        Faithfulness(),                          # reference-free
+        ResponseRelevancy(),                     # reference-free
+        LLMContextPrecisionWithReference(),      # retrieval ranking
+        LLMContextRecall(),                       # needs reference
+    ],
+)
+print(result)
+# {'faithfulness': 0.71, 'answer_relevancy': 0.88,
+#  'context_precision': 0.90, 'context_recall': 0.55}
+
+df = result.to_pandas()          # one row per sample; sort to find the worst</div>
+        <div class="callout tip">
+          <strong>Read the columns, not just the averages</strong>
+          The headline averages tell you the pipeline's health; the per-row table from <code>to_pandas()</code> tells you which questions failed and why. Sort by the weakest column and read the three worst rows - that is where every improvement in b7 and b8 starts.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="nvidia">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the Nvidia trio + reading results</span>
+      <h2>The Nvidia dual-judge trio + reading results <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">RAGAS also ships a trio of Nvidia metrics designed for stability: each uses two LLM judges on a small integer scale, which is more robust than a single judge on a fine-grained scale. Then we practice the real skill of this whole track - reading a results table as a diagnosis of where the pipeline breaks.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 350" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The Nvidia trio. Context relevance scores context against the query on zero to two. Response groundedness scores claims supported by context on zero to two. Answer accuracy scores the response against ground truth on zero, two, or four. Each uses two LLM judges on a small integer scale.">
+        <style>
+          .b6nT { font: 700 13.5px Inter, sans-serif; fill: #FFFFFF; }
+          .b6nI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b6nW { font: 400 11px Inter, sans-serif; fill: #FEE2E2; }
+          .b6nS { font: 400 11px Inter, sans-serif; fill: #334155; }
+          .b6nH { font: 700 12.5px Inter, sans-serif; fill: #B91C1C; }
+          .b6nN { font: 600 13px Inter, sans-serif; fill: #431407; }
+          .b6nArr { stroke: #CBD5E1; stroke-width: 2.2; fill: none; marker-end: url(#b6nAh); }
+        </style>
+        <defs>
+          <marker id="b6nAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <text class="b6nH" x="30" y="28">TWO LLM JUDGES &#8594; small integer scale (more stable)</text>
+        <rect x="30" y="42" width="260" height="96" rx="12" fill="#7F1D1D"/>
+        <text class="b6nT" x="48" y="70">Context Relevance</text>
+        <text class="b6nW" x="48" y="94">context vs query</text>
+        <text class="b6nW" x="48" y="116">scale {0, 1, 2} / 2</text>
+        <rect x="310" y="42" width="260" height="96" rx="12" fill="#B91C1C"/>
+        <text class="b6nT" x="328" y="70">Response Groundedness</text>
+        <text class="b6nW" x="328" y="94">claims supported by context</text>
+        <text class="b6nW" x="328" y="116">scale {0, 1, 2} / 2</text>
+        <rect x="590" y="42" width="260" height="96" rx="12" fill="#DC2626"/>
+        <text class="b6nT" x="608" y="70">Answer Accuracy</text>
+        <text class="b6nW" x="608" y="94">response vs ground truth</text>
+        <text class="b6nW" x="608" y="116">scale {0, 2, 4} / 4</text>
+        <text class="b6nH" x="30" y="190">READ THE TABLE AS A DIAGNOSIS</text>
+        <rect x="30" y="204" width="400" height="60" rx="10" fill="#FEE2E2" stroke="#DC2626"/>
+        <text class="b6nI" x="48" y="230">Low faithfulness / groundedness</text>
+        <text class="b6nS" x="48" y="252">&#8594; generation problem (fix the prompt / model)</text>
+        <rect x="450" y="204" width="400" height="60" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b6nI" x="468" y="230">Low context recall</text>
+        <text class="b6nS" x="468" y="252">&#8594; retriever problem (fix chunks / search)</text>
+        <rect x="30" y="322" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b6nN" x="54" y="334">Small integer scales and two judges make the trio steadier than one judge on a 1-10 scale.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the Nvidia trio on small integer scales, and the rule for reading a low column as a generation vs retrieval fault</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The Nvidia dual-judge trio<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>These three metrics were designed for reliability: each uses two LLM judges and scores on a small integer scale, which is less noisy than asking one judge for a fine-grained number.</p>
+        <ul>
+          <li><strong>Context Relevance</strong> - how relevant the retrieved context is to the query, scored {0, 1, 2} out of 2. A retrieval-quality signal.</li>
+          <li><strong>Response Groundedness</strong> - how well the response's claims are supported by the retrieved context, scored {0, 1, 2} out of 2. The trio's version of faithfulness.</li>
+          <li><strong>Answer Accuracy</strong> - how well the response matches the ground truth, scored {0, 2, 4} out of 4. This one needs a reference. It is the correctness signal we go deep on in b7.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Reading results as a diagnosis<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The payoff of running metrics together is component-wise diagnosis. Because the suite scores retrieval and generation separately, a low number points at a specific stage.</p>
+        <ul>
+          <li><strong>Low faithfulness or groundedness</strong> means the answer says things the context did not support. The retriever did its job; the <em>generator</em> is the problem - fix the prompt or the model.</li>
+          <li><strong>Low context recall</strong> means the right information never made it into the context. The generator cannot ground on what it never received; the <em>retriever</em> is the problem - fix chunking, embeddings, or search.</li>
+          <li><strong>Low context precision</strong> means the relevant chunks are buried under noise - a ranking problem in the retriever.</li>
+          <li><strong>High faithfulness but low answer accuracy</strong> means the answer is grounded in a context that is itself wrong or outdated - a knowledge-base problem, not a model one.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The team that tuned the wrong half.</strong> A group (anonymized) saw a mediocre RAG scorecard and spent two weeks swapping generation models, with no improvement. When they finally read the columns, faithfulness was fine at 0.9 while context recall sat at 0.5 - the retriever simply was not finding the right chunks. Two days of chunking and embedding work moved the whole system more than two weeks on the generator. The results table had said so on day one.</p>
+        </div>
+        <div class="callout tip">
+          <strong>Where the golden set comes from - back to b2</strong>
+          Reference-based metrics (context recall, answer accuracy) need ground truths, and hand-writing them is slow. RAGAS testset generation - the golden-set builder from b2 - can synthesize question / context / ground-truth triples from your own documents, giving this suite the references it runs on. The loop closes: b2 makes the set, b6 scores against it.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Assemble a dataset and predict the lowest metric <span class="tag demo">★ 12 min · pen and paper, then code</span></h2>
+    </div>
+    <p class="lede">Predicting a score before you run it is how you build intuition. Guess first, then let RAGAS check you.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Assemble three samples.</strong> Pick three Recall answers across corpora A, B, and C. For each, write out user_input, response, retrieved_contexts, and a reference ground truth. Keep them honest - include at least one answer you suspect is weak.</p></div>
+      <div class="step"><p><strong>Read each sample like the judge will.</strong> For every sample ask: does the answer add anything the context did not say (faithfulness risk)? Did the retriever miss a chunk the reference needed (context recall risk)? Is the answer on topic (relevancy)?</p></div>
+      <div class="step"><p><strong>Predict the lowest metric.</strong> Across the three samples, write down which of the four metrics you expect to score lowest, and one sentence of why. This is the prediction you are testing.</p></div>
+      <div class="step"><p><strong>Reflect on the diagnosis.</strong> If your predicted-lowest metric is a generation metric, your fix list points at the prompt or model; if it is a retrieval metric, it points at chunking and search. In one line: which half of the pipeline would you invest in next, and does the metric agree?</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's suite after b6</strong>
+      Recall now has a full RAGAS scorecard - retrieval and generation scored in one run, a per-row table to find the worst answers, and the reading skill to turn a low column into a targeted fix. In b7 we go deep on answer correctness, the reference-based metric that tells you not just whether Recall is grounded, but whether it is right.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b7 <span class="tag exercise">◐ 40 min total</span></h2>
+    </div>
+    <ul>
+      <li>Build a RAGAS EvaluationDataset of at least five samples from your own system (or Recall) and run evaluate() with faithfulness, response relevancy, context precision, and context recall.</li>
+      <li>Call <code>to_pandas()</code>, sort by the weakest column, and write a one-line diagnosis for each of the three worst rows - generation problem or retriever problem?</li>
+      <li>Add the Nvidia Answer Accuracy metric to the run and note how its {0, 2, 4} scale behaves next to the 0-to-1 metrics.</li>
+      <li>Read: the RAGAS metrics docs (core metrics + the Nvidia metrics page) and revisit b2 on testset generation as your source of ground truths.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from the RAGAS documentation. This page covers ~80% of its working content on running the suite - answer correctness gets its own deep dive in b7.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · core metrics + EvaluationDataset / evaluate()</span><span class="note">Part 1 · faithfulness, response relevancy, context precision, context recall; dataset shape; reference-free vs reference-based</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">RAGAS · Nvidia metrics (dual-judge trio)</span><span class="note">Part 2 · Context Relevance {0,1,2}/2, Response Groundedness {0,1,2}/2, Answer Accuracy {0,2,4}/4</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">RAGAS · testset generation</span><span class="note">Named as the golden-set source; full depth in b2</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · A RAGAS EvaluationDataset sample carries which fields?</p>
+      <button class="qopt" type="button">A · Only the question and the answer</button>
+      <button class="qopt" type="button">B · Only the retrieved contexts</button>
+      <button class="qopt" type="button">C · The question, the answer, the retrieved contexts, and optionally a reference ground truth</button>
+      <p class="qwhy">Each sample pairs user_input, response, and retrieved_contexts, plus an optional reference. Metrics that check completeness or correctness - like context recall - need that reference column.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Recall's scorecard shows faithfulness 0.9 but context recall 0.5. The most likely problem is...</p>
+      <button class="qopt" type="button">A · The retriever - it is not bringing back the chunks the answer needs, even though the generator stays grounded in what it gets</button>
+      <button class="qopt" type="button">B · The generator is hallucinating badly</button>
+      <button class="qopt" type="button">C · Nothing - both numbers are fine</button>
+      <p class="qwhy">High faithfulness means the generator grounds on the context it receives. Low context recall means the right information never reached it. That splits the diagnosis onto the retriever - fix chunking, embeddings, or search, not the prompt.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · The Nvidia trio (Context Relevance, Response Groundedness, Answer Accuracy) is designed to be more stable because...</p>
+      <button class="qopt" type="button">A · It avoids using LLMs entirely</button>
+      <button class="qopt" type="button">B · It uses two LLM judges and small integer scales rather than one judge on a fine-grained scale</button>
+      <button class="qopt" type="button">C · It only ever returns the value 1</button>
+      <p class="qwhy">The trio uses dual judges on small integer scales - Context Relevance and Response Groundedness on {0,1,2}/2, Answer Accuracy on {0,2,4}/4 - which is less noisy than a single judge assigning a fine-grained score.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 6 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>EvaluationDataset</b><span>Samples of user_input, response, retrieved_contexts, and optional reference. Wrap with from_list().</span></div>
+      <div class="cheat-item"><b>evaluate()</b><span>Pass the dataset and a list of metrics; get a per-metric average plus a per-row table via to_pandas().</span></div>
+      <div class="cheat-item"><b>Faithfulness</b><span>Claims supported / total. Generation. Reference-free. Hallucination check.</span></div>
+      <div class="cheat-item"><b>Response relevancy</b><span>Cosine of generated questions vs input. Generation. Reference-free. On-topic. Formerly Answer Relevancy.</span></div>
+      <div class="cheat-item"><b>Context precision + recall</b><span>Precision = ranking quality of chunks. Recall = completeness, needs a reference.</span></div>
+      <div class="cheat-item"><b>Nvidia trio</b><span>Dual judges, small integer scales: Context Relevance {0,1,2}/2, Response Groundedness {0,1,2}/2, Answer Accuracy {0,2,4}/4.</span></div>
+      <div class="cheat-item"><b>Diagnosis rule</b><span>Low faithfulness &#8594; generation problem. Low context recall &#8594; retriever problem. Read columns, not just the average.</span></div>
+      <div class="cheat-item"><b>Golden set source</b><span>RAGAS testset generation (b2) synthesizes the question / context / ground-truth triples this suite scores against.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 6 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b7-answer-correctness.html">Next: Answer correctness →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

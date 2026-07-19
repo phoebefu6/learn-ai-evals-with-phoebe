@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader session 4 · The scorecard to demand - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Leader session 4 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Leader track · Session 4 of 6</div>
+    <h1>The scorecard to demand <span class="accent">five numbers, not one gut feeling</span></h1>
+    <p class="sub">When a team tells you an AI system is "working well", you are owed more than a smile. You are owed a scorecard. This session gives you the five numbers a leader should require before trusting or shipping an AI system, what each one means in plain English, and what a bad value on each is quietly telling you. You will not learn to build them - you will learn to read them, and to know when one number is hiding the truth.</p>
+    <div class="chip-row">
+      <span class="chip level">🟡 Medium</span>
+      <span class="chip audience">Leaders: C-level · managers · curious minds</span>
+      <span class="chip audience">No code, ever</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Concepts</span>
+      <span class="a3" style="flex:4">20-40 · Exercises</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Why one number is never enough</h2>
+    </div>
+    <p class="lede">Ask most teams "how good is the AI?" and you get one number back - an accuracy, a satisfaction score, a thumbs-up rate. One number is comforting and almost always misleading. A system can be perfectly on-topic and confidently wrong. It can be factually flawless and too slow to use. It can nail every test question and miss the one that mattered. Anthropic's own guidance is direct about this: most real use cases need to be measured along several success criteria at once, not one. This hour hands you the five that matter and teaches you to read them together.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - read after class</span>
+      <span class="pill peach">★ Try it now prompt</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you walk out with today</strong>
+      The five numbers to demand on any AI scorecard, a plain-English reading of what each one means and what a bad value signals, the discipline of setting the ship threshold before you see results, one warning about metrics that can be gamed, and five questions to put to your data team this week.
+    </div>
+  </section>
+
+  <section class="section" id="five-numbers">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the five numbers to require</span>
+      <h2>The five numbers <span class="tag concept">10 min live</span></h2>
+    </div>
+    <p class="lede">A trustworthy AI scorecard reports at least five things, because each answers a different way the system can fail. Retrieval finds the facts, faithfulness stops it inventing them, relevancy keeps it on topic, correctness checks it against truth where it counts, and an operational number tells you it is usable. Miss any one and a different failure walks straight through the gap.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 400" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A scorecard card with five rows: retrieval score, faithfulness, answer relevancy, correctness, and an operational number, each with a plain-English meaning">
+        <style>
+          .a4sT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a4sH { font: 700 16px Inter, sans-serif; fill: #FFFFFF; }
+          .a4sI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .a4sW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .a4sS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .a4sN { font: 600 14px Inter, sans-serif; fill: #431407; }
+        </style>
+        <rect x="40" y="20" width="800" height="44" rx="10" fill="#7F1D1D"/>
+        <text class="a4sH" x="60" y="48">The scorecard a leader should demand</text>
+        <rect x="40" y="76" width="230" height="52" rx="10" fill="#B91C1C"/>
+        <text class="a4sT" x="58" y="98">1 · Retrieval score</text>
+        <text class="a4sW" x="58" y="117">hit rate / context recall</text>
+        <rect x="284" y="76" width="556" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4sI" x="302" y="98">Did we even find the right information to answer?</text>
+        <text class="a4sS" x="302" y="117">Bad value = the answer was doomed before the model spoke.</text>
+        <rect x="40" y="140" width="230" height="52" rx="10" fill="#B91C1C"/>
+        <text class="a4sT" x="58" y="162">2 · Faithfulness</text>
+        <text class="a4sW" x="58" y="181">groundedness</text>
+        <rect x="284" y="140" width="556" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4sI" x="302" y="162">Is every claim backed by the source, not invented?</text>
+        <text class="a4sS" x="302" y="181">Bad value = confident hallucination reaching the customer.</text>
+        <rect x="40" y="204" width="230" height="52" rx="10" fill="#DC2626"/>
+        <text class="a4sT" x="58" y="226">3 · Answer relevancy</text>
+        <text class="a4sW" x="58" y="245">on-topic</text>
+        <rect x="284" y="204" width="556" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4sI" x="302" y="226">Did it actually address what was asked?</text>
+        <text class="a4sS" x="302" y="245">Bad value = true, fluent, and beside the point.</text>
+        <rect x="40" y="268" width="230" height="52" rx="10" fill="#DC2626"/>
+        <text class="a4sT" x="58" y="290">4 · Correctness</text>
+        <text class="a4sW" x="58" y="309">vs ground truth</text>
+        <rect x="284" y="268" width="556" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4sI" x="302" y="290">Where a right answer exists, does it match it?</text>
+        <text class="a4sS" x="302" y="309">Bad value = wrong on the questions that have a real answer.</text>
+        <rect x="40" y="332" width="230" height="52" rx="10" fill="#1E293B"/>
+        <text class="a4sT" x="58" y="354">5 · Operational</text>
+        <text class="a4sW" x="58" y="373" style="fill:#CBD5E1">latency or cost</text>
+        <rect x="284" y="332" width="556" height="52" rx="10" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4sI" x="302" y="354">Is it fast enough and cheap enough to actually use?</text>
+        <text class="a4sS" x="302" y="373">Bad value = perfect answers nobody waits around for.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the five numbers every AI scorecard should carry</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Numbers 1 and 2 - did we find it, and did we stick to it<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The first two numbers are the foundation, because most business AI systems answer from your documents, not from thin air. If the system cannot find the right document, nothing downstream can save it - and if it can find it but then wanders off and invents details, the retrieval was wasted.</p>
+        <ul>
+          <li><strong>Retrieval score (hit rate / context recall).</strong> Of the times the answer lived in your knowledge base, how often did the system actually pull the right passage? A low value here means the answer was doomed before the model wrote a word. This is a retrieval metric - it grades the search step, not the writing step.</li>
+          <li><strong>Faithfulness (groundedness).</strong> Given what it retrieved, does every claim in the answer trace back to that source, or did the model embellish? This is the direct measure of hallucination. A bad value here is the most dangerous of all: a confident, fluent, invented answer that looks exactly like a real one.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Why they are separate</strong>
+          Retrieval and faithfulness fail independently. You can find the perfect document and still hallucinate around it, or ground yourself faithfully in the wrong document. Two numbers, two failures - which is why one blended "accuracy" hides so much.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Numbers 3 and 4 - on topic, and actually right<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The next two numbers grade the answer itself. Relevancy asks whether it addressed the question. Correctness asks whether it got the facts right where a right answer genuinely exists.</p>
+        <ul>
+          <li><strong>Answer relevancy (on-topic).</strong> A model can produce something true, well-sourced, and completely beside the point - answering the question it wished you had asked. Relevancy catches the fluent tangent. A bad value means users have to re-ask to get what they actually wanted.</li>
+          <li><strong>Correctness (vs ground truth).</strong> For the subset of questions that have one defensible answer - a policy figure, a due date, a calculation - does the system match the known-good answer? This is where you compare against a curated set of questions with verified answers. A bad value means it is wrong precisely where being wrong is checkable and costly.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The scorecard that looked green.</strong> A team (anonymized) reported 94% "accuracy" and wanted to ship. Split into the five numbers, the picture changed: relevancy and faithfulness were strong, but retrieval was only 71% - one in four hard questions never even surfaced the right document. The single blended number had averaged that failure into invisibility.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Number 5 - the operational reality<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The fifth number is the one technical teams sometimes forget to put in front of leaders, and the one leaders feel first: is it fast enough and affordable enough to be worth using? An answer that is correct, grounded, relevant, and well-retrieved is still a failure if it takes twelve seconds or costs more per query than the task is worth. Anthropic explicitly lists latency and cost among the success criteria a real deployment must weigh, alongside quality. Track at least one operational number - typical response time or cost per answer - so that "it works" always means "it works, at a speed and price we can live with". A bad value here is quiet: the answers are fine, but adoption stalls because using the thing is a chore.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="reading-it">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers reading a scorecard well</span>
+      <h2>Reading it without a data-science degree <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">You do not need to compute these numbers to read them well. You need three habits: look at all of them together, insist the ship line was drawn before the results came in, and stay alert to the number that can be gamed. Here is a healthy scorecard next to a worrying one that a single blended score would have called identical.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A good scorecard where all five cells pass, beside a concerning scorecard where retrieval and faithfulness fail even though the overall average looks similar">
+        <style>
+          .a4rT { font: 700 15px Inter, sans-serif; fill: #FFFFFF; }
+          .a4rP { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .a4rF { font: 700 13px Inter, sans-serif; fill: #FFFFFF; }
+          .a4rL { font: 600 12.5px Inter, sans-serif; fill: #334155; }
+          .a4rN { font: 600 14px Inter, sans-serif; fill: #431407; }
+        </style>
+        <rect x="40" y="24" width="360" height="40" rx="10" fill="#7F1D1D"/>
+        <text class="a4rT" x="60" y="50">Healthy - ship it</text>
+        <rect x="480" y="24" width="360" height="40" rx="10" fill="#1E293B"/>
+        <text class="a4rT" x="500" y="50">Concerning - do not ship</text>
+        <rect x="40" y="78" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="58" y="103">Retrieval</text>
+        <rect x="248" y="78" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="266" y="103">92% ✓</text>
+        <rect x="480" y="78" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="498" y="103">Retrieval</text>
+        <rect x="688" y="78" width="152" height="40" rx="8" fill="#B91C1C"/>
+        <text class="a4rF" x="706" y="103">68% ✕</text>
+        <rect x="40" y="126" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="58" y="151">Faithfulness</text>
+        <rect x="248" y="126" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="266" y="151">96% ✓</text>
+        <rect x="480" y="126" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="498" y="151">Faithfulness</text>
+        <rect x="688" y="126" width="152" height="40" rx="8" fill="#B91C1C"/>
+        <text class="a4rF" x="706" y="151">74% ✕</text>
+        <rect x="40" y="174" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="58" y="199">Relevancy</text>
+        <rect x="248" y="174" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="266" y="199">93% ✓</text>
+        <rect x="480" y="174" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="498" y="199">Relevancy</text>
+        <rect x="688" y="174" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="706" y="199">97% ✓</text>
+        <rect x="40" y="222" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="58" y="247">Correctness</text>
+        <rect x="248" y="222" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="266" y="247">90% ✓</text>
+        <rect x="480" y="222" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="498" y="247">Correctness</text>
+        <rect x="688" y="222" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="706" y="247">95% ✓</text>
+        <rect x="40" y="270" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="58" y="295">Latency</text>
+        <rect x="248" y="270" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="266" y="295">1.2s ✓</text>
+        <rect x="480" y="270" width="200" height="40" rx="8" fill="#FFFFFF" stroke="#CBD5E1"/>
+        <text class="a4rL" x="498" y="295">Latency</text>
+        <rect x="688" y="270" width="152" height="40" rx="8" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="a4rP" x="706" y="295">1.4s ✓</text>
+        <rect x="40" y="330" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a4rN" x="64" y="342">Averaged, both score about 90%. Read as five numbers, only one is safe to ship.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the same average, two very different systems</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Habit one - it is always multidimensional<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The single most useful instinct you can build is to distrust a single number. Anthropic frames it plainly: most use cases need to be evaluated along several success criteria at once - task fidelity, consistency, relevance, tone, privacy, latency, cost. A blend of these into one figure will always let a serious failure hide inside a healthy average, exactly as in the picture above.</p>
+        <ul>
+          <li><strong>One number lies by averaging.</strong> A great relevancy score can mask a poor retrieval score. Insist on seeing them broken out.</li>
+          <li><strong>Good criteria are specific and measurable.</strong> "High quality" is not a criterion. "Cites the correct policy at least 95% of the time" is. If you cannot picture the measurement, the criterion is not done.</li>
+          <li><strong>Different jobs weight them differently.</strong> A drafting assistant may forgive a weak correctness number; an automated payout tool may not forgive anything but a near-perfect one. You decide the weighting on purpose.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Habit two - the ship line was drawn first<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The most quietly corrosive move in evaluation is setting the passing threshold after seeing the scores. It always drifts toward whatever the system happened to achieve. The discipline is to decide - before you run the eval - what number counts as good enough to ship for this use case, and to write it down. Then the result either clears the bar you set or it does not.</p>
+        <ul>
+          <li><strong>Ask when the threshold was set.</strong> "We decided 90% correctness was the bar before we tested" is a healthy answer. "It scored 88%, and we think that is fine" set after the fact is a red flag.</li>
+          <li><strong>The threshold belongs to the business, not the model.</strong> It comes from the cost of a wrong answer you priced in session a1 - not from what the model can conveniently hit.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The one-line test</strong>
+          Ask: "What number did we agree, in advance, that this had to hit - and who agreed it?" A crisp answer means a real gate. A pause means the bar is being drawn around the arrow after it landed.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Habit three - ask what the metric misses<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Every metric is a proxy for something you actually care about, and any proxy can be gamed. This is Goodhart's law: when a measure becomes a target, it stops being a good measure. A team optimizing hard for one number will, without meaning to, teach the system to win that number in ways that hurt the real goal - answers that get longer to please a length-loving judge, or narrower to protect a correctness score. The leader's job is not to compute the metrics but to keep asking what they might be quietly missing, and to insist the scorecard has enough different numbers that gaming one shows up as damage in another. A healthy scorecard is partly a set of mutual checks.</p>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>Chasing one number.</strong> A team (anonymized) pushed a faithfulness score upward by making the assistant refuse more often - if it says less, it invents less. Faithfulness climbed beautifully. Relevancy and user satisfaction fell off a cliff, because the thing had learned to dodge questions. The second and third numbers caught what optimizing the first had broken.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise-1">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 1 of 2</span>
+      <h2>Build your acceptance scorecard <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Pick one real use case you own or are weighing. You are going to specify the five numbers you would demand before trusting it - and set a threshold for each, in advance.</p>
+    <div class="steps">
+      <div class="step"><p>Name the use case in one line. Note whether it answers from your documents (retrieval matters a lot) or reasons on its own (retrieval matters less).</p></div>
+      <div class="step"><p>For each of the five - retrieval, faithfulness, relevancy, correctness, and one operational number - write in plain English what "good" looks like for <em>this</em> use case.</p></div>
+      <div class="step"><p>Now set a number on each: the threshold you would require to ship. Do it before imagining what the system might score. Let the cost of a wrong answer, not the model's convenience, set the bar.</p></div>
+      <div class="step"><p>Circle the one number that matters most for this use case, and the one you would most fear being gamed. Those two deserve the closest reading.</p></div>
+    </div>
+    <div class="prompt-box good"><span class="label">★ Your scorecard partner (paste into any chat AI)</span>Help me build an acceptance scorecard for an AI use case. I will describe it. For each of these five - retrieval / hit rate, faithfulness / groundedness, answer relevancy, correctness vs ground truth, and one operational number (latency or cost) - ask me what "good enough to ship" should mean for my case, and help me write a specific, measurable threshold for each before I see any results. Then flag which single number I should worry could be gamed, and why. My use case is: [describe it]</div>
+  </section>
+
+  <section class="section" id="exercise-2">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 2 of 2</span>
+      <h2>Ship or do-not-ship <span class="tag demo">★ 8 min · read the card</span></h2>
+    </div>
+    <p class="lede">You are handed the scorecard below for a customer-facing policy assistant. Your job is to make the call and justify it in one sentence - the way you would in a go-live meeting.</p>
+    <table class="clean">
+      <thead>
+        <tr><th>Number</th><th>Result</th><th>Threshold set in advance</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Retrieval (hit rate)</td><td>70%</td><td>90%</td></tr>
+        <tr><td>Faithfulness</td><td>97%</td><td>95%</td></tr>
+        <tr><td>Answer relevancy</td><td>95%</td><td>90%</td></tr>
+        <tr><td>Correctness vs ground truth</td><td>92%</td><td>95%</td></tr>
+        <tr><td>Latency</td><td>1.3s</td><td>under 2s</td></tr>
+      </tbody>
+    </table>
+    <div class="steps">
+      <div class="step"><p>Which numbers clear the bar that was set in advance, and which miss? Mark each pass or fail against its own threshold - not against a gut feeling.</p></div>
+      <div class="step"><p>The overall average looks strong. Explain in one sentence why that average is misleading here, and which single failure decides the call.</p></div>
+      <div class="step"><p>Make the decision: ship, or do not ship? Justify it in one sentence a non-technical board member would understand.</p></div>
+      <div class="step"><p>If you would not ship, name the one number the team must move, and by how much, to earn a yes.</p></div>
+    </div>
+    <div class="callout tip">
+      <strong>The intended read</strong>
+      Faithfulness, relevancy and latency all pass, but retrieval misses badly (70 vs 90) and correctness misses (92 vs 95). A customer-facing policy tool that fails to find the right policy one time in three is a do-not-ship, no matter how good the average looks. The number to move first is retrieval.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session a5 <span class="tag exercise">◐ 30 min total</span></h2>
+    </div>
+    <ul>
+      <li>Finish the acceptance scorecard for your top use case, thresholds and all, and keep it - a5 shows how these same numbers can lie to you and drift after launch.</li>
+      <li>Take a scorecard a team has already shown you and check one thing: was the ship threshold set before or after the results came in? Note what you find.</li>
+      <li>Pick the one number in your scorecard most at risk of being gamed, and write the sentence you would use to ask the team how they guard against it.</li>
+      <li>Optional: glance at the builder track's b1 to see a live scorecard being read - you do not need the code, but the five numbers get concrete.</li>
+    </ul>
+    <div class="callout win">
+      <strong>★ Questions to ask your data team this week</strong>
+      <ol>
+        <li>Can I see our AI quality broken into separate numbers - retrieval, faithfulness, relevancy, correctness, and speed or cost - rather than one blended score?</li>
+        <li>What ship threshold did we set for each, and were those set before we saw the results?</li>
+        <li>Where does our system score lowest, and what is that low number letting through to users?</li>
+        <li>Which of these numbers could be gamed, and what other number would catch it if it were?</li>
+        <li>What is our operational number - typical response time or cost per answer - and is it good enough for people to actually adopt this?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">The leader track teaches from published engineering guidance and course curricula - no vendor marketing. This page covers:</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Anthropic · Define your success criteria</span><span class="note">Part 1-2 · criteria are specific, measurable, and multidimensional - one number misleads</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">The RAG Triad (context relevance, groundedness, answer relevance)</span><span class="note">Part 1 · the retrieval and generation numbers on the scorecard</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">RAGAS (retrieval vs generation metrics)</span><span class="note">Part 1 · hit rate / context recall vs faithfulness / answer relevancy</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · A team reports a single "94% accuracy" for an AI system. The best leadership response is...</p>
+      <button class="qopt" type="button">A · Approve it, 94% is a strong number</button>
+      <button class="qopt" type="button">B · Ask them to raise it to 99%</button>
+      <button class="qopt" type="button">C · Ask to see it broken into separate numbers, because one blended score can hide a serious failure in the average</button>
+      <p class="qwhy">Most use cases are multidimensional. A high average can conceal a poor retrieval or faithfulness score. Demand the numbers broken out - the same average can describe a safe system and a dangerous one.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Faithfulness (groundedness) on a scorecard measures...</p>
+      <button class="qopt" type="button">A · Whether every claim in the answer is backed by the retrieved source rather than invented - the direct check on hallucination</button>
+      <button class="qopt" type="button">B · How fast the system responds</button>
+      <button class="qopt" type="button">C · How popular the feature is with users</button>
+      <p class="qwhy">Faithfulness asks whether the answer stuck to its sources. A bad value is the most dangerous failure: a confident, fluent, invented answer that looks identical to a correct one.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · The ship threshold on a scorecard should be...</p>
+      <button class="qopt" type="button">A · Chosen after seeing the results, so it is realistic</button>
+      <button class="qopt" type="button">B · Set on purpose before the eval runs, from the cost of a wrong answer for this use case</button>
+      <button class="qopt" type="button">C · Whatever number the model can comfortably reach</button>
+      <p class="qwhy">A threshold set after the fact always drifts toward what the system happened to score. Decide the bar in advance, driven by the business cost of being wrong, then see if the system clears it.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 4 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Number 1 · Retrieval</b><span>Hit rate / context recall. Did we find the right info at all? Bad value = doomed before the model spoke.</span></div>
+      <div class="cheat-item"><b>Number 2 · Faithfulness</b><span>Groundedness. Every claim backed by the source? Bad value = confident hallucination.</span></div>
+      <div class="cheat-item"><b>Number 3 · Relevancy</b><span>On-topic. Did it answer what was asked? Bad value = true but beside the point.</span></div>
+      <div class="cheat-item"><b>Number 4 · Correctness</b><span>Vs ground truth where an answer exists. Bad value = wrong on the checkable questions.</span></div>
+      <div class="cheat-item"><b>Number 5 · Operational</b><span>Latency or cost. Fast and cheap enough to use? Bad value = right answers nobody waits for.</span></div>
+      <div class="cheat-item"><b>One number lies</b><span>Always multidimensional. A blend hides failures in the average - demand them broken out.</span></div>
+      <div class="cheat-item"><b>Threshold first</b><span>Set the ship bar before you see results, from the cost of a wrong answer - not the model's convenience.</span></div>
+      <div class="cheat-item"><b>Mind the gaming</b><span>Goodhart: a measure that becomes a target stops being a good measure. Ask what each metric misses.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Leader session 4 of 6 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="a5-risk-drift.html">Next: Risk, drift and governance →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

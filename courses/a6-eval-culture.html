@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Leader session 6 · Building an eval culture - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Leader session 6 of 6</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Leader track · Session 6 of 6</div>
+    <h1>Building an eval culture <span class="accent">a habit, not a heroic one-off</span></h1>
+    <p class="sub">You now know why evaluation matters, what good means, the difference between offline and online, the scorecard to demand, and the ways it can lie. This final session answers the only question that decides whether any of it sticks: how do you make evaluation a habit your team does by default, instead of a heroic scramble someone runs the week before a launch and then forgets? That is a leadership job, and this hour hands you the playbook.</p>
+    <div class="chip-row">
+      <span class="chip level">🟠 Deciding</span>
+      <span class="chip audience">Leaders: C-level · managers · curious minds</span>
+      <span class="chip audience">No code, ever</span>
+      <span class="chip time">45 min</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:4">3-20 · Concepts</span>
+      <span class="a3" style="flex:4">20-40 · Exercises</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>Evaluation is a habit or it is nothing</h2>
+    </div>
+    <p class="lede">Almost every team can run one evaluation. Very few make it a standing part of how they build. The gap between the two is not technical - it is cultural, and culture is set by what leaders reward, schedule, and fund. An eval that happens once, heroically, before a launch, is a photograph. An eval woven into how the team builds is a heartbeat. This session is about installing the heartbeat: writing the eval first, growing the golden set, automating the gate, and naming who owns it.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - read after class</span>
+      <span class="pill peach">★ Try it now prompt</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you walk out with today</strong>
+      The eval-driven development loop, the golden set as a growing asset, why eval must be automated or it lapses, the roles and cadence that keep it alive, a maturity ladder to place your org on, and five questions to put to your data team this week.
+    </div>
+  </section>
+
+  <section class="section" id="edd">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers eval-driven development</span>
+      <h2>Eval-driven development <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">The single most important shift is when the eval gets written. In a mature team, the eval comes first - you define what success means before you build the thing, exactly as Anthropic advises. Then build, measure, ship only past the gate, monitor, and feed every real failure back into the golden set. It is a loop, and it never fully stops.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A loop: write the eval first to define success, then build, measure, ship only past the gate, monitor in production, and feed failures back into the golden set">
+        <style>
+          .a6eT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .a6eH { font: 700 16px Inter, sans-serif; fill: #FFFFFF; }
+          .a6eW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .a6eN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .a6eArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#a6eAh); }
+          .a6eBack { stroke: #D97706; stroke-width: 2.5; fill: none; marker-end: url(#a6eAg); stroke-dasharray: 6 5; }
+        </style>
+        <defs>
+          <marker id="a6eAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+          <marker id="a6eAg" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#D97706" stroke-width="1.8"/>
+          </marker>
+        </defs>
+        <rect x="30" y="30" width="200" height="70" rx="12" fill="#7F1D1D"/>
+        <text class="a6eT" x="50" y="60">1 · Write eval first</text>
+        <text class="a6eW" x="50" y="82">define success</text>
+        <rect x="330" y="30" width="200" height="70" rx="12" fill="#B91C1C"/>
+        <text class="a6eT" x="350" y="60">2 · Build</text>
+        <text class="a6eW" x="350" y="82">to hit the criteria</text>
+        <rect x="630" y="30" width="210" height="70" rx="12" fill="#B91C1C"/>
+        <text class="a6eT" x="650" y="60">3 · Measure</text>
+        <text class="a6eW" x="650" y="82">against the eval</text>
+        <rect x="630" y="140" width="210" height="70" rx="12" fill="#DC2626"/>
+        <text class="a6eT" x="650" y="170">4 · Ship past gate</text>
+        <text class="a6eW" x="650" y="192">only if it clears the bar</text>
+        <rect x="330" y="140" width="200" height="70" rx="12" fill="#DC2626"/>
+        <text class="a6eT" x="350" y="170">5 · Monitor</text>
+        <text class="a6eW" x="350" y="192">on live traffic</text>
+        <rect x="30" y="140" width="200" height="70" rx="12" fill="#1E293B"/>
+        <text class="a6eT" x="50" y="170">6 · Feed failures</text>
+        <text class="a6eW" x="50" y="192" style="fill:#CBD5E1">back into golden set</text>
+        <line class="a6eArr" x1="232" y1="65" x2="326" y2="65"/>
+        <line class="a6eArr" x1="532" y1="65" x2="626" y2="65"/>
+        <line class="a6eArr" x1="735" y1="102" x2="735" y2="138"/>
+        <line class="a6eArr" x1="628" y1="175" x2="534" y2="175"/>
+        <line class="a6eArr" x1="328" y1="175" x2="234" y2="175"/>
+        <path class="a6eBack" d="M 130 138 C 130 118, 130 110, 130 102"/>
+        <rect x="30" y="290" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a6eN" x="54" y="302">The eval comes first and the loop never closes - every failure grows the next round's test.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the eval-driven development loop</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Eval before build - define success first<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The instinct most teams have is to build the thing, get it working, and then - if there is time - test it. Reverse that. Anthropic's guidance to builders is to define your success criteria first, then create empirical evaluations against them, and only then build toward those numbers. Writing the eval first forces the hard conversation early: what does good actually mean here, and how would we know? A team that cannot write its eval does not yet understand what it is building.</p>
+        <ul>
+          <li><strong>The eval is the spec.</strong> When success is defined as measurable criteria up front, "done" stops being a feeling and becomes a threshold. Everyone builds toward the same bar.</li>
+          <li><strong>It surfaces disagreement early.</strong> Writing the eval first is where you discover that two stakeholders meant different things by "good". Far cheaper to find that on day one than after launch.</li>
+          <li><strong>The leader's move:</strong> ask to see the eval before you approve the build, not after. "What is the test this has to pass, and did we write it before we started?"</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The golden set as a growing asset<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>The golden set - your collection of test questions with known-good answers - is the most valuable thing an eval culture builds, and it should never stop growing. Anthropic advises prioritizing the volume of automated evaluation cases over a handful of hand-graded ones. The best fuel for that volume is free and arrives every day: real production failures.</p>
+        <ul>
+          <li><strong>Every real failure is a gift.</strong> When the system gets something wrong in production, that case, with its correct answer, gets added to the golden set. The system can never quietly regress on that failure again - the eval now guards it forever.</li>
+          <li><strong>The set compounds.</strong> A golden set that grows with real failures gets more representative of reality every month, while a set frozen at launch drifts further from it. This is the antidote to the stale-set risk from session a5.</li>
+          <li><strong>Volume beats artistry.</strong> A large set of automated cases catches more than a small set of lovingly hand-graded ones. Breadth is the goal.</li>
+        </ul>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>The failure log that became the moat.</strong> A team (anonymized) made one rule: every customer-reported wrong answer became a new eval case by end of week, with the verified correct answer attached. Within a year their golden set had grown tenfold, drawn entirely from real misses. Regressions on old bugs dropped to near zero, because the eval now remembered every mistake the team had ever made.</p>
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>Automate it, and give it an owner<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Two things quietly kill an eval culture: manual effort and diffuse ownership. If running the eval is a person's occasional side task, it will lapse the first busy week - and busy weeks are exactly when a risky change ships. The fix is to automate it so the eval runs on every change without anyone remembering to trigger it, and to give the whole discipline a named owner with a schedule. Not "the team" - a person, with a cadence: the golden set is refreshed monthly, drift is reviewed weekly, the gate runs on every release. Ownership plus automation is what turns good intentions into a habit that survives turnover, deadlines, and enthusiasm running out. This is the least glamorous slide in the course and the one that decides whether the other five sessions matter.</p>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="roadmap">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the roadmap and what is next</span>
+      <h2>The roadmap and where this goes <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Eval culture is not all-or-nothing - it is a ladder teams climb. Most start at vibes, then add an offline gate, then guard every change with a regression eval, then watch production, and finally reach a culture where eval leads. Knowing your rung tells you the next one. And the ground is shifting: agents are raising the stakes on everything you have learned.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 340" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A maturity ladder rising through five rungs: vibes, offline gate, regression in CI, online monitoring, and an eval-driven culture">
+        <style>
+          .a6rT { font: 700 14.5px Inter, sans-serif; fill: #FFFFFF; }
+          .a6rI { font: 700 14.5px Inter, sans-serif; fill: #1E293B; }
+          .a6rS { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .a6rL { font: 600 12px Inter, sans-serif; fill: #334155; }
+          .a6rN { font: 600 14px Inter, sans-serif; fill: #431407; }
+        </style>
+        <rect x="40" y="250" width="300" height="46" rx="9" fill="#FCA5A5"/>
+        <text class="a6rI" x="60" y="279">1 · Vibes</text>
+        <text class="a6rL" x="180" y="279">it seemed fine in the demo</text>
+        <rect x="120" y="196" width="320" height="46" rx="9" fill="#DC2626"/>
+        <text class="a6rT" x="140" y="225">2 · Offline gate</text>
+        <text class="a6rS" x="270" y="225">a measured bar before launch</text>
+        <rect x="220" y="142" width="340" height="46" rx="9" fill="#B91C1C"/>
+        <text class="a6rT" x="240" y="171">3 · Regression in CI</text>
+        <text class="a6rS" x="380" y="171">every change re-tested automatically</text>
+        <rect x="340" y="88" width="340" height="46" rx="9" fill="#B91C1C"/>
+        <text class="a6rT" x="360" y="117">4 · Online monitoring</text>
+        <text class="a6rS" x="500" y="117">watching live traffic for drift</text>
+        <rect x="460" y="34" width="360" height="46" rx="9" fill="#7F1D1D"/>
+        <text class="a6rT" x="480" y="63">5 · Eval-driven culture</text>
+        <text class="a6rS" x="620" y="63">eval leads; the loop never stops</text>
+        <rect x="40" y="312" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="a6rN" x="64" y="324">You do not need rung 5 tomorrow. You need to know your rung and name the next one.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the eval maturity ladder</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The maturity ladder and the roles it needs<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Each rung is a real, fundable step - and each needs people, not just tools.</p>
+        <ul>
+          <li><strong>Vibes to offline gate.</strong> The first climb is from "it seemed fine" to a measured threshold before launch. This is where most of the value arrives, and it needs someone to own the golden set.</li>
+          <li><strong>Offline gate to regression in CI.</strong> The eval now runs automatically on every change, so nobody has to remember. This needs an engineer to wire it into the release process once.</li>
+          <li><strong>Regression to online monitoring.</strong> You start watching live traffic for the drift you met in a5. This needs someone accountable for reviewing the monitor on a cadence.</li>
+          <li><strong>Online to eval-driven culture.</strong> The top rung is where evals are written first and failures feed the set by default. This needs leadership - it is a habit, and habits are set by what leaders reward.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>Name the rung, name the next step</strong>
+          The most useful thing a leader can do is say honestly where the org sits today and fund exactly one rung up. Trying to leap from vibes to a full culture in one quarter usually collapses back to vibes.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Agents raise the stakes<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Everything in this course was about systems that answer a question. The frontier now is agents - systems that take actions, call tools, and pursue multi-step goals with real autonomy. More autonomy means more to evaluate, and the surface grows fast.</p>
+        <ul>
+          <li><strong>New things to measure.</strong> Beyond answer quality, agents introduce tool-call accuracy (did it use the right tool correctly), agent goal accuracy (did it actually achieve what the user wanted), and topic adherence (did it stay in bounds across many steps). These become new columns on the scorecard.</li>
+          <li><strong>Failures compound across steps.</strong> A small error early in a ten-step task can cascade. Evaluating only the final answer misses where things went wrong - you increasingly have to evaluate the path, not just the destination.</li>
+          <li><strong>The leader takeaway:</strong> the discipline you learned here does not shrink as systems get more capable - it grows. This is a preview, not a lesson; the depth belongs to a later course.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>A warm close - where you go next<span class="mini">2 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>You started this course with a simple, uncomfortable truth: a model always answers, fluently, whether it is right or wrong, and only evaluation tells the two apart. Six sessions later you can demand a scorecard, read it without a data-science degree, tell offline from online, spot the four ways an eval lies, and install the culture that keeps it honest. That is a leader's fluency in evaluation - not building the tests, but knowing what to require and how to read the answer. If you want to see where the answers come from, the systems being evaluated here are often retrieval-based, and the RAG course is the natural companion to this one. And when you are ready to see how these systems get built and chained into the agents we just previewed, the LangChain course picks up the thread. Thank you for spending these six hours making measurement a habit. It is the least glamorous discipline in AI and the one that decides whether any of it can be trusted.</p>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <p><strong>From heroics to habit.</strong> A team (anonymized) that spent a year at "vibes" adopted just two rules from this course: write the eval before the build, and turn every production failure into a permanent test case. They did not buy new tools. Eighteen months on, shipping an AI change felt as routine as shipping any other software - because the gate was always there, and it was always current.</p>
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise-1">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 1 of 2</span>
+      <h2>Place your org on the ladder <span class="tag demo">★ 12 min · pen and paper</span></h2>
+    </div>
+    <p class="lede">Be honest about which rung your organization actually stands on today for one real AI system - then name the single next rung and what it would take to reach it.</p>
+    <div class="steps">
+      <div class="step"><p>Read the five rungs - vibes, offline gate, regression in CI, online monitoring, eval-driven culture - and mark where this system genuinely sits. Judge by what happens by default, not by what happens heroically once.</p></div>
+      <div class="step"><p>Write the evidence for your placement. "We have a gate but it only runs when someone remembers" is rung 2 reaching for 3, not rung 3.</p></div>
+      <div class="step"><p>Name the next rung and the one concrete thing that would get you there - wiring the eval into the release process, or assigning someone to review the drift monitor weekly.</p></div>
+      <div class="step"><p>Estimate the cost of that one step in people and time. It is almost always smaller than leaders fear - and the return is every future launch getting safer.</p></div>
+    </div>
+    <div class="prompt-box good"><span class="label">★ Your maturity-ladder partner (paste into any chat AI)</span>Help me place an AI team on an eval maturity ladder with five rungs: (1) vibes, (2) offline gate before launch, (3) regression eval in CI on every change, (4) online monitoring of live traffic, (5) eval-driven culture where evals are written first and failures feed the test set. I will describe how my team works today. Ask me clarifying questions, tell me which rung I am genuinely on, then name the single next rung and the one concrete change that would get me there. My team works like this: [describe it]</div>
+  </section>
+
+  <section class="section" id="exercise-2">
+    <div class="section-kicker">
+      <span class="klabel">Exercise 2 of 2</span>
+      <h2>Assign an owner and a cadence <span class="tag demo">★ 8 min · make it real</span></h2>
+    </div>
+    <p class="lede">An eval culture dies without a named owner and a schedule. For one real system, assign both - specifically enough that it would actually happen.</p>
+    <div class="steps">
+      <div class="step"><p>Name a single person as the eval owner for this system. Not a team, not a rotation with no lead - one accountable name.</p></div>
+      <div class="step"><p>Set the cadence for each recurring task: how often the golden set is refreshed with new failures, how often the drift monitor is reviewed, and when the gate runs (ideally on every release, automatically).</p></div>
+      <div class="step"><p>Write the one rule that keeps the golden set growing - for example, "every production failure becomes an eval case with its correct answer by end of week".</p></div>
+      <div class="step"><p>Decide how the owner reports up: a one-line monthly note to you on the five scorecard numbers and any drift. Make the habit visible to leadership so it stays funded.</p></div>
+    </div>
+    <div class="callout tip">
+      <strong>What good looks like</strong>
+      "Priya owns eval for the support assistant. The gate runs on every release; she refreshes the golden set monthly from the week's production failures and reviews the drift monitor every Monday. She sends me a one-line scorecard note each month." That sentence is the difference between a culture and a wish.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Carry it forward <span class="tag exercise">◐ 30 min total</span></h2>
+    </div>
+    <ul>
+      <li>Finish placing your top system on the maturity ladder, name the next rung, and put the one concrete step to reach it on an actual roadmap with a date.</li>
+      <li>Assign a named eval owner and a written cadence for one real system this week - and tell that person they own it.</li>
+      <li>Adopt the one rule that grows the golden set: every production failure becomes a permanent eval case. Announce it.</li>
+      <li>Optional: switch to the builder track's b1 to watch these ideas run in code, or open the RAG course to see how the systems being evaluated actually retrieve their answers.</li>
+    </ul>
+    <div class="callout win">
+      <strong>★ Questions to ask your data team this week</strong>
+      <ol>
+        <li>Do we write the eval before we build, or after - and could we define success as measurable criteria up front for our next project?</li>
+        <li>Does our golden set grow from real production failures, and when did we last add a case from a customer-reported miss?</li>
+        <li>Does our eval run automatically on every change, or only when someone remembers to trigger it?</li>
+        <li>Who is the single named owner of evaluation for each system, and what is their cadence for refreshing the set and reviewing drift?</li>
+        <li>Which rung of the maturity ladder are we honestly on, and what is the one next rung we should fund this quarter?</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">The leader track teaches from published engineering guidance and course curricula - no vendor marketing. This page covers:</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Anthropic · Define success criteria &amp; develop test cases</span><span class="note">Part 1 · define success first, then build empirical evals; prioritize volume of automated cases</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">LangSmith · Online evaluation</span><span class="note">Part 2 · monitoring live traffic as the fourth rung of the ladder</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">Agent evaluation outlook (tool-call, goal, topic adherence)</span><span class="note">Part 2 · previewed at a high level - the frontier beyond this course</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · In eval-driven development, when should the eval be written?</p>
+      <button class="qopt" type="button">A · After launch, once you see how the system behaves</button>
+      <button class="qopt" type="button">B · First - define success as measurable criteria before you build, then build toward them</button>
+      <button class="qopt" type="button">C · Only if there is spare time at the end of the project</button>
+      <p class="qwhy">Anthropic advises defining success criteria first, then creating empirical evaluations against them, then building. Writing the eval first turns "done" into a threshold and surfaces stakeholder disagreement early.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · The best fuel for a golden set that keeps growing is...</p>
+      <button class="qopt" type="button">A · Buying a bigger benchmark once a year</button>
+      <button class="qopt" type="button">B · A few beautifully hand-graded examples, kept small</button>
+      <button class="qopt" type="button">C · Real production failures, folded back in with their correct answers so the system can never quietly regress on them</button>
+      <p class="qwhy">Every real failure is a free, perfectly representative test case. Feeding failures back in makes the set more like reality every month and guards against ever repeating that mistake - the antidote to a stale set.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · As systems become agents that take actions and pursue multi-step goals, evaluation...</p>
+      <button class="qopt" type="button">A · Grows - you add things like tool-call accuracy, goal accuracy, and topic adherence, and evaluate the path, not just the final answer</button>
+      <button class="qopt" type="button">B · Becomes unnecessary because agents are more capable</button>
+      <button class="qopt" type="button">C · Only needs the final answer checked</button>
+      <p class="qwhy">More autonomy means more to evaluate. Agents add tool-call accuracy, agent goal accuracy, and topic adherence, and errors can cascade across steps - so you increasingly evaluate the whole path, not just the destination.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Leader session 6 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Eval first</b><span>Define success as measurable criteria before you build. The eval is the spec; "done" becomes a threshold.</span></div>
+      <div class="cheat-item"><b>The loop never closes</b><span>Write eval, build, measure, ship past the gate, monitor, feed failures back. Repeat forever.</span></div>
+      <div class="cheat-item"><b>Golden set = asset</b><span>It grows from real production failures. A set frozen at launch drifts from reality; a growing one compounds.</span></div>
+      <div class="cheat-item"><b>Volume beats artistry</b><span>Many automated cases catch more than a few hand-graded ones. Breadth is the goal.</span></div>
+      <div class="cheat-item"><b>Automate or it lapses</b><span>Manual eval dies the first busy week. Wire it into every release so nobody has to remember.</span></div>
+      <div class="cheat-item"><b>Name an owner</b><span>One accountable person plus a cadence - set refreshed monthly, drift reviewed weekly, gate on every release.</span></div>
+      <div class="cheat-item"><b>The ladder</b><span>Vibes → offline gate → regression in CI → online monitoring → eval-driven culture. Know your rung; fund the next.</span></div>
+      <div class="cheat-item"><b>Agents raise the stakes</b><span>More autonomy, more to measure: tool-call accuracy, goal accuracy, topic adherence. Evaluate the path.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Leader session 6 of 6 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="../courses/b1-first-metric.html">Next: switch to the builder track →</a> &nbsp;·&nbsp; <a href="https://phoebefu6.github.io/learn-langchain-with-phoebe/">LangChain ↗</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

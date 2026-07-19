@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 1 · Your first metric - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 1 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 1 of 10</div>
+    <h1>Your first metric: <span class="accent">a scorecard that moves</span></h1>
+    <p class="sub">Evaluation stops being abstract the moment you watch a number change. This session builds the smallest real eval: a golden set of questions with known right answers, run against Recall's retriever, scored with Hit Rate and MRR. You will do it live in the browser first - drag k and watch the score move and the misses appear - then see the same thing in Python. By the end you can measure a retriever instead of trusting it.</p>
+    <div class="chip-row">
+      <span class="chip level">🟢 Builder track</span>
+      <span class="chip audience">Practitioners · some Python</span>
+      <span class="chip audience">Live scorecard included</span>
+      <span class="chip time">Start here</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Welcome</span>
+      <span class="a2" style="flex:3">3-18 · Concepts</span>
+      <span class="a3" style="flex:5">18-40 · Build-along</span>
+      <span class="a4" style="flex:1">40-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>The smallest eval that is still real</h2>
+    </div>
+    <p class="lede">Every evaluation, however fancy, is the same three moves: take questions whose right answer you already know (a <strong>golden set</strong>), run the system, and compare. The rest of the track adds better questions, better metrics, and automation - but this loop is the whole idea. We build it today over Recall, the RAG assistant from the RAG course, and we make the score move in your browser before a line of Python.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A working intuition for a golden set, the two most common retrieval metrics (Hit Rate@k and MRR), hands-on time with a live scorecard over Recall, and the Python to compute the same numbers - the first real measurement of an AI system you will make.
+    </div>
+  </section>
+
+  <section class="section" id="golden">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the eval loop + the golden set</span>
+      <h2>Golden set, run, compare <span class="tag concept">7 min live</span></h2>
+    </div>
+    <p class="lede">A golden set is a list of questions paired with the answer (or the document) that <em>should</em> come back. You run the system on each question and check whether it got the right one. Count the hits and you have a metric. That is evaluation, stripped to its bones.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="The eval loop: a golden set of question plus expected answer feeds the system under test, the output is compared to the expected answer, and the comparison rolls up into a score">
+        <style>
+          .b1gT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b1gI { font: 700 13.5px Inter, sans-serif; fill: #1E293B; }
+          .b1gW { font: 400 12px Inter, sans-serif; fill: #FEE2E2; }
+          .b1gS { font: 400 12px Inter, sans-serif; fill: #334155; }
+          .b1gN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b1gArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b1gAh); }
+        </style>
+        <defs>
+          <marker id="b1gAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="30" y="110" width="180" height="80" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b1gI" x="48" y="140">Golden set</text>
+        <text class="b1gS" x="48" y="162">question +</text>
+        <text class="b1gS" x="48" y="180">expected answer</text>
+        <rect x="270" y="110" width="170" height="80" rx="12" fill="#B91C1C"/>
+        <text class="b1gT" x="288" y="145">System under test</text>
+        <text class="b1gW" x="288" y="168">Recall retrieves</text>
+        <rect x="500" y="110" width="170" height="80" rx="12" fill="#DC2626"/>
+        <text class="b1gT" x="518" y="145">Compare</text>
+        <text class="b1gW" x="518" y="168">got == expected?</text>
+        <rect x="730" y="110" width="120" height="80" rx="12" fill="#7F1D1D"/>
+        <text class="b1gT" x="748" y="145">Score</text>
+        <text class="b1gW" x="748" y="168">count the hits</text>
+        <line class="b1gArr" x1="212" y1="150" x2="266" y2="150"/>
+        <line class="b1gArr" x1="442" y1="150" x2="496" y2="150"/>
+        <line class="b1gArr" x1="672" y1="150" x2="726" y2="150"/>
+        <rect x="30" y="250" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b1gN" x="54" y="262">Every eval in this course is this loop. The metrics just change how "compare" turns into a number.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - the eval loop: golden set, run, compare, score</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>What makes a set "golden"<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Golden just means "we agreed on the right answer in advance". For a retriever, the right answer is usually "which document should come back for this question". Our golden set has twelve questions across Recall's three corpora, each tagged with the one chunk that should rank first.</p>
+        <ul>
+          <li><strong>Known answers are the whole point.</strong> Without a right answer to compare against, you are back to vibes. The golden set is where human judgment gets captured once, so the machine can check against it forever.</li>
+          <li><strong>Small but representative beats big but skewed.</strong> Twelve honest, varied questions teach you more than a thousand near-duplicates. Session b2 is entirely about building these well.</li>
+          <li><strong>It doubles as a regression net.</strong> Once the set exists, every future change gets re-scored against it automatically. Today's twelve questions are the seed of the CI gate in b8.</li>
+        </ul>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>Hit Rate and MRR, without the jargon<span class="mini">3 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Two metrics answer the two questions you actually have about a retriever: did the right document come back at all, and how high did it rank?</p>
+        <ul>
+          <li><strong>Hit Rate@k</strong> = the fraction of questions where the right document showed up in the top k results. "@3" means "somewhere in the top 3". It answers <em>did we find it</em>.</li>
+          <li><strong>MRR (Mean Reciprocal Rank)</strong> = the average of 1 divided by the rank of the right document. Right answer at position 1 scores 1.0; at position 2, 0.5; at position 3, 0.33. It answers <em>how high did it rank</em> - and only the first correct hit counts.</li>
+          <li><strong>Rank over threshold.</strong> Early on, trust the ranking (and these rank-based metrics) more than any absolute similarity score, which drifts by model.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The MRR formula, once</strong>
+          MRR = average of (1 / rank of the first right answer) across all questions, counting 0 when the right answer never appears. Example: three questions with the right answer at ranks 1, 2, and 3 gives (1 + 0.5 + 0.33) / 3 ≈ 0.61. High MRR means the right thing is not just present but near the top.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="scorecard">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the live scorecard</span>
+      <h2>Watch the score move <span class="tag concept">8 min live</span></h2>
+    </div>
+    <p class="lede">Numbers on a slide are forgettable; a number you can move is not. Below is a real evaluation running in your browser - twelve golden questions against Recall's retriever. Change k and watch Hit Rate climb, MRR hold steady (it does not care about k past the first hit), and the misses turn to hits.</p>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>★ Build-along: your first scorecard<span class="mini">6 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Click <strong>k=1</strong>, then <strong>k=3</strong>, then <strong>k=5</strong>. Watch Hit Rate rise as the net widens, watch which questions flip from <em>miss</em> to <em>hit</em>, and notice Precision@1 (right answer ranked first) stay put - because widening k cannot change what is already at position 1.</p>
+        <div class="evalbox" data-k="1"
+             data-caption="Change k and watch the scorecard. Notice the two questions that miss at k=1 but hit by k=3, and the one that needs k=5."></div>
+        <div class="callout tip">
+          <strong>Honesty note - what this scorecard really does</strong>
+          Retrieval here uses the same <em>simplified</em> lexical embedder as the RAG course playground, so it runs with zero network. But the evaluation math - Hit Rate@k, MRR, Precision@1 over a golden set - is exactly what you compute in production. You are watching the real metric mechanic with a toy retriever.
+        </div>
+        <p>Read the table underneath the bars: each row is a golden question, its expected chunk, what actually ranked first, the rank the right answer landed at, and whether that counts as a hit at the current k. That table is a bug report and a to-do list in one - every miss is a retrieval improvement waiting to happen.</p>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>The same numbers in Python<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Outside the browser the loop is identical: for each golden question, retrieve, find the rank of the expected id, and roll up. Here it is from scratch, then the one-liner the ecosystem gives you.</p>
+        <div class="prompt-box good"><span class="label">Python · Hit Rate + MRR from scratch</span>golden = [
+    {"q": "cancel and get money back", "expected": "C-refund"},
+    {"q": "I forgot my password",      "expected": "C-reset"},
+    # ... your full golden set
+]
+
+def evaluate(retriever, golden, k=3):
+    hits, rr = 0, 0.0
+    for item in golden:
+        ranked = retriever(item["q"])          # returns chunk ids, best first
+        if item["expected"] in ranked[:k]:
+            hits += 1
+        if item["expected"] in ranked:
+            rank = ranked.index(item["expected"]) + 1   # 1-based
+            rr += 1 / rank
+    n = len(golden)
+    return {"hit_rate@%d" % k: hits / n, "mrr": rr / n}
+
+print(evaluate(recall_retriever, golden, k=3))</div>
+        <p>And with LlamaIndex, the same metrics come from a built-in evaluator - you supply the golden set and it reports hit rate and MRR (plus precision, recall, NDCG) for you.</p>
+        <div class="prompt-box good"><span class="label">Python · LlamaIndex RetrieverEvaluator</span>from llama_index.core.evaluation import RetrieverEvaluator
+
+evaluator = RetrieverEvaluator.from_metric_names(
+    ["hit_rate", "mrr"], retriever=retriever
+)
+result = evaluator.evaluate(query="cancel and get money back",
+                            expected_ids=["C-refund"])
+print(result)   # hit_rate + mrr for this query; use evaluate_dataset for the whole set</div>
+        <div class="callout tip">
+          <strong>Why rank-based metrics first</strong>
+          Hit Rate and MRR need only a list of ids and a known-right id - no LLM, no reference text, cheap and deterministic. They are the fastest signal that a retrieval change helped or hurt, which is why every regression suite (b8) starts here before adding the pricier generation metrics.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Read the scorecard like a to-do list <span class="tag demo">★ 10 min · the scorecard above</span></h2>
+    </div>
+    <p class="lede">A scorecard is only useful if it changes what you do next. Mine the one above for actions.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Find the misses.</strong> At k=1, note every question whose right answer was not ranked first. Write down what actually came back instead.</p></div>
+      <div class="step"><p><strong>Diagnose one.</strong> Pick a miss and read the expected chunk. Why did the retriever prefer something else - shared words with a wrong chunk, a vague question, a genuinely ambiguous case? This instinct is the whole of retrieval tuning.</p></div>
+      <div class="step"><p><strong>Watch MRR vs Hit Rate.</strong> Note a question that is a "hit" at k=5 but ranked 5th. Hit Rate calls it a win; MRR barely rewards it. Which metric would you trust for a system that only shows users the top result?</p></div>
+      <div class="step"><p><strong>Reflect.</strong> In one line: is this retriever good enough to ship for a support bot that shows one answer? Your k=1 Precision is the number that decides.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's scorecard after b1</strong>
+      Recall now has a number, not a vibe. You can measure its retriever and spot every miss. In b2 we make the golden set itself trustworthy - because a lazy golden set produces confident, meaningless scores.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b2 <span class="tag exercise">◐ 40 min total</span></h2>
+    </div>
+    <ul>
+      <li>Implement the from-scratch <code>evaluate()</code> on any retriever you have (or a toy one over five documents) and confirm Hit Rate@1 &le; Hit Rate@3 always holds.</li>
+      <li>Add one deliberately hard golden question where the right answer shares no keywords with the query, and watch it drag MRR down.</li>
+      <li>Write down three real questions your own system gets, with the answer you wish it gave - your first golden entries for b2.</li>
+      <li>Read: LlamaIndex's retrieval evaluation guide and the Wikipedia entry on Mean Reciprocal Rank.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers ~80% of their working content on first-metric retrieval evaluation - the rest (hosted runners, full metric suites) lands in later sessions.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">LlamaIndex · retrieval evaluation (RetrieverEvaluator)</span><span class="note">Part 1-2 · hit_rate + mrr over a golden set · from_metric_names</span></div>
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">Mean Reciprocal Rank (definition + formula)</span><span class="note">Part 2 · 1/rank of the first hit, averaged</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">RAGAS + retrieval ranking metrics (precision, recall, NDCG)</span><span class="note">Named here; full depth in b3</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">1 · A "golden set" is...</p>
+      <button class="qopt" type="button">A · The most expensive documents in your corpus</button>
+      <button class="qopt" type="button">B · Questions paired with their known-correct answers, agreed in advance, to compare the system against</button>
+      <button class="qopt" type="button">C · The model's own confidence scores</button>
+      <p class="qwhy">Golden means the right answer was agreed in advance, so the machine can check against it forever. Without known answers you are back to vibes.</p>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">2 · The right answer is retrieved at rank 2. Its contribution to MRR is...</p>
+      <button class="qopt" type="button">A · 1.0</button>
+      <button class="qopt" type="button">B · 0.0</button>
+      <button class="qopt" type="button">C · 0.5 (one divided by the rank)</button>
+      <p class="qwhy">MRR uses 1/rank of the first correct hit. Rank 2 gives 0.5; rank 1 gives 1.0; never found gives 0. Only the first hit counts.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">3 · Widening k from 1 to 5 can raise Hit Rate but leaves Precision@1 unchanged because...</p>
+      <button class="qopt" type="button">A · Precision@1 only looks at the single top result, which a wider net cannot change</button>
+      <button class="qopt" type="button">B · Precision@1 is always equal to Hit Rate</button>
+      <button class="qopt" type="button">C · k has no effect on any metric</button>
+      <p class="qwhy">Hit Rate@k counts a hit anywhere in the top k, so a bigger k finds more. Precision@1 only cares about position 1, which widening k cannot alter.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 1 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>The eval loop</b><span>Golden set → run the system → compare to expected → score. Every eval is this loop.</span></div>
+      <div class="cheat-item"><b>Golden set</b><span>Questions with known-right answers, agreed in advance. Small but representative beats big but skewed.</span></div>
+      <div class="cheat-item"><b>Hit Rate@k</b><span>Fraction of questions where the right doc is in the top k. Answers "did we find it".</span></div>
+      <div class="cheat-item"><b>MRR</b><span>Average of 1/rank of the first right answer. Answers "how high did it rank". 0 if never found.</span></div>
+      <div class="cheat-item"><b>Precision@1</b><span>Right answer ranked first. The number that matters when users see one result. k cannot change it.</span></div>
+      <div class="cheat-item"><b>Rank over threshold</b><span>Trust rank-based metrics over absolute similarity scores, which drift by model.</span></div>
+      <div class="cheat-item"><b>Cheap first</b><span>Hit Rate + MRR need only ids and a known-right id - no LLM. The fastest regression signal.</span></div>
+      <div class="cheat-item"><b>Misses = to-do list</b><span>Every miss on the scorecard is a retrieval improvement waiting to happen.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 1 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b2-golden-set.html">Next: Building a golden set →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/rag-corpora.js?v=1"></script>
+<script src="../assets/eval-live.js?v=1"></script>
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>

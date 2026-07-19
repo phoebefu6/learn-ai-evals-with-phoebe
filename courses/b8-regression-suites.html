@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Builder session 8 · Regression eval suites - learn evals with phoebe</title>
+<link rel="stylesheet" href="../assets/style.css?v=1">
+</head>
+<body>
+
+<div class="toolbar">
+  <div class="wrap">
+    <span class="crumb"><a href="../index.html">learn-evals-with-phoebe</a> / Builder session 8 of 10</span>
+    <button class="btn" id="toggle-all" type="button">Expand all</button>
+    <button class="btn primary" id="zoom-toggle" type="button">Projector zoom: off</button>
+  </div>
+</div>
+
+<header class="masthead">
+  <div class="wrap">
+    <div class="eyebrow">Learn Evals with Phoebe · Builder track · Session 8 of 10</div>
+    <h1>Regression eval suites: <span class="accent">the gate that blocks a bad ship</span></h1>
+    <p class="sub">Every metric you have built so far is a measurement. This session turns those measurements into a decision. We treat Recall's eval set as a test suite: any change to the prompt, the model, or the retrieval runs the suite, and a threshold on the pass rate decides ship or block - enforced by an exit code in CI, exactly like unit tests. We wire it with a promptfoo config and a bash gate you can drop into a pipeline. By the end, a regression cannot reach production quietly.</p>
+    <div class="chip-row">
+      <span class="chip level">🔴 Builder track</span>
+      <span class="chip audience">Hardest · YAML + bash + CI</span>
+      <span class="chip audience">promptfoo + LangSmith</span>
+      <span class="chip time">Session 8 of 10</span>
+    </div>
+    <div class="agenda">
+      <span class="a1" style="flex:1">0-3 · Recap</span>
+      <span class="a2" style="flex:4">3-20 · Suite as tests</span>
+      <span class="a3" style="flex:4">20-38 · The CI gate</span>
+      <span class="a4" style="flex:1">38-45 · Q&amp;A</span>
+    </div>
+  </div>
+</header>
+
+<main class="wrap">
+
+  <section class="section" id="intro">
+    <div class="section-kicker">
+      <span class="klabel">Part 0</span>
+      <h2>A metric you do not gate on is decoration</h2>
+    </div>
+    <p class="lede">Hit Rate, faithfulness, answer correctness - all of them tell you how Recall is doing right now. None of them stop a bad change from shipping unless something acts on the number. Engineers already solved this problem for code: a test suite that runs on every change and a CI job that refuses to deploy when tests fail. An eval suite is the same machinery pointed at model behaviour. Today we make Recall's evals block a regression, not just report one.</p>
+    <div class="legend">
+      <span class="pill solid">Live - presented in session</span>
+      <span class="pill light">Self-study - full depth after class</span>
+      <span class="pill peach">★ Try it now</span>
+      <span class="pill inkpill">Sources covered at the end</span>
+    </div>
+    <div class="callout win">
+      <strong>★ What you build today</strong>
+      A promptfoo config that runs Recall's golden questions with real assertions, and a bash CI gate that parses the failures and exits non-zero when the pass rate drops below your threshold - the wiring that makes an eval a gate instead of a dashboard.
+    </div>
+  </section>
+
+  <section class="section" id="suite">
+    <div class="section-kicker">
+      <span class="klabel">Part 1 · covers the eval suite as a test suite</span>
+      <h2>The eval suite is a test suite <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Reframe the whole track in one sentence: your golden set plus your metrics is a suite of tests, and every change to Recall is a commit that must pass it. A new system prompt, a swapped model, a tweaked retrieval k - each triggers a full run of the suite, and the result is a pass or a fail, not a paragraph of vibes. promptfoo is a config-driven runner built for exactly this: you declare prompts, providers, and tests, and it runs the matrix.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 320" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="A change to the prompt, model, or retrieval triggers a run of the eval suite, which produces a pass or fail gate that either ships the change or blocks it">
+        <style>
+          .b8rT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b8rI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b8rW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b8rS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b8rG { font: 700 12px Inter, sans-serif; fill: #431407; }
+          .b8rN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b8rArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b8rAh); }
+        </style>
+        <defs>
+          <marker id="b8rAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="24" y="118" width="180" height="84" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b8rI" x="40" y="146">A change</text>
+        <text class="b8rS" x="40" y="168">prompt / model /</text>
+        <text class="b8rS" x="40" y="186">retrieval</text>
+        <rect x="268" y="118" width="180" height="84" rx="12" fill="#B91C1C"/>
+        <text class="b8rT" x="284" y="146">Run eval suite</text>
+        <text class="b8rW" x="284" y="168">golden set +</text>
+        <text class="b8rW" x="284" y="186">assertions</text>
+        <rect x="512" y="118" width="164" height="84" rx="12" fill="#DC2626"/>
+        <text class="b8rT" x="528" y="150">Pass / fail</text>
+        <text class="b8rW" x="528" y="176">gate on pass rate</text>
+        <rect x="740" y="40" width="116" height="70" rx="12" fill="#7F1D1D"/>
+        <text class="b8rT" x="756" y="72">Ship</text>
+        <text class="b8rW" x="756" y="94">above bar</text>
+        <rect x="740" y="210" width="116" height="70" rx="12" fill="#431407"/>
+        <text class="b8rT" x="756" y="242">Block</text>
+        <text class="b8rW" x="756" y="264">below bar</text>
+        <line class="b8rArr" x1="206" y1="160" x2="264" y2="160"/>
+        <line class="b8rArr" x1="450" y1="160" x2="508" y2="160"/>
+        <line class="b8rArr" x1="678" y1="140" x2="736" y2="90"/>
+        <line class="b8rArr" x1="678" y1="180" x2="736" y2="230"/>
+        <rect x="700" y="146" width="12" height="12" rx="3" fill="#D97706"/>
+        <text class="b8rG" x="600" y="120">threshold</text>
+        <rect x="24" y="292" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b8rN" x="48" y="304">Same shape as a code test suite: change in, run, and a binary gate decides what reaches users.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - a change runs the suite, a pass/fail gate ships or blocks it</figcaption>
+    </figure>
+
+    <details class="card" open>
+      <summary><span class="mode live">Live</span>Assertions: contains, similar, llm-rubric<span class="mini">4 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>A test needs an assertion - the thing that turns an output into a pass or a fail. promptfoo gives you a ladder of them, from cheap and strict to smart and fuzzy, and you pick per test.</p>
+        <ul>
+          <li><strong>contains / equals</strong> - the output must contain (or exactly equal) a string. Cheap, deterministic, perfect for "the refund answer must mention 5 business days".</li>
+          <li><strong>similar</strong> - an embedding assertion: the output must be semantically close to an expected answer above a similarity threshold. Forgives phrasing, catches meaning drift.</li>
+          <li><strong>llm-rubric</strong> - an LLM grades the output against a rubric you write in plain language ("the answer is polite and cites a policy"). This is the LLM-as-judge from b4, wired as a test assertion.</li>
+        </ul>
+        <div class="callout tip">
+          <strong>The suite runs on every change</strong>
+          The point is not to run it once. It is that a single command re-scores the whole golden set against every assertion, so any change - a prompt edit, a model swap - gets the same battery of tests before it ships. Same discipline as running the unit tests before you merge.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>A promptfoo config for Recall<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>Everything lives in <code>promptfooconfig.yaml</code>: the prompts under test, the providers (models) to run them on, and the tests - each with its variables and its assertions. This is the whole suite as one declarative file.</p>
+        <div class="prompt-box good"><span class="label">YAML · promptfooconfig.yaml</span># Recall regression suite
+prompts:
+  - "Answer the support question using only the context.\nQ: {{question}}"
+
+providers:
+  - openai:gpt-4o-mini
+  - anthropic:claude-haiku-4-5
+
+tests:
+  - vars:
+      question: "How long do refunds take?"
+    assert:
+      - type: contains
+        value: "5 business days"
+      - type: similar
+        value: "Refunds reach the original method in 5 business days."
+        threshold: 0.8
+  - vars:
+      question: "How do I reset my password?"
+    assert:
+      - type: llm-rubric
+        value: "Tells the user to use the Forgot password link and mentions a reset email."</div>
+        <p>Run the whole thing with one command. promptfoo executes every prompt against every provider for every test, applies the assertions, and prints a pass/fail matrix.</p>
+        <div class="prompt-box good"><span class="label">bash · run the suite</span># run every test against every provider
+promptfoo eval -c promptfooconfig.yaml
+
+# open the results in the local viewer
+promptfoo view</div>
+        <div class="callout tip">
+          <strong>Pick the cheapest assertion that catches the bug</strong>
+          Reach for <code>contains</code> or <code>equals</code> first - they are free and deterministic. Use <code>similar</code> when phrasing varies. Save <code>llm-rubric</code> for judgements a string match cannot make, since it costs a model call per test. A suite that is all rubric is slow and non-deterministic; a suite that is all string-match misses meaning drift.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="gate">
+    <div class="section-kicker">
+      <span class="klabel">Part 2 · covers the CI threshold gate</span>
+      <h2>The CI threshold gate <span class="tag concept">9 min live</span></h2>
+    </div>
+    <p class="lede">Running the suite is half the job. The other half is making its result <em>block a deploy</em>. In CI that means one thing: an exit code. A job that exits 0 lets the pipeline continue; a job that exits non-zero stops it. So the gate is simple - run the suite, compare the pass rate to a threshold, and exit 1 when the threshold is breached. The pipeline does the rest.</p>
+
+    <figure class="zoomable">
+      <svg viewBox="0 0 880 300" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="In the CI pipeline the eval runs and emits JSON, a script compares the pass rate to a threshold, and the exit code gates the deploy: exit zero continues, exit one blocks">
+        <style>
+          .b8cT { font: 700 14px Inter, sans-serif; fill: #FFFFFF; }
+          .b8cI { font: 700 13px Inter, sans-serif; fill: #1E293B; }
+          .b8cW { font: 400 11.5px Inter, sans-serif; fill: #FEE2E2; }
+          .b8cS { font: 400 11.5px Inter, sans-serif; fill: #334155; }
+          .b8cM { font: 700 12px Inter, sans-serif; fill: #7F1D1D; }
+          .b8cN { font: 600 14px Inter, sans-serif; fill: #431407; }
+          .b8cArr { stroke: #CBD5E1; stroke-width: 2.5; fill: none; marker-end: url(#b8cAh); }
+        </style>
+        <defs>
+          <marker id="b8cAh" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+            <path d="M0,0 L6,3 L0,6" fill="none" stroke="#94A3B8" stroke-width="1.6"/>
+          </marker>
+        </defs>
+        <rect x="20" y="110" width="160" height="80" rx="12" fill="#B91C1C"/>
+        <text class="b8cT" x="36" y="140">promptfoo eval</text>
+        <text class="b8cW" x="36" y="164">emit JSON</text>
+        <rect x="238" y="110" width="164" height="80" rx="12" fill="#DC2626"/>
+        <text class="b8cT" x="254" y="140">Parse failures</text>
+        <text class="b8cW" x="254" y="164">jq -&gt; pass rate</text>
+        <rect x="460" y="110" width="168" height="80" rx="12" fill="#7F1D1D"/>
+        <text class="b8cT" x="476" y="140">Compare to</text>
+        <text class="b8cW" x="476" y="164">threshold</text>
+        <rect x="700" y="30" width="156" height="70" rx="12" fill="#FEF2F2" stroke="#FCA5A5"/>
+        <text class="b8cI" x="716" y="60">exit 0</text>
+        <text class="b8cS" x="716" y="82">deploy continues</text>
+        <rect x="700" y="200" width="156" height="70" rx="12" fill="#431407"/>
+        <text class="b8cT" x="716" y="230">exit 1</text>
+        <text class="b8cW" x="716" y="252">deploy blocked</text>
+        <line class="b8cArr" x1="182" y1="150" x2="234" y2="150"/>
+        <line class="b8cArr" x1="404" y1="150" x2="456" y2="150"/>
+        <line class="b8cArr" x1="630" y1="130" x2="696" y2="75"/>
+        <line class="b8cArr" x1="630" y1="170" x2="696" y2="225"/>
+        <text class="b8cM" x="470" y="205">exit code = the gate</text>
+        <rect x="20" y="272" width="14" height="14" rx="3" fill="#D97706"/>
+        <text class="b8cN" x="44" y="284">No dashboard required: the exit code alone decides whether the pipeline ships the change.</text>
+      </svg>
+      <figcaption>🔍 Click to zoom - eval runs, pass rate vs threshold, exit code gates the deploy</figcaption>
+    </figure>
+
+    <details class="card">
+      <summary><span class="mode live">Live</span>The bash gate: parse, compare, exit<span class="mini">5 min</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>promptfoo can write its results as JSON. A short script reads the failure count out of that JSON, computes the pass rate, checks it against your threshold, and sets the exit code. CI reads the exit code and gates the deploy. Note the escaped comparison and redirect operators - bash uses <code>-gt</code> and <code>-lt</code> for integer comparison and <code>&gt;</code> to redirect output.</p>
+        <div class="prompt-box good"><span class="label">bash · CI gate on the pass rate</span>#!/usr/bin/env bash
+set -euo pipefail
+
+THRESHOLD=95          # require &gt;= 95% of tests to pass
+
+# run the suite and write results to JSON
+promptfoo eval -c promptfooconfig.yaml -o results.json
+
+# pull totals out of the JSON with jq
+FAILURES=$(jq '.results.stats.failures' results.json)
+SUCCESSES=$(jq '.results.stats.successes' results.json)
+TOTAL=$(( SUCCESSES + FAILURES ))
+
+# integer pass rate, 0-100
+PASS_RATE=$(( SUCCESSES * 100 / TOTAL ))
+echo "pass rate: ${PASS_RATE}% (${FAILURES} failures)" &gt; eval-report.txt
+
+# gate: block the deploy if we dropped below the bar
+if [ "$PASS_RATE" -lt "$THRESHOLD" ]; then
+  echo "REGRESSION: ${PASS_RATE}% &lt; ${THRESHOLD}% - blocking deploy"
+  exit 1
+fi
+
+# also block on any hard failure count you refuse to tolerate
+if [ "$FAILURES" -gt 0 ]; then
+  echo "warning: ${FAILURES} test(s) failed"
+fi
+
+echo "eval gate passed"
+exit 0</div>
+        <div class="callout example">
+          <span class="ex-pill">Real world</span>
+          <strong>A regression caught before ship</strong>
+          A teammate swaps Recall's model to a cheaper one to cut cost. Locally the refund answer still reads fine, so the PR looks safe. CI runs the suite: the <code>contains "5 business days"</code> assertion now fails on four questions because the new model rounds to "about a week", and the <code>llm-rubric</code> password test fails twice. Pass rate drops to 88%, below the 95% threshold, the gate script exits 1, and the pipeline blocks the merge with <code>eval-report.txt</code> attached. The cost saving was real; the silent quality drop would have shipped without this gate. The exit code caught it before a single user saw the worse answer.</div>
+        <div class="callout tip">
+          <strong>Set the threshold from a known-good baseline</strong>
+          Do not pick 95% from the air. Run the suite on the current shipped version, read its pass rate, and set the gate at or just below that. The gate's job is to catch a <em>drop</em> from where you already are - a change that makes Recall worse than today - not to enforce a number you have never actually hit.
+        </div>
+      </div>
+    </details>
+
+    <details class="card">
+      <summary><span class="mode self">Self-study</span>The same gate from LangSmith's dataset side<span class="mini">4 min read</span><span class="caret">▶</span></summary>
+      <div class="body">
+        <p>promptfoo drives the suite from a YAML config. LangSmith drives the same discipline from a stored dataset: you register a dataset of examples, define evaluators, and call <code>evaluate()</code>. The result is a run you can compare against previous runs and threshold in exactly the same way.</p>
+        <div class="prompt-box good"><span class="label">Python · LangSmith evaluate() over a dataset</span>from langsmith import evaluate
+
+def recall_target(inputs: dict) -&gt; dict:
+    # your system under test: returns Recall's answer for one example
+    return {"answer": recall_answer(inputs["question"])}
+
+def correctness(run, example) -&gt; dict:
+    # an evaluator: compare run output to the reference on the example
+    ok = example.outputs["answer"].lower() in run.outputs["answer"].lower()
+    return {"key": "correctness", "score": 1.0 if ok else 0.0}
+
+result = evaluate(
+    recall_target,
+    data="recall-golden-set",          # a dataset registered in LangSmith
+    evaluators=[correctness],
+)
+# read the aggregate score, compare to your threshold, gate the same way</div>
+        <div class="callout tip">
+          <strong>Honesty note - CI patterns are concept-level</strong>
+          The promptfoo config and assertions are documented and stable. The exact CI wiring - which JSON keys, which jq path, how <code>evaluate()</code>'s result is turned into an exit code - varies by version and by your pipeline (GitHub Actions, GitLab, and so on). Treat the bash gate here as the <em>shape</em> of the solution, not a copy-paste for your setup. The durable idea is: run the suite, reduce it to a pass rate, threshold it, and let the exit code gate the deploy. OpenAI's evals framework follows the same run-and-threshold shape from its own harness.
+        </div>
+      </div>
+    </details>
+  </section>
+
+  <section class="section" id="exercise">
+    <div class="section-kicker">
+      <span class="klabel">Build-along · take it further</span>
+      <h2>Define Recall's gate <span class="tag demo">★ 10 min · design it</span></h2>
+    </div>
+    <p class="lede">A gate is a decision made in advance. Write Recall's now, before a risky change forces the question in a hurry.</p>
+    <div class="steps">
+      <div class="step"><p><strong>Set the threshold.</strong> Decide the pass rate below which a change to Recall must be blocked. Base it on today's suite result, not a wish. Write it as one number with one sentence of justification.</p></div>
+      <div class="step"><p><strong>Pick assertion one.</strong> Choose a strict, cheap assertion to gate on - a <code>contains</code> on a fact that must appear (a specific policy number, a refund window). Name the question it guards.</p></div>
+      <div class="step"><p><strong>Pick assertion two.</strong> Choose a smarter assertion - a <code>similar</code> or <code>llm-rubric</code> that catches meaning drift a string match would miss. Write the rubric or the expected answer in one line.</p></div>
+      <div class="step"><p><strong>Trace the exit code.</strong> In one line each: what does the pipeline do when the gate exits 0, and what does it do when it exits 1? If you cannot state both, the gate is not wired yet.</p></div>
+    </div>
+    <div class="callout win">
+      <strong>★ Recall's gate after b8</strong>
+      Recall's eval suite is now a test suite with teeth. A change that drops the pass rate below your threshold makes the gate exit non-zero and blocks the deploy - the same way a failing unit test blocks a merge. Recall's quality can no longer regress quietly. In b9 we add tracing and observability so that when the gate does fire, you can see exactly which step of a run went wrong.
+    </div>
+  </section>
+
+  <section class="section" id="homework">
+    <div class="section-kicker">
+      <span class="klabel">Homework</span>
+      <h2>Before session b9 <span class="tag exercise">◐ 50 min total</span></h2>
+    </div>
+    <ul>
+      <li>Write a <code>promptfooconfig.yaml</code> with at least four of Recall's golden questions and one assertion of each type: <code>contains</code>, <code>similar</code>, and <code>llm-rubric</code>. Run <code>promptfoo eval</code> and read the matrix.</li>
+      <li>Adapt the bash gate to your own JSON output: confirm it exits 1 when you deliberately break one test, and exits 0 when you fix it. Verify with <code>echo $?</code> after each run.</li>
+      <li>Change Recall's prompt in a way you expect to help, re-run the suite, and check whether the gate agrees - a reminder that intuition and the number can disagree.</li>
+      <li>Read: promptfoo config reference and CI/CD guide; skim the LangSmith <code>evaluate()</code> and OpenAI evals docs for the same run-and-threshold shape.</li>
+    </ul>
+  </section>
+
+  <section class="section" id="official">
+    <div class="section-kicker">
+      <span class="klabel">Source material</span>
+      <h2>Official sources covered</h2>
+    </div>
+    <p class="lede">Taught from official docs. This page covers promptfoo's config and assertions in full; the CI wiring and the other runners are shown at concept level.</p>
+    <div class="covered">
+      <div class="covered-row"><span class="status pill solid">✓</span><span class="name">promptfoo · config + assertions (contains, similar, llm-rubric) + CI/CD</span><span class="note">Parts 1-2 · promptfooconfig.yaml, promptfoo eval, JSON output, exit-code gate</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">LangSmith · evaluate(target, data, evaluators)</span><span class="note">Part 2 · same discipline from a stored dataset; wiring is concept-level</span></div>
+      <div class="covered-row"><span class="status pill light">◐</span><span class="name">OpenAI · evals framework</span><span class="note">Named · same run-and-threshold shape from its own harness</span></div>
+    </div>
+  </section>
+
+  <section class="section" id="quiz">
+    <div class="section-kicker">
+      <span class="klabel">Check yourself</span>
+      <h2>Three questions before you go 🎯 <span class="tag exercise">◐ 90 seconds</span></h2>
+    </div>
+    <div class="quiz-q" data-answer="2">
+      <p class="qtext">1 · In a CI gate, what actually blocks the deploy when the eval fails?</p>
+      <button class="qopt" type="button">A · A red badge in the results dashboard</button>
+      <button class="qopt" type="button">B · An email to the on-call engineer</button>
+      <button class="qopt" type="button">C · A non-zero exit code from the gate script, which the pipeline reads</button>
+      <p class="qwhy">CI gates on the exit code: 0 lets the pipeline continue, non-zero stops it. The gate script exits 1 when the pass rate breaches the threshold, and that exit code is what blocks the deploy.</p>
+    </div>
+    <div class="quiz-q" data-answer="0">
+      <p class="qtext">2 · Which promptfoo assertion uses an LLM to grade the output against criteria you write?</p>
+      <button class="qopt" type="button">A · llm-rubric</button>
+      <button class="qopt" type="button">B · contains</button>
+      <button class="qopt" type="button">C · similar</button>
+      <p class="qwhy">llm-rubric hands the output to an LLM with your plain-language rubric - the LLM-as-judge wired in as a test. contains is a string match; similar is an embedding-distance check.</p>
+    </div>
+    <div class="quiz-q" data-answer="1">
+      <p class="qtext">3 · Why set the pass-rate threshold from the currently shipped version's score?</p>
+      <button class="qopt" type="button">A · Because 100% is the only safe threshold</button>
+      <button class="qopt" type="button">B · So the gate catches a drop from where you already are, not an arbitrary number you never hit</button>
+      <button class="qopt" type="button">C · Because promptfoo requires it</button>
+      <p class="qwhy">The gate's job is to catch a regression - a change that makes the system worse than today. Anchoring the threshold to the known-good baseline makes it a real drop detector rather than an unreachable target.</p>
+    </div>
+    <p class="quiz-score"></p>
+  </section>
+
+  <section class="cheat" id="cheatsheet">
+    <h3>Builder session 8 cheat sheet <span>· pin this</span></h3>
+    <div class="grid-2">
+      <div class="cheat-item"><b>Eval suite = test suite</b><span>Your golden set + metrics is a suite of tests; every prompt/model/retrieval change must pass it.</span></div>
+      <div class="cheat-item"><b>promptfoo config</b><span>promptfooconfig.yaml declares prompts, providers, and tests (vars + assert). Run with promptfoo eval.</span></div>
+      <div class="cheat-item"><b>Assertion ladder</b><span>contains/equals (cheap, strict) → similar (embedding, forgives phrasing) → llm-rubric (LLM judge, smart, costly).</span></div>
+      <div class="cheat-item"><b>Cheapest that catches it</b><span>Prefer string matches; escalate to similar, then llm-rubric only when needed. All-rubric suites are slow and non-deterministic.</span></div>
+      <div class="cheat-item"><b>Exit code = the gate</b><span>CI reads the exit code: 0 continues, non-zero blocks. The gate script exits 1 when the threshold breaks.</span></div>
+      <div class="cheat-item"><b>Parse then compare</b><span>Emit JSON, read failures with jq, compute pass rate, compare to threshold (e.g. -lt), exit accordingly.</span></div>
+      <div class="cheat-item"><b>Threshold from baseline</b><span>Set the bar (e.g. &gt;=95%) from the currently shipped score so the gate catches a real drop, not a wish.</span></div>
+      <div class="cheat-item"><b>Same shape everywhere</b><span>LangSmith evaluate(target, data, evaluators) and OpenAI evals do the same run-and-threshold discipline.</span></div>
+    </div>
+  </section>
+
+  <footer class="pagefoot">
+    <span>Builder session 8 of 10 · learn-evals-with-phoebe · by Phoebe Fu &nbsp;·&nbsp; 📚 <a href="https://phoebefu6.github.io/learn-with-phoebe/">Learn with Phoebe ↗</a></span>
+    <span><a href="../index.html">← All sessions</a> &nbsp;·&nbsp; <a href="b9-tracing-observability.html">Next: Tracing and observability →</a></span>
+  </footer>
+
+</main>
+
+<script src="../assets/app.js?v=1"></script>
+</body>
+</html>
