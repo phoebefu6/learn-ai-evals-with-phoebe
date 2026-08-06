@@ -1,4 +1,4 @@
-# learn-evals-with-phoebe - official course map
+# learn-ai-evals-with-phoebe - official course map
 
 **What this is:** the coverage contract. Maps each session to the real sources it teaches from,
 marks coverage (✓ full / ◐ partial / - not by design), lists the verified facts the pages may

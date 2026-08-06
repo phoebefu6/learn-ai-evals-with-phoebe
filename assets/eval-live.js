@@ -1,4 +1,4 @@
-/* eval-live.js - the in-browser evaluation scorecard for learn-evals-with-phoebe.
+/* eval-live.js - the in-browser evaluation scorecard for learn-ai-evals-with-phoebe.
  *
  * It runs a real retrieval evaluation over a GOLDEN SET (question -> expected chunk id) against
  * Recall's corpora (from rag-corpora.js). It retrieves with a deliberately SIMPLIFIED lexical
