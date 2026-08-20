@@ -761,8 +761,16 @@ details.card.linked { border-color: var(--pv-flag); box-shadow: 0 0 0 3px var(--
   /* long inline code tokens and nowrap chips are the two things that still
      forced the page sideways below 640px: let them break rather than push
      the layout. Inside the media query only - desktop is untouched. */
-  :not(pre) > code, .prompt-box span, code span { overflow-wrap: anywhere; word-break: break-word; }
+  :not(pre) > code, .prompt-box span, code span,
+  p span, li span, td span, span.note, .note,
+  .agenda span, .chip-row span { overflow-wrap: anywhere; word-break: break-word; }
   .chip, .syn-chip, .pill, .mode, .tag { white-space: normal; max-width: 100%; }
+
+  /* a flex item will not shrink below its content unless min-width is reset -
+     the coverage rows put a long note in an auto-margin flex slot, which pushed
+     the whole page sideways however the text was allowed to wrap */
+  .covered-row { flex-wrap: wrap; }
+  .covered-row .note { margin-left: 0; text-align: left; min-width: 0; flex: 1 1 100%; }
 
   /* the agenda bar truncated its own labels into nonsense - stack it */
   .agenda { flex-direction: column; align-items: stretch; gap: .3rem; }
